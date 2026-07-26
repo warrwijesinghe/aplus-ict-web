@@ -1,0 +1,24 @@
+import { useState } from 'react';
+import { resourceApi } from '../../api/resource.api.js';
+export const ResourceImage = ({ resourceId, alt = '', className = '' }) => {
+  const [failed, setFailed] = useState(false);
+  if (!resourceId || failed)
+    return (
+      <div
+        aria-label={alt || 'Image unavailable'}
+        className={`image-fallback ${className}`}
+        role="img"
+      >
+        Image unavailable
+      </div>
+    );
+  return (
+    <img
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      src={resourceApi.publicContentUrl(resourceId)}
+    />
+  );
+};
