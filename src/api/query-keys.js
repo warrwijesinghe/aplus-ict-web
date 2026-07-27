@@ -5,7 +5,16 @@ export const queryKeys = {
     courses: (params = {}) => ['content', 'courses', params],
     course: (slug) => ['content', 'course', slug],
     curriculum: (id) => ['content', 'curriculum', id],
-    preview: (id) => ['content', 'preview', id]
+    preview: (id) => ['content', 'preview', id],
+    publicAlIctCourse: ['content', 'public', 'al-ict'],
+    publicTrackLessons: (slug) => ['content', 'public', 'track-lessons', slug],
+    publicTrackLesson: (trackSlug, lessonSlug) => [
+      'content',
+      'public',
+      'track-lesson',
+      trackSlug,
+      lessonSlug
+    ]
   },
   learning: {
     enrolments: (params = {}) => ['learning', 'enrolments', params],

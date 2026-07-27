@@ -14,6 +14,6 @@ test('renders the public learning message', () => {
     </MemoryRouter>
   );
   expect(
-    screen.getByRole('heading', { name: /learn ict with a clear path forward/i })
+    screen.getByRole('heading', { name: /a\/l ict — learn free\. progress further/i })
   ).toBeInTheDocument();
 });

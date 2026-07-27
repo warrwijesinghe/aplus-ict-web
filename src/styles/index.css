@@ -1,13 +1,19 @@
 @import 'tailwindcss';
 
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color: #172033;
-  background: #f6f8fc;
-  --brand: #075985;
-  --ink: #172033;
-  --muted: #526077;
-  --line: #dbe3ef;
+  font-family:
+    Inter,
+    Noto Sans Sinhala,
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+  color: #14213d;
+  background: #f8f6f1;
+  --brand: #0b6e69;
+  --brand-dark: #07534f;
+  --ink: #14213d;
+  --muted: #5f6c7b;
+  --line: #d9e2e1;
   --surface: #fff;
 }
 * {
@@ -70,7 +76,10 @@ button:disabled {
   display: flex;
   gap: 1rem;
   justify-content: space-between;
-  padding: 1rem clamp(1rem, 4vw, 4rem);
+  padding: 0.85rem clamp(1rem, 4vw, 4rem);
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 .brand {
   color: var(--ink);
@@ -85,7 +94,32 @@ aside nav {
   gap: 0.9rem;
 }
 .header nav a {
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 650;
   text-decoration: none;
+}
+.header nav a.active {
+  color: var(--brand);
+}
+.header-login {
+  background: var(--brand);
+  border-radius: 999px;
+  color: white !important;
+  padding: 0.55rem 0.85rem;
+}
+.menu-toggle {
+  display: none;
+  padding: 0.45rem 0.6rem;
+}
+.sr-only {
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 .page {
   margin: 0 auto;
@@ -93,26 +127,308 @@ aside nav {
   padding: clamp(1.25rem, 4vw, 3.5rem);
 }
 .footer {
-  background: #172033;
+  background: #14213d;
   color: white;
   margin-top: 3rem;
   padding: 2rem clamp(1rem, 4vw, 4rem);
 }
 .hero {
-  background: #e0f2fe;
-  border-radius: 1rem;
+  background: linear-gradient(135deg, #dff4ef 0%, #f8e8be 100%);
+  border-radius: 1.25rem;
   padding: clamp(1.5rem, 5vw, 4rem);
+}
+.al-ict-hero {
+  align-items: end;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
 }
 .hero h1 {
   font-size: clamp(2.25rem, 6vw, 4.5rem);
   line-height: 1.05;
   max-width: 13ch;
 }
+.hero p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 63ch;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.hero-stat-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+.hero-stat-grid p {
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(11, 110, 105, 0.16);
+  border-radius: 0.9rem;
+  margin: 0;
+  padding: 1rem;
+}
+.hero-stat-grid strong {
+  color: var(--brand-dark);
+  display: block;
+  font-size: 1.65rem;
+}
+.hero-stat-grid span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.google-note {
+  color: var(--muted);
+  font-size: 0.85rem !important;
+}
 .eyebrow {
   color: var(--brand);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+.home-section {
+  max-width: 900px;
+}
+.home-section h2,
+.section-heading h2,
+.track-heading h1,
+.catalogue-hero h1 {
+  font-size: clamp(1.9rem, 4vw, 3.25rem);
+  line-height: 1.15;
+  max-width: 22ch;
+}
+.steps-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 1.5rem;
+}
+.steps-grid article {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  padding: 1.25rem;
+}
+.steps-grid span {
+  color: var(--brand);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.steps-grid h3 {
+  margin-bottom: 0.4rem;
+}
+.steps-grid p {
+  color: var(--muted);
+  margin: 0;
+}
+.catalogue-hero {
+  background: #14213d;
+  border-radius: 1.25rem;
+  color: white;
+  padding: clamp(1.75rem, 5vw, 4.5rem);
+}
+.catalogue-hero .eyebrow {
+  color: #8fe3d5;
+}
+.catalogue-hero h1 {
+  margin-block: 0.4rem 1rem;
+}
+.catalogue-hero p {
+  line-height: 1.7;
+  max-width: 65ch;
+}
+.medium-section {
+  margin-top: 3.5rem;
+}
+.section-heading {
+  margin-bottom: 1.25rem;
+}
+.section-heading h2 {
+  margin-block: 0.25rem;
+}
+.medium-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.medium-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  color: var(--ink);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  text-decoration: none;
+  transition:
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+.medium-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-2px);
+}
+.medium-card h3 {
+  font-size: 1.5rem;
+  margin: 1rem 0 0.5rem;
+}
+.medium-card p {
+  color: var(--muted);
+  line-height: 1.6;
+  min-height: 3.2em;
+}
+.medium-card > span:last-child {
+  color: var(--brand);
+  font-weight: 700;
+}
+.medium-icon {
+  align-items: center;
+  background: #ddf3ef;
+  border-radius: 0.6rem;
+  color: var(--brand-dark);
+  display: inline-flex;
+  font-weight: 800;
+  height: 2.75rem;
+  justify-content: center;
+  width: 2.75rem;
+}
+.catalogue-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+.next-section {
+  border-left: 3px solid #e6b85c;
+  padding-left: 1.25rem;
+}
+.track-heading {
+  max-width: 760px;
+}
+.track-heading > p:not(.eyebrow),
+.catalogue-hero p {
+  line-height: 1.7;
+}
+.back-link {
+  font-weight: 700;
+  text-decoration: none;
+}
+.lesson-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.lesson-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 235px;
+  padding: 1.25rem;
+}
+.lesson-card h2 {
+  font-size: 1.2rem;
+  margin: 0.25rem 0 0.5rem;
+}
+.lesson-card p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+.lesson-card-placeholder {
+  background: #fcfcfa;
+  border-style: dashed;
+}
+.lesson-number {
+  color: var(--brand) !important;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+}
+.catalogue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+.catalogue-meta span,
+.catalogue-status,
+.access-badge {
+  background: #e4f5f0;
+  border-radius: 999px;
+  color: var(--brand-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+}
+.catalogue-status {
+  align-self: flex-start;
+  background: #f2efe7;
+  color: #75643a;
+  margin-top: auto;
+}
+.text-link {
+  color: var(--brand-dark);
+  font-weight: 750;
+  margin-top: 1rem;
+  text-decoration: none;
+}
+.catalogue-notice {
+  align-items: flex-start;
+  background: #fff7df;
+  border: 1px solid #f0d98f;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+}
+.catalogue-notice span {
+  color: #66562c;
+}
+.chapter-list {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+}
+.chapter {
+  align-items: center;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: auto 1fr auto;
+  padding: 1rem 1.25rem;
+}
+.chapter h2 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+.chapter p {
+  color: var(--muted);
+  margin: 0.3rem 0 0;
+}
+.chapter-order {
+  color: var(--brand);
+  font-weight: 800;
+}
+.chapter-locked {
+  background: #fbfbfa;
+}
+.access-badge.locked {
+  background: #f9e8e9;
+  color: #9f303d;
+}
+.login-cta {
+  background: #dff4ef;
+  border-radius: 1rem;
+  margin-top: 2.5rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
 }
 section {
   margin-block: 2.5rem;
@@ -240,8 +556,53 @@ select {
 }
 @media (max-width: 700px) {
   .header {
-    align-items: flex-start;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .menu-toggle {
+    display: inline-block;
+    margin-left: auto;
+  }
+  .header nav {
+    display: none;
+    flex-basis: 100%;
     flex-direction: column;
+    align-items: stretch;
+    padding-top: 0.5rem;
+  }
+  .header nav.open {
+    display: flex;
+  }
+  .header nav a,
+  .header nav button {
+    padding: 0.65rem 0.2rem;
+  }
+  .header-login {
+    padding: 0.65rem 0.85rem !important;
+    text-align: center;
+  }
+  .al-ict-hero,
+  .steps-grid,
+  .medium-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .hero-stat-grid strong {
+    font-size: 1.25rem;
+  }
+  .hero-stat-grid p {
+    padding: 0.75rem;
+  }
+  .chapter {
+    align-items: start;
+    grid-template-columns: auto 1fr;
+  }
+  .chapter .access-badge {
+    grid-column: 2;
+    justify-self: start;
   }
   .portal {
     grid-template-columns: 1fr;

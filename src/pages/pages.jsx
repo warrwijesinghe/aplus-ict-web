@@ -48,71 +48,77 @@ const Field = ({ label, name, register, error, type = 'text', ...props }) => (
 const Card = ({ children }) => <article className="card">{children}</article>;
 
 export const HomePage = () => {
-  const courses = useQuery({
-    queryKey: queryKeys.content.courses({ limit: 3 }),
-    queryFn: ({ signal }) => contentApi.courses({ limit: 3 }, signal)
-  });
-  const products = useQuery({
-    queryKey: queryKeys.commerce.products({ limit: 3 }),
-    queryFn: ({ signal }) => commerceApi.products({ limit: 3 }, signal)
-  });
   return (
     <>
-      <section className="hero">
-        <p className="eyebrow">A Plus ICT</p>
-        <h1>Learn ICT with a clear path forward.</h1>
-        <p>Explore teacher-led courses and learning packages built around your studies.</p>
-        <p>
-          <Link className="button" to="/courses">
-            Browse courses
-          </Link>{' '}
-          <Link className="button secondary" to="/store">
-            Browse learning packages
-          </Link>
-        </p>
+      <section className="hero al-ict-hero">
+        <div>
+          <p className="eyebrow">A Plus ICT · Sri Lanka</p>
+          <h1>A/L ICT — Learn Free. Progress Further.</h1>
+          <p>
+            සිංහල සහ English Medium දෙකෙන්ම A/L ICT පාඩම් 13 ක්, Free Chapters, Structured LMS සහ
+            paid lesson access එකම learning flow එකකින්.
+          </p>
+          <p className="hero-actions">
+            <Link className="button" to="/al-ict">
+              Explore A/L ICT Lessons
+            </Link>
+            <Link className="button secondary" to="/login">
+              Student Login
+            </Link>
+          </p>
+          <p className="google-note">Google student sign-in is planned for a future phase.</p>
+        </div>
+        <div className="hero-stat-grid" aria-label="A/L ICT catalogue highlights">
+          <p>
+            <strong>13</strong>
+            <span>Syllabus lessons</span>
+          </p>
+          <p>
+            <strong>2</strong>
+            <span>Learning media</span>
+          </p>
+          <p>
+            <strong>Free</strong>
+            <span>Start learning today</span>
+          </p>
+        </div>
       </section>
-      <CataloguePreview
-        title="Published courses"
-        error={courses.error}
-        items={dataItems(courses.data)}
-        loading={courses.isLoading}
-        render={(course) => <CourseCard course={course} />}
-        empty="Published courses will appear here when available."
-      />
-      <CataloguePreview
-        title="Learning packages"
-        error={products.error}
-        items={dataItems(products.data)}
-        loading={products.isLoading}
-        render={(product) => <ProductCard product={product} />}
-        empty="Active learning packages will appear here when available."
-      />
-      <section>
-        <h2>Learning that stays focused</h2>
+      <section className="home-section" id="how-it-works">
+        <p className="eyebrow">How it works</p>
+        <h2>A/L ICT එක ක්‍රමානුකූලව ඉගෙන ගන්න.</h2>
+        <div className="steps-grid">
+          <article>
+            <span>01</span>
+            <h3>Choose your medium</h3>
+            <p>සිංහල හෝ English Medium track එක තෝරන්න.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Start with Free Chapters</h3>
+            <p>ඔබගේ lesson flow එක අත්හදා බලන්න.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Progress with purpose</h3>
+            <p>Published paid lessons later unlock through student access.</p>
+          </article>
+        </div>
+      </section>
+      <section className="home-section" id="about">
+        <p className="eyebrow">Focused learning</p>
+        <h2>A/L ICT සඳහාම ගොඩනැගූ learning platform එකක්.</h2>
         <p>
-          Work through course material, track progress, and access learning packages when they are
-          available.
+          Data, Information, Operating System, Database, Networking, Programming, Information
+          Systems, Web Development සහ Internet of Things වැනි A/L ICT අන්තර්ගතයට අදාළ topics සඳහා
+          පැහැදිලි path එකක්.
         </p>
+        <Link className="text-link" to="/al-ict">
+          Choose Sinhala or English Medium →
+        </Link>
       </section>
     </>
   );
 };
-const CataloguePreview = ({ title, loading, error, items, render, empty }) => (
-  <section>
-    <h2>{title}</h2>
-    {loading ? (
-      <LoadingSkeleton />
-    ) : error ? (
-      <PageError error={error} />
-    ) : items.length ? (
-      <div className="grid">{items.map(render)}</div>
-    ) : (
-      <EmptyState title="Nothing published yet">
-        <p>{empty}</p>
-      </EmptyState>
-    )}
-  </section>
-);
 const CourseCard = ({ course }) => (
   <Card>
     <ResourceImage alt="" resourceId={course.thumbnailResourceId} />

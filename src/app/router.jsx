@@ -8,6 +8,7 @@ import { AuthLayout } from '../layouts/AuthLayout.jsx';
 import { PublicLayout } from '../layouts/PublicLayout.jsx';
 import { StudentLayout } from '../layouts/StudentLayout.jsx';
 import { TeacherLayout } from '../layouts/TeacherLayout.jsx';
+import { AlIctLandingPage, AlIctLessonPreviewPage, AlIctTrackPage } from '../pages/AlIctPages.jsx';
 import {
   AdminDashboard,
   AdminListPage,
@@ -42,6 +43,9 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { path: '/', element: <HomePage /> },
+      { path: '/al-ict', element: <AlIctLandingPage /> },
+      { path: '/al-ict/:medium', element: <AlIctTrackPage /> },
+      { path: '/al-ict/:medium/lessons/:lessonSlug', element: <AlIctLessonPreviewPage /> },
       { path: '/courses', element: <CoursesPage /> },
       { path: '/courses/:courseSlug', element: <CourseDetailPage /> },
       { path: '/courses/:courseId/curriculum', element: <CurriculumPage /> },
