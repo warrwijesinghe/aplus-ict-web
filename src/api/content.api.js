@@ -11,14 +11,12 @@ export const contentApi = {
     contentClient.get(`/api/v1/catalog/courses/${id}/curriculum`, { signal }).then(unwrap),
   preview: (id, signal) =>
     contentClient.get(`/api/v1/catalog/lessons/${id}/preview`, { signal }).then(unwrap),
-  publicAlIctCourse: (signal) =>
-    contentClient.get('/api/public/courses/al-ict', { signal }).then(unwrap),
-  publicTrackLessons: (trackSlug, signal) =>
-    contentClient.get(`/api/public/course-tracks/${trackSlug}/lessons`, { signal }).then(unwrap),
-  publicTrackLesson: (trackSlug, lessonSlug, signal) =>
-    contentClient
-      .get(`/api/public/course-tracks/${trackSlug}/lessons/${lessonSlug}`, { signal })
-      .then(unwrap),
+  publicCourses: (signal) => contentClient.get('/api/public/courses', { signal }).then(unwrap),
+  publicCourse: (slug, signal) =>
+    contentClient.get(`/api/public/courses/${slug}`, { signal }).then(unwrap),
+  publicCurriculum: (slug, signal) =>
+    contentClient.get(`/api/public/courses/${slug}/curriculum`, { signal }).then(unwrap),
+  siteProfile: (signal) => contentClient.get('/api/public/site-profile', { signal }).then(unwrap),
   adminList: (type, params, signal) =>
     contentClient.get(`/api/v1/admin/content/${type}`, { params, signal }).then(unwrap)
 };

@@ -385,9 +385,7 @@ export const LoginPage = () => {
           {mutation.isPending ? 'Signing in…' : 'Log in'}
         </button>
       </form>
-      <p>
-        New here? <Link to="/register">Create a student account</Link>.
-      </p>
+      <p>Student accounts use the Google sign-in action on the public website.</p>
     </section>
   );
 };

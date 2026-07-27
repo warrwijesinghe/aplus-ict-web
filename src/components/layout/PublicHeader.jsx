@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { serviceUrls } from '../../api/service-urls.js';
 import { useAuth } from '../../auth/auth-context.jsx';
 import { destinationForUser } from '../../utils/route-destination.js';
+
 export const PublicHeader = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const closeMenu = () => setIsOpen(false);
+  const roles = user?.roles?.map((role) => (typeof role === 'string' ? role : role.code)) || [];
   return (
     <header className="header">
       <Link className="brand" to="/">
@@ -25,39 +28,35 @@ export const PublicHeader = () => {
         <NavLink onClick={closeMenu} to="/">
           Home
         </NavLink>
-        <NavLink onClick={closeMenu} to="/al-ict">
-          A/L ICT
+        <NavLink onClick={closeMenu} to="/courses">
+          Courses
         </NavLink>
-        <NavLink onClick={closeMenu} to="/al-ict/sinhala-medium">
-          සිංහල මාධ්‍ය
+        <NavLink onClick={closeMenu} to="/student-guide">
+          Student Guide
         </NavLink>
-        <NavLink onClick={closeMenu} to="/al-ict/english-medium">
-          English Medium
+        <NavLink onClick={closeMenu} to="/about">
+          About Us
         </NavLink>
-        <Link onClick={closeMenu} to="/al-ict#free-lessons">
-          Free Lessons
-        </Link>
-        <Link onClick={closeMenu} to="/#how-it-works">
-          How It Works
-        </Link>
-        <Link onClick={closeMenu} to="/#about">
-          About
-        </Link>
+        <NavLink onClick={closeMenu} to="/contact">
+          Contact Us
+        </NavLink>
         {isAuthenticated ? (
           <>
             <Link onClick={closeMenu} to={destinationForUser(user)}>
-              Go to Dashboard
+              {roles.includes('student') ? 'My Learning' : 'Go to Dashboard'}
             </Link>
             <button onClick={logout} type="button">
               Logout
             </button>
           </>
         ) : (
-          <>
-            <NavLink className="header-login" onClick={closeMenu} to="/login">
-              Student Login
-            </NavLink>
-          </>
+          <a
+            className="header-login"
+            href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=/courses`}
+            onClick={closeMenu}
+          >
+            Continue with Google
+          </a>
         )}
       </nav>
     </header>

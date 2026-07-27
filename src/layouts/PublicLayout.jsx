@@ -1,5 +1,7 @@
 import { Outlet } from 'react-router-dom';
+import { PublicFooter } from '../components/layout/PublicFooter.jsx';
 import { PublicHeader } from '../components/layout/PublicHeader.jsx';
+
 export const PublicLayout = () => (
   <>
     <a className="skip" href="#main">
@@ -9,6 +11,6 @@ export const PublicLayout = () => (
     <main id="main" className="page">
       <Outlet />
     </main>
-    <footer className="footer">© {new Date().getFullYear()} A Plus ICT</footer>
+    <PublicFooter />
   </>
 );

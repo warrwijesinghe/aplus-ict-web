@@ -6,19 +6,15 @@ export const queryKeys = {
     course: (slug) => ['content', 'course', slug],
     curriculum: (id) => ['content', 'curriculum', id],
     preview: (id) => ['content', 'preview', id],
-    publicAlIctCourse: ['content', 'public', 'al-ict'],
-    publicTrackLessons: (slug) => ['content', 'public', 'track-lessons', slug],
-    publicTrackLesson: (trackSlug, lessonSlug) => [
-      'content',
-      'public',
-      'track-lesson',
-      trackSlug,
-      lessonSlug
-    ]
+    publicCourses: ['content', 'public', 'courses'],
+    publicCourse: (slug) => ['content', 'public', 'course', slug],
+    publicCurriculum: (slug) => ['content', 'public', 'curriculum', slug],
+    siteProfile: ['content', 'public', 'site-profile']
   },
   learning: {
     enrolments: (params = {}) => ['learning', 'enrolments', params],
-    progress: (id) => ['learning', 'progress', id]
+    progress: (id) => ['learning', 'progress', id],
+    activityProgress: (slug) => ['learning', 'activity-progress', slug]
   },
   commerce: {
     products: (params = {}) => ['commerce', 'products', params],

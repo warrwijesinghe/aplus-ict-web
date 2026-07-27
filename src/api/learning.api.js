@@ -15,6 +15,12 @@ export const learningApi = {
     learningClient.patch(`/api/v1/learning/me/lessons/${id}/progress`, body).then(data),
   complete: (id, body) =>
     learningClient.post(`/api/v1/learning/me/lessons/${id}/complete`, body).then(data),
+  activityProgress: (courseSlug, signal) =>
+    learningClient
+      .get(`/api/v1/learning/me/courses/${courseSlug}/activity-progress`, { signal })
+      .then(data),
+  completeActivity: (activityId, body) =>
+    learningClient.post(`/api/v1/learning/me/activities/${activityId}/complete`, body).then(data),
   adminEnrolments: (params, signal) =>
     learningClient.get('/api/v1/admin/learning/enrolments', { params, signal }).then(data)
 };

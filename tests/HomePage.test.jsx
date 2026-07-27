@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import { HomePage } from '../src/pages/HomePage.jsx';
+import { PublicHomePage } from '../src/pages/PublicCoursePages.jsx';
 
 test('renders the public learning message', () => {
   render(
@@ -9,11 +9,11 @@ test('renders the public learning message', () => {
       <QueryClientProvider
         client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
       >
-        <HomePage />
+        <PublicHomePage />
       </QueryClientProvider>
     </MemoryRouter>
   );
   expect(
-    screen.getByRole('heading', { name: /a\/l ict — learn free\. progress further/i })
+    screen.getByRole('heading', { name: /a\/l ict .* ක්‍රමානුකූලව/i })
   ).toBeInTheDocument();
 });

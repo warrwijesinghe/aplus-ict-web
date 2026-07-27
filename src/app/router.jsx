@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { GuestOnlyRoute } from '../auth/guest-only-route.jsx';
 import { PermissionRoute } from '../auth/permission-route.jsx';
 import { ProtectedRoute } from '../auth/protected-route.jsx';
@@ -8,14 +8,19 @@ import { AuthLayout } from '../layouts/AuthLayout.jsx';
 import { PublicLayout } from '../layouts/PublicLayout.jsx';
 import { StudentLayout } from '../layouts/StudentLayout.jsx';
 import { TeacherLayout } from '../layouts/TeacherLayout.jsx';
-import { AlIctLandingPage, AlIctLessonPreviewPage, AlIctTrackPage } from '../pages/AlIctPages.jsx';
+import {
+  AboutPage,
+  ContactPage,
+  CourseLearningPage,
+  PublicCourseDetailPage,
+  PublicCoursesPage,
+  PublicHomePage,
+  StudentGuidePage
+} from '../pages/PublicCoursePages.jsx';
 import {
   AdminDashboard,
   AdminListPage,
-  CourseDetailPage,
-  CoursesPage,
   CurriculumPage,
-  HomePage,
   LessonPreviewPage,
   LoginPage,
   NewOrderPage,
@@ -26,7 +31,6 @@ import {
   ProductDetailPage,
   ProfilePage,
   ProgressPage,
-  RegisterPage,
   ServiceUnavailablePage,
   StorePage,
   StudentCoursesPage,
@@ -42,12 +46,16 @@ export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
     children: [
-      { path: '/', element: <HomePage /> },
-      { path: '/al-ict', element: <AlIctLandingPage /> },
-      { path: '/al-ict/:medium', element: <AlIctTrackPage /> },
-      { path: '/al-ict/:medium/lessons/:lessonSlug', element: <AlIctLessonPreviewPage /> },
-      { path: '/courses', element: <CoursesPage /> },
-      { path: '/courses/:courseSlug', element: <CourseDetailPage /> },
+      { path: '/', element: <PublicHomePage /> },
+      { path: '/courses', element: <PublicCoursesPage /> },
+      { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
+      { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
+      { path: '/student-guide', element: <StudentGuidePage /> },
+      { path: '/about', element: <AboutPage /> },
+      { path: '/contact', element: <ContactPage /> },
+      { path: '/al-ict', element: <Navigate replace to="/courses" /> },
+      { path: '/al-ict/:medium', element: <Navigate replace to="/courses" /> },
+      { path: '/al-ict/:medium/lessons/:lessonSlug', element: <Navigate replace to="/courses" /> },
       { path: '/courses/:courseId/curriculum', element: <CurriculumPage /> },
       { path: '/lessons/:lessonId/preview', element: <LessonPreviewPage /> },
       { path: '/store', element: <StorePage /> },
@@ -59,10 +67,7 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <AuthLayout />,
-        children: [
-          { path: '/login', element: <LoginPage /> },
-          { path: '/register', element: <RegisterPage /> }
-        ]
+        children: [{ path: '/login', element: <LoginPage /> }]
       }
     ]
   },
