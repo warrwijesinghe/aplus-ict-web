@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { resourceApi } from '../../api/resource.api.js';
-export const ResourceImage = ({ resourceId, alt = '', className = '' }) => {
+export const ResourceImage = ({ resourceId, alt = '', className = '', loading = 'lazy' }) => {
   const [failed, setFailed] = useState(false);
   if (!resourceId || failed)
     return (
@@ -16,7 +16,7 @@ export const ResourceImage = ({ resourceId, alt = '', className = '' }) => {
     <img
       alt={alt}
       className={className}
-      loading="lazy"
+      loading={loading}
       onError={() => setFailed(true)}
       src={resourceApi.publicContentUrl(resourceId)}
     />

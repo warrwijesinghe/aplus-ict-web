@@ -4,6 +4,33 @@ import { contentApi } from '../../api/content.api.js';
 import { queryKeys } from '../../api/query-keys.js';
 import { useAuth } from '../../auth/auth-context.jsx';
 import { destinationForUser } from '../../utils/route-destination.js';
+import { serviceUrls } from '../../api/service-urls.js';
+import { BrandLogo } from './BrandLogo.jsx';
+
+const socialGlyphs = {
+  facebook: 'f',
+  instagram: '◎',
+  linkedin: 'in',
+  tiktok: '♪',
+  youtube: '▶',
+  whatsapp: '◔'
+};
+
+const SocialLink = ({ item }) => {
+  const glyph = socialGlyphs[item.platform?.toLowerCase()] || '↗';
+  return (
+    <a
+      aria-label={item.label || item.platform}
+      className="social-link"
+      href={item.url}
+      rel="noreferrer"
+      target="_blank"
+    >
+      <span aria-hidden="true">{glyph}</span>
+      <span>{item.label || item.platform}</span>
+    </a>
+  );
+};
 
 export const PublicFooter = () => {
   const { isAuthenticated, user } = useAuth();
@@ -17,7 +44,9 @@ export const PublicFooter = () => {
     <footer className="footer">
       <div className="footer-grid">
         <section>
-          <h2>{data?.brandName || 'A Plus ICT'}</h2>
+          <Link className="footer-brand" to="/">
+            <BrandLogo brandName={data?.brandName} resourceId={data?.logoResourceId} />
+          </Link>
           <p>{data?.shortDescription || 'A focused learning space for A/L ICT.'}</p>
         </section>
         <nav aria-label="Footer navigation">
@@ -26,16 +55,18 @@ export const PublicFooter = () => {
           <Link to="/student-guide">Student Guide</Link>
           <Link to="/about">About Us</Link>
           <Link to="/contact">Contact Us</Link>
-          <Link to={isAuthenticated ? destinationForUser(user) : '/login'}>
-            {isAuthenticated ? 'My Learning' : 'Continue with Google'}
-          </Link>
+          {isAuthenticated ? (
+            <Link to={destinationForUser(user)}>My Learning</Link>
+          ) : (
+            <a href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=/courses`}>
+              Continue with Google
+            </a>
+          )}
         </nav>
         {data?.socialLinks?.length ? (
           <nav aria-label="Social links">
             {data.socialLinks.map((item) => (
-              <a href={item.url} key={item.id}>
-                {item.label}
-              </a>
+              <SocialLink item={item} key={item.id} />
             ))}
           </nav>
         ) : null}

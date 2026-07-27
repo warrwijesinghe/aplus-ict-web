@@ -1,9 +1,9 @@
-import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { PublicHomePage } from '../src/pages/PublicCoursePages.jsx';
 
-test('renders the public learning message', () => {
+test('renders the official public learning message', () => {
   render(
     <MemoryRouter>
       <QueryClientProvider
@@ -13,7 +13,5 @@ test('renders the public learning message', () => {
       </QueryClientProvider>
     </MemoryRouter>
   );
-  expect(
-    screen.getByRole('heading', { name: /a\/l ict .* ක්‍රමානුකූලව/i })
-  ).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /learn a\/l ict with clarity/i })).toBeInTheDocument();
 });
