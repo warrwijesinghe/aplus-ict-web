@@ -1,0 +1,29 @@
+name: Deploy Web to mdev
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+concurrency:
+  group: aplus-ict-web-mdev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy A Plus ICT web
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          port: ${{ secrets.DEV_SERVER_PORT }}
+          script_stop: true
+          command_timeout: 20m
+          script: |
+            cd /srv/aplus-ict/aplus-ict-web
+            ./scripts/deploy-dev.sh
