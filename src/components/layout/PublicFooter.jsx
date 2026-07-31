@@ -45,13 +45,14 @@ export const PublicFooter = () => {
       <div className="footer-grid">
         <section>
           <Link className="footer-brand" to="/">
-            <BrandLogo brandName={data?.brandName} resourceId={data?.logoResourceId} />
+            <BrandLogo brandName={data?.brandName} variant="light" />
           </Link>
           <p>{data?.shortDescription || 'A focused learning space for A/L ICT.'}</p>
         </section>
         <nav aria-label="Footer navigation">
           <Link to="/">Home</Link>
           <Link to="/courses">Courses</Link>
+          <Link to="/resources">Resources</Link>
           <Link to="/student-guide">Student Guide</Link>
           <Link to="/about">About Us</Link>
           <Link to="/contact">Contact Us</Link>

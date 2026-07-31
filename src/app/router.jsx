@@ -8,15 +8,22 @@ import { AuthLayout } from '../layouts/AuthLayout.jsx';
 import { PublicLayout } from '../layouts/PublicLayout.jsx';
 import { StudentLayout } from '../layouts/StudentLayout.jsx';
 import { TeacherLayout } from '../layouts/TeacherLayout.jsx';
+import { GoogleLoginSuccessPage } from '../pages/GoogleLoginSuccessPage.jsx';
+import { EnrollmentPage } from '../pages/EnrollmentPage.jsx';
+import { EnrollmentDashboard, StudentProfilePage } from '../pages/StudentExperiencePages.jsx';
+import { AdminContentPage } from '../pages/AdminContentPage.jsx';
+import { LogoutPage } from '../pages/LogoutPage.jsx';
 import {
   AboutPage,
   ContactPage,
   CourseLearningPage,
+  LessonLearningPage,
   PublicCourseDetailPage,
   PublicCoursesPage,
   PublicHomePage,
   StudentGuidePage
 } from '../pages/PublicCoursePages.jsx';
+import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
 import {
   AdminDashboard,
   AdminListPage,
@@ -49,7 +56,10 @@ export const router = createBrowserRouter([
       { path: '/', element: <PublicHomePage /> },
       { path: '/courses', element: <PublicCoursesPage /> },
       { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
+      { path: '/enroll/:courseSlug', element: <EnrollmentPage /> },
       { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
+      { path: '/courses/:courseSlug/lessons/:lessonId', element: <LessonLearningPage /> },
+      { path: '/resources', element: <PublicResourcesPage /> },
       { path: '/student-guide', element: <StudentGuidePage /> },
       { path: '/about', element: <AboutPage /> },
       { path: '/contact', element: <ContactPage /> },
@@ -59,7 +69,8 @@ export const router = createBrowserRouter([
       { path: '/courses/:courseId/curriculum', element: <CurriculumPage /> },
       { path: '/lessons/:lessonId/preview', element: <LessonPreviewPage /> },
       { path: '/store', element: <StorePage /> },
-      { path: '/store/products/:productSlug', element: <ProductDetailPage /> }
+      { path: '/store/products/:productSlug', element: <ProductDetailPage /> },
+      { path: '/logout', element: <LogoutPage /> }
     ]
   },
   {
@@ -71,11 +82,18 @@ export const router = createBrowserRouter([
       }
     ]
   },
+  {
+    element: <AuthLayout />,
+    children: [{ path: '/login/success', element: <GoogleLoginSuccessPage /> }]
+  },
   { path: '/unauthorized', element: <UnauthorizedPage /> },
   { path: '/service-unavailable', element: <ServiceUnavailablePage /> },
   {
     element: <ProtectedRoute />,
     children: [
+      { path: '/dashboard', element: <EnrollmentDashboard /> },
+      { path: '/dashboard/courses', element: <EnrollmentDashboard /> },
+      { path: '/dashboard/profile', element: <StudentProfilePage /> },
       {
         element: <RoleRoute roles={['student']} />,
         children: [
@@ -118,7 +136,7 @@ export const router = createBrowserRouter([
             children: [
               { path: '/admin', element: <AdminDashboard /> },
               { path: '/admin/content/subjects', element: plannedAdmin },
-              { path: '/admin/content/courses', element: plannedAdmin },
+              { path: '/admin/content/courses', element: <AdminContentPage /> },
               { path: '/admin/content/modules', element: plannedAdmin },
               { path: '/admin/content/lessons', element: plannedAdmin },
               {

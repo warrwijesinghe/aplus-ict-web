@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { commerceApi } from '../api/commerce.api.js';
 import { contentApi } from '../api/content.api.js';
@@ -19,8 +19,8 @@ import { ResourceImage } from '../components/resources/ResourceImage.jsx';
 import { useOrderSelection } from '../features/store/selection-context.jsx';
 import { formatCurrency } from '../utils/currency.js';
 import { formatDate } from '../utils/date-time.js';
-import { destinationForUser, safeDestination } from '../utils/route-destination.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
+import { EnrollmentDashboard, StudentProfilePage } from './StudentExperiencePages.jsx';
 
 const dataItems = (result) => result?.data?.items || [];
 const PageError = ({ error }) => <InlineError error={error} />;
@@ -353,39 +353,16 @@ const credentialsSchema = z.object({
   password: z.string().min(1, 'Password is required.')
 });
 export const LoginPage = () => {
-  const { login } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const form = useForm({ resolver: zodResolver(credentialsSchema) });
-  const mutation = useMutation({
-    mutationFn: login,
-    onSuccess: (user) =>
-      navigate(safeDestination(location.state?.from, destinationForUser(user)), { replace: true })
-  });
+  const { startGoogleLogin } = useAuth();
+
   return (
     <section className="form-card">
-      <h1>Log in</h1>
-      <form onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
-        <Field
-          error={form.formState.errors.email}
-          label="Email"
-          name="email"
-          register={form.register}
-          type="email"
-        />
-        <Field
-          error={form.formState.errors.password}
-          label="Password"
-          name="password"
-          register={form.register}
-          type="password"
-        />
-        {mutation.error && <InlineError error={mutation.error} />}
-        <button disabled={mutation.isPending} type="submit">
-          {mutation.isPending ? 'Signing in…' : 'Log in'}
-        </button>
-      </form>
-      <p>Student accounts use the Google sign-in action on the public website.</p>
+      <p className="eyebrow">Student sign in</p>
+      <h1>Continue your learning</h1>
+      <p>Use your Google account to open your saved lessons and progress.</p>
+      <button onClick={startGoogleLogin} type="button">
+        Continue with Google
+      </button>
     </section>
   );
 };
@@ -555,12 +532,37 @@ export const ProductDetailPage = () => {
   );
 };
 
-export const StudentDashboard = () => (
-  <>
-    <h1>Welcome to your learning dashboard</h1>
-    <p>Use My courses to continue learning, or My orders to review your purchases.</p>
-  </>
-);
+export const StudentDashboard = EnrollmentDashboard;
+/*export const StudentDashboard = () => {
+  const { user } = useAuth();
+
+  return (
+    <section className="member-dashboard">
+      <p className="eyebrow">Member area</p>
+      <h1>Welcome back, {user?.name || 'student'}.</h1>
+      <p className="member-dashboard-intro">
+        Pick up your next A/L ICT quest, browse free course content, or manage your lesson unlocks.
+      </p>
+      <div className="member-action-grid">
+        <Link to="/courses">
+          <span aria-hidden="true">01</span>
+          <strong>Continue learning</strong>
+          <small>Open a course and resume the next lesson.</small>
+        </Link>
+        <Link to="/student/orders">
+          <span aria-hidden="true">02</span>
+          <strong>My lesson unlocks</strong>
+          <small>Review orders and submit a payment when needed.</small>
+        </Link>
+        <Link to="/student/profile">
+          <span aria-hidden="true">03</span>
+          <strong>My profile</strong>
+          <small>Check your account and sign-in settings.</small>
+        </Link>
+      </div>
+    </section>
+  );
+};*/
 export const StudentCoursesPage = () => {
   const enrolments = useQuery({
     queryKey: queryKeys.learning.enrolments(),
@@ -809,21 +811,29 @@ export const PaymentPage = () => {
     </section>
   );
 };
-export const ProfilePage = () => {
+export const ProfilePage = StudentProfilePage;
+/*export const ProfilePage = () => {
   const { user, logoutAll } = useAuth();
   return (
-    <>
-      <h1>Profile</h1>
-      <p>
-        {user?.firstName} {user?.lastName}
-      </p>
-      <p>{user?.email}</p>
-      <button onClick={logoutAll} type="button">
-        Log out on all devices
-      </button>
-    </>
+    <section className="member-profile">
+      <p className="eyebrow">My account</p>
+      <h1>Profile and session</h1>
+      <article>
+        <h2>{user?.name || 'A Plus ICT student'}</h2>
+        <p>{user?.email}</p>
+        <p>Your student account uses Google sign-in. No password is stored in this Web app.</p>
+      </article>
+      <div className="member-profile-actions">
+        <Link className="button" to="/logout">
+          Log out on this device
+        </Link>
+        <button onClick={logoutAll} type="button">
+          Log out on all devices
+        </button>
+      </div>
+    </section>
   );
-};
+};*/
 
 const PlannedPage = ({ title }) => (
   <>

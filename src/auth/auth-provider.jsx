@@ -6,6 +6,16 @@ import { authMemory } from './auth-memory.js';
 import { hasAnyPermission, hasPermission, hasRole } from './authorization.js';
 import { AuthContext } from './auth-context.jsx';
 
+// The API currently returns one role as "role"; route guards use a roles array.
+// Normalising at this boundary keeps every client component on one user shape.
+const normalizeUser = (user) => ({
+  ...user,
+  permissions: user?.permissions || [],
+  roles: user?.roles || (user?.role ? [user.role] : [])
+});
+
+const isGoogleCallbackRoute = () => window.location.pathname === '/login/success';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isRestoringSession, setIsRestoringSession] = useState(true);
@@ -20,11 +30,21 @@ export const AuthProvider = ({ children }) => {
     const result = await authApi.refresh();
     authMemory.set(result.accessToken);
     const current = await authApi.me();
-    setUser(current.user);
-    return current.user;
+    const user = normalizeUser(current.user);
+    setUser(user);
+    return user;
   }, []);
   useEffect(() => {
     configureRefreshQueue({ refresh: refreshSession, onSessionFailure: clearSession });
+
+    // The callback page validates the one-time fragment token itself. Skipping
+    // the automatic refresh here avoids a stale refresh failure clearing that
+    // newly received access token during the callback.
+    if (isGoogleCallbackRoute()) {
+      setIsRestoringSession(false);
+      return;
+    }
+
     refreshSession()
       .catch(clearSession)
       .finally(() => setIsRestoringSession(false));
@@ -33,9 +53,29 @@ export const AuthProvider = ({ children }) => {
     const result = await action(input);
     authMemory.set(result.accessToken);
     const current = await authApi.me();
-    setUser(current.user);
-    return current.user;
+    const user = normalizeUser(current.user);
+    setUser(user);
+    return user;
   }, []);
+  const completeGoogleLogin = useCallback(
+    async (accessToken) => {
+      setIsRestoringSession(true);
+      authMemory.set(accessToken);
+
+      try {
+        const current = await authApi.me();
+        const user = normalizeUser(current.user);
+        setUser(user);
+        return user;
+      } catch (error) {
+        clearSession();
+        throw error;
+      } finally {
+        setIsRestoringSession(false);
+      }
+    },
+    [clearSession]
+  );
   const value = useMemo(
     () => ({
       user,
@@ -46,6 +86,8 @@ export const AuthProvider = ({ children }) => {
       permissions: user?.permissions || [],
       login: (input) => establish(authApi.login, input),
       register: (input) => establish(authApi.register, input),
+      startGoogleLogin: authApi.login,
+      completeGoogleLogin,
       refreshSession,
       logout: async () => {
         try {
@@ -65,7 +107,7 @@ export const AuthProvider = ({ children }) => {
       hasPermission: (permission) => hasPermission(user, permission),
       hasAnyPermission: (permissions) => hasAnyPermission(user, permissions)
     }),
-    [clearSession, establish, isRestoringSession, refreshSession, user]
+    [clearSession, completeGoogleLogin, establish, isRestoringSession, refreshSession, user]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
