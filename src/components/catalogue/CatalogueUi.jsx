@@ -59,9 +59,10 @@ export const ActiveCourseCard = ({ course, continueLearning }) => (
 
 export const CatalogueCourseCard = ({ course }) => {
   const comingSoon = course.availabilityStatus === 'coming_soon';
-  const image = course.medium?.code === 'sinhala'
+  const isAlCourse = course.academicLevel?.code === 'AL' || course.slug?.startsWith('al-');
+  const image = isAlCourse && course.medium?.code === 'sinhala'
     ? '/images/al-ict-sinhala.jfif'
-    : course.medium?.code === 'english'
+    : isAlCourse && course.medium?.code === 'english'
       ? '/images/al-ict-english.jpg'
       : '/images/course-card-default.jpg';
   return (

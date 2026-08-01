@@ -157,7 +157,7 @@ export const PublicResourcesPage = () => {
   // level is published. API-supplied values extend these sensible defaults.
   const available = {
     academicLevels: mergeFilterOptions(['al', 'ol'], data?.filters?.academicLevels),
-    media: mergeFilterOptions(['sinhala', 'english', 'tamil', 'all'], data?.filters?.media),
+    media: mergeFilterOptions(['sinhala', 'english'], data?.filters?.media?.filter((medium) => medium !== 'tamil' && medium !== 'all')),
     resourceTypes: mergeFilterOptions(
       Object.keys(resourceTypeLabels),
       data?.filters?.resourceTypes
@@ -236,39 +236,30 @@ export const PublicResourcesPage = () => {
         </button>
       </section>
 
-      {query.isLoading ? <LoadingSkeleton /> : null}
-      {query.isError ? <InlineError error={query.error} /> : null}
-      {!query.isLoading && !query.isError && items.length ? (
+      {query.isPending ? <LoadingSkeleton label="Loading resources" /> : null}
+      {query.isError ? <InlineError error={query.error} onRetry={query.refetch} /> : null}
+      {query.isSuccess && items.length ? (
         <section className="resource-grid" aria-live="polite">
           {items.map((item) => (
             <ResourceCard item={item} key={item.id} />
           ))}
         </section>
       ) : null}
-      {!query.isLoading && !query.isError && !items.length ? (
+      {query.isSuccess && !items.length ? (
         <EmptyState title="No resources match those filters">
+          <p>Clear your filters or choose the Government School ICT grade range that fits you.</p>
           <button
             className="button secondary"
             onClick={() => setFilters(initialFilters)}
             type="button"
           >
-            View all resources
+            Clear filters
           </button>
+          <p className="pathway-links"><Link to="/school-ict">Grades 6–9</Link><Link to="/ol-ict">Grades 10–11</Link><Link to="/al-ict">Grades 12–13</Link></p>
         </EmptyState>
       ) : null}
 
-      <section className="resources-cta">
-        <div>
-          <p className="eyebrow">Keep learning</p>
-          <h2>Want guided ICT lessons as well?</h2>
-          <p>
-            Explore structured learning paths with free activities for Sinhala and English Medium.
-          </p>
-        </div>
-        <Link className="button" to="/courses">
-          Explore courses
-        </Link>
-      </section>
+      <section className="resources-cta"><div><p className="eyebrow">Keep learning</p><h2>Choose your Government School grade</h2></div><p className="pathway-links"><Link className="button secondary" to="/school-ict">Grades 6–9</Link><Link className="button secondary" to="/ol-ict">Grades 10–11</Link><Link className="button secondary" to="/al-ict">Grades 12–13</Link></p></section>
     </>
   );
 };

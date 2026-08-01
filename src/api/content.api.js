@@ -1,4 +1,5 @@
 import { contentClient } from './clients/content.client.js';
+import { ApiError } from './api-error.js';
 const unwrap = (response) => response.data;
 const itemList = (response) => ({ data: { items: response.data.data } });
 const inferredLevel = (course) => {
@@ -47,8 +48,26 @@ export const contentApi = {
     contentClient.get(`/api/v1/public/courses/${slug}`, { signal }).then(unwrap),
   publicCurriculum: (slug, signal) =>
     contentClient.get(`/api/v1/public/courses/${slug}/curriculum`, { signal }).then(unwrap),
-  publicLesson: (courseSlug, lessonSlug, signal) =>
-    contentClient.get(`/api/v1/public/courses/${courseSlug}/lessons/${lessonSlug}`, { signal }).then(unwrap),
+  publicLesson: async (courseSlug, lessonSlug, signal) => {
+    try {
+      return await contentClient.get(`/api/v1/public/courses/${courseSlug}/lessons/${lessonSlug}`, { signal }).then(unwrap);
+    } catch (error) {
+      // Earlier public-content deployments expose lesson detail through the
+      // published curriculum rather than a dedicated lesson endpoint.
+      if (error?.status !== 404) throw error;
+      const response = await contentApi.publicCurriculum(courseSlug, signal);
+      const course = response.data;
+      const source = (course?.lessons || []).find((lesson) => lesson.slug === lessonSlug || String(lesson.id) === lessonSlug);
+      if (!source) throw new ApiError({ code: 'LESSON_NOT_FOUND', message: 'This lesson is not available.', status: 404, service: 'content' });
+      const contentItems = (source.activities || []).map((activity) => ({
+        ...activity,
+        contentType: activity.contentType || activity.activityType,
+        descriptionEn: activity.descriptionEn || activity.summary,
+        isLocked: activity.isLocked ?? activity.accessType === 'paid'
+      }));
+      return { data: { course, lesson: { ...source, topics: [{ id: `${source.id}-content`, title: source.title, contentItems }] } } };
+    }
+  },
   siteProfile: (signal) => contentClient.get('/api/v1/site-profile', { signal }).then(unwrap),
   adminList: (type, params, signal) =>
     contentClient.get(`/api/v1/admin/${type}`, { params, signal }).then(unwrap),

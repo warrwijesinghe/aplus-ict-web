@@ -61,6 +61,10 @@ const courseDescription = (course) =>
   course.description ||
   'Follow a structured lesson path, begin with free content, and build your A/L ICT confidence.';
 
+const courseHeading = (course) => course?.medium?.code === 'sinhala'
+  ? course.titleSi || course.title
+  : course?.titleEn || course?.title;
+
 // Reuse the supplied learning imagery as lightweight lesson covers. The number
 // determines the image, so both Sinhala and English tracks stay visually aligned.
 const lessonImages = [
@@ -579,9 +583,10 @@ export const PublicCourseDetailPage = () => {
         }
       : null
   });
-  if (query.isLoading || curriculum.isLoading || enrollment.isLoading)
-    return <LoadingSkeleton />;
-  if (query.isError || curriculum.isError) return <InlineError error={query.error || curriculum.error} />;
+  if (query.isPending || curriculum.isPending || enrollment.isLoading)
+    return <LoadingSkeleton label="Loading course" />;
+  if (query.isError || curriculum.isError) return <InlineError error={query.error || curriculum.error} onRetry={() => { query.refetch(); curriculum.refetch(); }} />;
+  if (!course) return <EmptyState title="This course is not available" />;
   const lessons = curriculum.data?.data?.lessons || [];
   const comingSoon = course.availabilityStatus === 'coming_soon';
   const progressByLesson = new Map(
@@ -589,7 +594,7 @@ export const PublicCourseDetailPage = () => {
   );
   return (
     <>
-      <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to="/">Home</Link><span>/</span><Link to="/#courses">Courses</Link><span>/</span><span>{course.title}</span></nav>
+      <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to="/">Home</Link><span>/</span><Link to="/al-ict">Grades 12–13</Link><span>/</span><span>A/L ICT</span><span>/</span><span>{course.medium?.nameEn || course.medium?.name || 'Course'}</span></nav>
       <section className="course-detail-hero">
         <div className="course-hero-image-frame">
           {course.heroResourceId ? (
@@ -608,7 +613,7 @@ export const PublicCourseDetailPage = () => {
         </div>
         <div>
           <p className="eyebrow">{course.academicLevel?.nameEn || 'ICT'} · {course.medium?.nameEn || course.medium?.name || course.medium?.code}</p>
-          <h1>{course.title}</h1>
+          <h1 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{courseHeading(course)}</h1>
           <p className="course-detail-description">{courseDescription(course)}</p>
           {counts(course)}
           <p className="course-detail-note">
@@ -1057,8 +1062,8 @@ export const LessonLearningPage = () => {
       isAccessibleForFree: lesson.freeContentCount > 0,
     } : null,
   });
-  if (query.isLoading) return <LoadingSkeleton label="Loading lesson" />;
-  if (query.isError) return <InlineError error={query.error} />;
+  if (query.isPending) return <LoadingSkeleton label="Loading lesson" />;
+  if (query.isError) return <InlineError error={query.error} onRetry={query.refetch} />;
   if (!lesson) return <EmptyState title="This lesson is not available" />;
   const topicCount = lesson.topics?.length || 0;
   return (
@@ -1157,8 +1162,8 @@ export const StudentGuidePage = () => {
         </p>
       </aside>
       <div className="guide-actions">
-        <Link className="button" to="/courses">
-          Explore Courses
+        <Link className="button" to="/#pathways">
+          Choose Your Grade
         </Link>
         <Link className="button secondary" to="/resources">
           Browse Free Resources
@@ -1180,8 +1185,8 @@ const SitePage = ({ contact }) => {
     queryKey: queryKeys.content.siteProfile,
     queryFn: ({ signal }) => contentApi.siteProfile(signal)
   });
-  if (query.isLoading) return <LoadingSkeleton />;
-  if (query.isError) return <InlineError error={query.error} />;
+  if (query.isPending) return <LoadingSkeleton label="Loading information" />;
+  if (query.isError) return <InlineError error={query.error} onRetry={query.refetch} />;
   const profile = query.data.data;
   if (!profile) return <EmptyState title="Information will be published soon" />;
   if (contact)
@@ -1215,9 +1220,7 @@ const SitePage = ({ contact }) => {
               Message on WhatsApp
             </a>
           )}
-          <Link className="button secondary" to="/courses">
-            View Courses
-          </Link>
+          <Link className="button secondary" to="/#pathways">Choose Your Grade</Link>
         </div>
       </section>
     );
@@ -1266,9 +1269,7 @@ const SitePage = ({ contact }) => {
       </div>
       <SocialLinks links={profile.socialLinks} />
       <div className="guide-actions">
-        <Link className="button" to="/courses">
-          View Courses
-        </Link>
+        <Link className="button" to="/#pathways">Choose Your Grade</Link>
         <Link className="button secondary" to="/resources">
           Browse Resources
         </Link>
