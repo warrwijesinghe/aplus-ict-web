@@ -6,9 +6,10 @@ export const queryKeys = {
     course: (slug) => ['content', 'course', slug],
     curriculum: (id) => ['content', 'curriculum', id],
     preview: (id) => ['content', 'preview', id],
-    publicCourses: ['content', 'public', 'courses'],
+    publicCourses: (params = {}) => ['content', 'public', 'courses', params],
     publicCourse: (slug) => ['content', 'public', 'course', slug],
     publicCurriculum: (slug) => ['content', 'public', 'curriculum', slug],
+    publicLesson: (courseSlug, lessonSlug) => ['content', 'public', 'lesson', courseSlug, lessonSlug],
     siteProfile: ['content', 'public', 'site-profile'],
     publicDownloads: (params = {}) => ['content', 'public', 'downloads', params]
   },

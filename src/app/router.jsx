@@ -24,6 +24,7 @@ import {
   StudentGuidePage
 } from '../pages/PublicCoursePages.jsx';
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
+import { PrivacyPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
 import {
   AdminDashboard,
   AdminListPage,
@@ -58,14 +59,14 @@ export const router = createBrowserRouter([
       { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
       { path: '/enroll/:courseSlug', element: <EnrollmentPage /> },
       { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
-      { path: '/courses/:courseSlug/lessons/:lessonId', element: <LessonLearningPage /> },
+      { path: '/courses/:courseSlug/lessons/:lessonSlug', element: <LessonLearningPage /> },
       { path: '/resources', element: <PublicResourcesPage /> },
+      { path: '/free-lessons', element: <PublicResourcesPage /> },
       { path: '/student-guide', element: <StudentGuidePage /> },
       { path: '/about', element: <AboutPage /> },
       { path: '/contact', element: <ContactPage /> },
-      { path: '/al-ict', element: <Navigate replace to="/courses" /> },
-      { path: '/al-ict/:medium', element: <Navigate replace to="/courses" /> },
-      { path: '/al-ict/:medium/lessons/:lessonSlug', element: <Navigate replace to="/courses" /> },
+      { path: '/privacy-policy', element: <PrivacyPolicyPage /> },
+      { path: '/terms', element: <TermsPage /> },
       { path: '/courses/:courseId/curriculum', element: <CurriculumPage /> },
       { path: '/lessons/:lessonId/preview', element: <LessonPreviewPage /> },
       { path: '/store', element: <StorePage /> },

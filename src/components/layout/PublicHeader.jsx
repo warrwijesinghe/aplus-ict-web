@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { contentApi } from '../../api/content.api.js';
@@ -23,6 +23,17 @@ export const PublicHeader = () => {
     setIsOpen(false);
     setIsMemberOpen(false);
   };
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') closeMenu();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.body.classList.toggle('navigation-open', isOpen);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.classList.remove('navigation-open');
+    };
+  }, [isOpen]);
   const roles = user?.roles?.map((role) => (typeof role === 'string' ? role : role.code)) || [];
   const loginReturnTo = encodeURIComponent(location.pathname + location.search);
   const memberDestination = destinationForUser(user);
@@ -56,9 +67,6 @@ export const PublicHeader = () => {
         </NavLink>
         <NavLink onClick={closeMenu} to="/resources">
           Resources
-        </NavLink>
-        <NavLink onClick={closeMenu} to="/student-guide">
-          Student Guide
         </NavLink>
         <NavLink onClick={closeMenu} to="/about">
           About Us
@@ -107,7 +115,7 @@ export const PublicHeader = () => {
             href={serviceUrls.auth + '/api/v1/auth/google?returnTo=' + loginReturnTo}
             onClick={closeMenu}
           >
-            Continue with Google
+            Login
           </a>
         )}
       </nav>

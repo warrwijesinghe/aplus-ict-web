@@ -13,6 +13,10 @@ import { useOrderSelection } from '../features/store/selection-context.jsx';
 import { usePageSeo } from '../seo/use-page-seo.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
+import {
+  BilingualHeading,
+  CatalogueCourseCard
+} from '../components/catalogue/CatalogueUi.jsx';
 
 const freeContentTotal = (course) =>
   Number(course.freeContentCount ?? course.freeActivityCount ?? 0);
@@ -106,6 +110,15 @@ const lessonAvailability = (lesson) => {
   return { className: 'paid', label: 'Premium content' };
 };
 
+const LessonAvailabilityBadge = ({ lesson }) => {
+  const available = Number(lesson.freeContentCount || 0) + Number(lesson.paidContentCount || 0) > 0;
+  return (
+    <span className={`availability-badge ${available ? 'active' : 'coming-soon'}`}>
+      {available ? 'Available lesson' : 'Coming soon'}
+    </span>
+  );
+};
+
 const contentTypeLabel = {
   activity: 'Activity',
   download: 'Download',
@@ -118,10 +131,30 @@ const contentTypeLabel = {
   video: 'Video lesson'
 };
 
+const youtubeEmbedUrl = (url) => {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    const videoId = parsed.hostname === 'youtu.be'
+      ? parsed.pathname.slice(1)
+      : parsed.hostname.endsWith('youtube.com')
+        ? parsed.searchParams.get('v')
+        : null;
+    return videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)
+      ? `https://www.youtube-nocookie.com/embed/${videoId}`
+      : null;
+  } catch {
+    return null;
+  }
+};
+
 const ActivityStudyContent = ({ activity }) => {
   const [fileError, setFileError] = useState('');
   const [isOpeningFile, setIsOpeningFile] = useState(false);
   const videoUrl = safeExternalUrl(activity.youtubeUrl);
+  const embeddedVideoUrl = activity.config?.display === 'embedded'
+    ? youtubeEmbedUrl(videoUrl)
+    : null;
 
   const openAttachedResource = async () => {
     setFileError('');
@@ -148,9 +181,21 @@ const ActivityStudyContent = ({ activity }) => {
   return (
     <div className="activity-study-content">
       {activity.content ? <p>{activity.content}</p> : null}
+      {embeddedVideoUrl ? (
+        <div className="lesson-video-frame">
+          <iframe
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            src={embeddedVideoUrl}
+            title={activity.title}
+          />
+        </div>
+      ) : null}
       {videoUrl ? (
         <a className="activity-open-link" href={videoUrl} rel="noreferrer" target="_blank">
-          Open video lesson
+          {embeddedVideoUrl ? 'Open on YouTube' : 'Open video lesson'}
         </a>
       ) : null}
       {activity.resourceId ? (
@@ -180,6 +225,7 @@ const SyllabusLessonCard = ({ courseSlug, isEnrolled, lesson, progress }) => {
           <span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span>
           {lesson.estimatedPeriods ? <span>{lesson.estimatedPeriods} periods</span> : null}
         </div>
+        <LessonAvailabilityBadge lesson={lesson} />
         <h3>{lesson.title}</h3>
         {lesson.shortDescription ? <p>{lesson.shortDescription}</p> : null}
         <div className="lesson-content-counts">
@@ -196,7 +242,7 @@ const SyllabusLessonCard = ({ courseSlug, isEnrolled, lesson, progress }) => {
             <progress max="100" value={lessonStats.progressPercent} />
           </div>
         ) : null}
-        <Link className="lesson-card-link" to={`/courses/${courseSlug}/lessons/${lesson.id}`}>
+        <Link className="lesson-card-link" to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
           {isEnrolled ? 'Start lesson' : 'Preview lesson'}
         </Link>
       </div>
@@ -253,8 +299,8 @@ const CourseCard = ({ course }) => {
 
 const CourseGrid = () => {
   const query = useQuery({
-    queryKey: queryKeys.content.publicCourses,
-    queryFn: ({ signal }) => contentApi.publicCourses(signal)
+    queryKey: queryKeys.content.publicCourses(),
+    queryFn: ({ signal }) => contentApi.publicCourses({}, signal)
   });
   if (query.isLoading) return <LoadingSkeleton />;
   if (query.isError) return <InlineError error={query.error} />;
@@ -270,28 +316,11 @@ const CourseGrid = () => {
   );
 };
 
-const SocialLinks = ({ links = [] }) => {
-  if (!links.length) return null;
-  return (
-    <section className="home-section social-section">
-      <p className="eyebrow">Stay connected</p>
-      <h2>Follow A Plus ICT</h2>
-      <div className="social-pills">
-        {links.map((item) => (
-          <a href={item.url} key={item.id} rel="noreferrer" target="_blank">
-            {item.label || item.platform}
-          </a>
-        ))}
-      </div>
-    </section>
-  );
-};
-
 export const PublicHomePage = () => {
   usePageSeo({
-    title: 'A/L ICT Lessons and Free Learning Resources',
+    title: 'A Plus ICT | Grade 6 to A/L ICT Courses in Sinhala and English',
     description:
-      'Learn A/L ICT with structured Sinhala and English Medium lessons, free study resources, and clear progress tracking.',
+      'Explore Sri Lankan ICT courses from Grade 6 to A/L in Sinhala and English medium. View complete syllabuses, structured lessons, videos, notes, activities and quizzes.',
     path: '/',
     structuredData: {
       '@context': 'https://schema.org',
@@ -301,91 +330,96 @@ export const PublicHomePage = () => {
         'A Sri Lankan A/L ICT learning platform with structured courses and free learning resources.'
     }
   });
-  const profile = useQuery({
-    queryKey: queryKeys.content.siteProfile,
-    queryFn: ({ signal }) => contentApi.siteProfile(signal),
-    retry: false
+  const catalogue = useQuery({
+    queryKey: queryKeys.content.publicCourses(),
+    queryFn: ({ signal }) => contentApi.publicCourses({}, signal),
+    staleTime: 60_000
   });
-  const data = profile.data?.data;
+  const courses = catalogue.data?.data || [];
+  const courseGroups = Object.values(
+    courses.reduce((groups, course) => {
+        const code = course.academicLevel?.code;
+        if (!code) return groups;
+        groups[code] ||= { level: course.academicLevel, courses: [] };
+        groups[code].courses.push(course);
+        return groups;
+      }, {})
+  ).sort((a, b) => (a.level?.code || '').localeCompare(b.level?.code || '', undefined, { numeric: true }));
   return (
     <>
       <section className="hero al-ict-hero">
-        {data?.bannerResourceId ? (
-          <ResourceImage
-            alt="A Plus ICT students learning"
-            className="hero-image"
-            loading="eager"
-            resourceId={data.bannerResourceId}
-          />
-        ) : (
-          <img
-            alt="Student learning online"
-            className="hero-image"
-            loading="eager"
-            src="/images/learning-hero.jpg"
-          />
-        )}
+        <img alt="Student learning online" className="hero-image" loading="eager" src="/images/learning-hero.jpg" />
         <div className="hero-copy">
           <p className="eyebrow">A Plus ICT</p>
-          <h1>Learn A/L ICT with clarity, structure, and confidence.</h1>
+          <h1>ICT Learning from Grade 6 to A/L</h1>
+          <p className="hero-sinhala" lang="si">6 ශ්‍රේණියේ සිට උසස් පෙළ දක්වා ICT ඉගෙනීම</p>
           <p>
-            Free lessons, guided learning activities, and progress tracking in one focused learning
-            space.
+            Choose your grade and medium to explore the complete syllabus, lessons and learning content.
           </p>
           <p className="hero-actions">
             <Link className="button" to="/courses">
-              Start Learning Free
-            </Link>
-            <Link className="button secondary" to="/resources">
-              Browse Free Resources
+              View Courses
             </Link>
           </p>
         </div>
       </section>
-      <section className="home-section featured-courses">
-        <p className="eyebrow">A/L ICT courses</p>
-        <h2>Choose your learning medium</h2>
+      <section className="home-section featured-courses" id="courses">
+        <p className="eyebrow">Course catalogue</p>
+        <BilingualHeading english="Choose your ICT course" sinhala="ඔබගේ ICT පාඨමාලාව තෝරන්න" />
         <p className="section-intro">
-          Select a published course to see its syllabus, free activities, and learning path.
+          Every level has separate Sinhala and English-medium courses. A/L ICT is currently active; Grades 6–11 are coming soon.
         </p>
-        <CourseGrid />
+        {catalogue.isLoading ? <LoadingSkeleton label="Loading courses" /> : null}
+        {catalogue.isError ? <InlineError error={catalogue.error} /> : null}
+        {!catalogue.isLoading && !catalogue.isError && !courseGroups.length ? <EmptyState title="Courses are being prepared" /> : null}
+        <div className="course-level-groups">{courseGroups.map((group) => (
+          <section className="course-level-group" key={group.level.code}>
+            <BilingualHeading as="h2" english={`${group.level.nameEn} ICT`} sinhala={`${group.level.nameSi} ICT`} />
+            <div className="catalogue-course-grid">{group.courses.map((course) => <CatalogueCourseCard course={course} key={course.id} />)}</div>
+          </section>
+        ))}</div>
       </section>
       <section className="home-section learning-highlight" id="how-it-works">
         <p className="eyebrow">How learning works</p>
-        <h2>Simple steps. Meaningful progress.</h2>
+        <BilingualHeading english="Simple steps. Meaningful progress." sinhala="සරල පියවර. අර්ථවත් ප්‍රගතිය." />
         <div className="steps-grid">
           <article>
             <span>01</span>
-            <h3>Select a course</h3>
-            <p>Choose the A/L ICT medium that suits you.</p>
+            <h3>Choose your grade or examination and medium</h3>
+            <p lang="si">ඔබේ ශ්‍රේණිය හෝ විභාගය සහ මාධ්‍යය තෝරන්න.</p>
           </article>
           <article>
             <span>02</span>
-            <h3>Start with free lessons</h3>
-            <p>Open available activities and build your knowledge.</p>
+            <h3>Sign in securely with Google</h3>
+            <p lang="si">Google සමඟ ආරක්ෂිතව පිවිසෙන්න.</p>
           </article>
           <article>
             <span>03</span>
-            <h3>Track your progress</h3>
-            <p>Your completed free activities stay visible in My Learning.</p>
+            <h3>Learn free chapters and track progress</h3>
+            <p lang="si">නොමිලේ පාඩම් ඉගෙන ප්‍රගතිය සටහන් කරගන්න.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Unlock advanced lessons when available</h3>
+            <p lang="si">ලබාගත හැකි විට උසස් පාඩම් අගුළු හරින්න.</p>
           </article>
         </div>
       </section>
       <section className="home-section benefits-section">
         <p className="eyebrow">Why A Plus ICT</p>
-        <h2>Built for steady, independent learning.</h2>
+        <h2>Built for clear, focused learning.</h2>
         <div className="benefits-grid">
           <article>
-            <h3>Clear syllabus path</h3>
-            <p>Move through ordered lessons without losing your place.</p>
+            <h3>Sinhala and English-medium courses</h3>
+            <p>Choose a clear path for your academic level and medium.</p>
           </article>
           <article>
-            <h3>Free first steps</h3>
-            <p>Start learning before deciding whether you need additional access.</p>
+            <h3>Complete syllabus structure</h3>
+            <p>Lessons contain videos, notes, activities and quizzes.</p>
           </article>
           <article>
-            <h3>Progress that makes sense</h3>
-            <p>Locked activities never reduce your free-learning progress.</p>
+            <h3>Free and paid content together</h3>
+            <p>Explore free content, then unlock a lesson when you need its paid material.</p>
           </article>
         </div>
       </section>
@@ -408,59 +442,79 @@ export const PublicHomePage = () => {
       <section className="home-section tutor-preview">
         <div className="tutor-image-frame">
           <img
-            alt={data?.tutorName || 'A Plus ICT tutor'}
+            alt="WARR Wijesinghe"
             className="tutor-image"
             src="/images/aplus-ict-tutor.png"
           />
         </div>
         <div>
           <p className="eyebrow">Meet your tutor</p>
-          <h2>{data?.tutorName || 'A Plus ICT tutor'}</h2>
-          <p>{data?.tutorTitle || 'Focused guidance for your A/L ICT learning journey.'}</p>
+          <h2>WARR Wijesinghe</h2>
+          <p>ICT educator · Software engineer</p>
           <p>
-            {data?.tutorBio ||
-              'Build a clear foundation, practise consistently, and move through every lesson with confidence.'}
+            Build a clear foundation, practise consistently, and move through every lesson with confidence.
           </p>
           <Link className="text-link" to="/about">
             About A Plus ICT <span aria-hidden="true">→</span>
           </Link>
         </div>
       </section>
-      <SocialLinks links={data?.socialLinks} />
-      <section className="login-cta">
-        <p className="eyebrow">Ready when you are</p>
-        <h2>Start your A/L ICT learning path today.</h2>
-        <Link className="button" to="/courses">
-          Start Learning Free
-        </Link>
-      </section>
     </>
+  );
+};
+
+const SocialLinks = ({ links = [] }) => {
+  if (!links.length) return null;
+  return (
+    <section className="social-section">
+      <p className="eyebrow">Stay connected</p>
+      <h2>Follow A Plus ICT</h2>
+      <div className="social-pills">
+        {links.map((item) => (
+          <a href={item.url} key={item.id} rel="noreferrer" target="_blank">
+            {item.label || item.platform}
+          </a>
+        ))}
+      </div>
+    </section>
   );
 };
 
 export const PublicCoursesPage = () => {
   usePageSeo({
-    title: 'A/L ICT Courses in Sinhala and English Medium',
+    title: 'ICT Course Catalogue in Sinhala and English',
     description:
-      'Browse A Plus ICT A/L ICT courses in Sinhala Medium and English Medium, each with a structured 13-lesson syllabus.',
+      'Browse Sri Lankan ICT courses from Grade 6 to A/L in separate Sinhala and English-medium learning paths.',
     path: '/courses'
   });
+  const catalogue = useQuery({
+    queryKey: queryKeys.content.publicCourses(),
+    queryFn: ({ signal }) => contentApi.publicCourses({}, signal),
+    staleTime: 60_000
+  });
+  const groups = Object.values((catalogue.data?.data || []).reduce((result, course) => {
+    const code = course.academicLevel?.code;
+    if (!code) return result;
+    result[code] ||= { level: course.academicLevel, courses: [] };
+    result[code].courses.push(course);
+    return result;
+  }, {})).sort((a, b) => (a.level?.code || '').localeCompare(b.level?.code || '', undefined, { numeric: true }));
 
   return (
-    <>
-      <section className="track-heading">
-        <p className="eyebrow">Courses</p>
-        <h1>A/L ICT learning paths</h1>
-        <p>
-          Choose Sinhala Medium or English Medium, begin with a free activity, and move through the
-          syllabus at your own pace.
-        </p>
-        <Link className="text-link" to="/resources">
-          Looking for syllabus documents or teachers guides? Browse resources
-        </Link>
-      </section>
-      <CourseGrid />
-    </>
+    <section className="catalogue-page home-section">
+      <p className="eyebrow">Course catalogue</p>
+      <BilingualHeading as="h1" english="ICT Courses from Grade 6 to A/L" sinhala="6 ශ්‍රේණියේ සිට උසස් පෙළ දක්වා ICT පාඨමාලා" />
+      <p className="section-intro">Choose your academic level and medium to view its course details, syllabus and available lessons.</p>
+      {catalogue.isLoading ? <LoadingSkeleton label="Loading courses" /> : null}
+      {catalogue.isError ? <InlineError error={catalogue.error} /> : null}
+      {!catalogue.isLoading && !catalogue.isError && !groups.length ? <EmptyState title="Courses are being prepared" /> : null}
+      <div className="course-level-groups">{groups.map((group) => (
+        <section className="course-level-group" key={group.level.code}>
+          <BilingualHeading english={`${group.level.nameEn} ICT`} sinhala={`${group.level.nameSi} ICT`} />
+          <div className="catalogue-course-grid">{group.courses.map((course) => <CatalogueCourseCard course={course} key={course.id} />)}</div>
+        </section>
+      ))}</div>
+    </section>
   );
 };
 
@@ -504,11 +558,13 @@ export const PublicCourseDetailPage = () => {
     return <LoadingSkeleton />;
   if (query.isError || curriculum.isError) return <InlineError error={query.error || curriculum.error} />;
   const lessons = curriculum.data?.data?.lessons || [];
+  const comingSoon = course.availabilityStatus === 'coming_soon';
   const progressByLesson = new Map(
     (learningProgress.data?.lessons || []).map((lesson) => [lesson.id, lesson.progress])
   );
   return (
     <>
+      <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to="/">Home</Link><span>/</span><Link to="/#courses">Courses</Link><span>/</span><span>{course.title}</span></nav>
       <section className="course-detail-hero">
         <div className="course-hero-image-frame">
           {course.heroResourceId ? (
@@ -526,29 +582,21 @@ export const PublicCourseDetailPage = () => {
           )}
         </div>
         <div>
-          <p className="eyebrow">{course.medium?.name || course.medium?.code}</p>
+          <p className="eyebrow">{course.academicLevel?.nameEn || 'ICT'} · {course.medium?.nameEn || course.medium?.name || course.medium?.code}</p>
           <h1>{course.title}</h1>
           <p className="course-detail-description">{courseDescription(course)}</p>
           {counts(course)}
           <p className="course-detail-note">
             Explore free content first. Your progress expands as you unlock premium lesson content.
           </p>
-          <div className="course-detail-actions">
-            <Link className="button" to={enrollment.data ? `/courses/${course.slug}/learn` : `/enroll/${course.slug}`}>
-              {enrollment.data ? 'Continue Learning' : isAuthenticated ? 'Enroll Free' : 'Login to Enroll'}
-            </Link>
-            <Link className="button secondary" to="/resources">
-              Browse Free Resources
-            </Link>
-          </div>
+          {comingSoon ? <p className="course-detail-note">Coming Soon — this course cannot be enrolled in or purchased yet.</p> : <div className="course-detail-actions"><Link className="button" to={enrollment.data ? `/courses/${course.slug}/learn` : `/enroll/${course.slug}`}>{enrollment.data ? 'Continue Learning' : isAuthenticated ? 'Enroll Free' : 'Login to Enroll'}</Link></div>}
         </div>
       </section>
       <section className="syllabus-summary">
         <p className="eyebrow">Syllabus overview</p>
-        <h2>Explore the 13-lesson learning path</h2>
+        <h2>Complete syllabus and lessons</h2>
         <p className="syllabus-intro">
-          Each lesson follows the official A/L ICT topic order. Start with open content, complete
-          quests, and unlock premium lesson content whenever you are ready.
+          View each published lesson, its topics, free content and paid lesson unlock where available.
         </p>
         {lessons.length ? (
           <div className="syllabus-lesson-grid">
@@ -686,7 +734,10 @@ const LearningLessonCard = ({ courseSlug, lesson }) => {
             <p className="lesson-number">Lesson {String(lesson.lessonNumber).padStart(2, '0')}</p>
             <h2>{lesson.title}</h2>
           </div>
-          <span className={'lesson-access ' + availability.className}>{availability.label}</span>
+          <div className="lesson-card-status">
+            <LessonAvailabilityBadge lesson={lesson} />
+            <span className={'lesson-access ' + availability.className}>{availability.label}</span>
+          </div>
         </div>
         {lesson.shortDescription ? (
           <p className="lesson-summary">{lesson.shortDescription}</p>
@@ -709,7 +760,7 @@ const LearningLessonCard = ({ courseSlug, lesson }) => {
           <p>{progressMessage}</p>
         </div>
         <UnlockLessonButton lesson={lesson} />
-        <Link className="lesson-workspace-link" to={`/courses/${courseSlug}/lessons/${lesson.id}`}>
+        <Link className="lesson-workspace-link" to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
           {hasActivities ? 'Open lesson workspace' : 'View lesson details'}
         </Link>
       </div>
@@ -792,7 +843,7 @@ const LessonMapItem = ({ courseSlug, lesson, selectedLessonId }) => {
   return (
     <Link
       className={'lesson-map-item' + (isCurrentLesson ? ' current' : '')}
-      to={`/courses/${courseSlug}/lessons/${lesson.id}`}
+      to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}
     >
       <span>{String(lesson.lessonNumber).padStart(2, '0')}</span>
       <div>
@@ -806,7 +857,7 @@ const LessonMapItem = ({ courseSlug, lesson, selectedLessonId }) => {
 // The dedicated workspace keeps one lesson focused: learners can study,
 // complete individual quests, and see the next locked opportunity without
 // losing their position in the wider course.
-export const LessonLearningPage = () => {
+export const LegacyLessonLearningPage = () => {
   const { courseSlug, lessonId } = useParams();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
@@ -926,20 +977,108 @@ export const LessonLearningPage = () => {
           <UnlockLessonButton lesson={lesson} />
           <div className="lesson-workspace-navigation">
             {previousLesson ? (
-              <Link to={`/courses/${courseSlug}/lessons/${previousLesson.id}`}>
+              <Link to={`/courses/${courseSlug}/lessons/${previousLesson.slug || previousLesson.id}`}>
                 Previous lesson
               </Link>
             ) : (
               <span />
             )}
             {nextLesson ? (
-              <Link to={`/courses/${courseSlug}/lessons/${nextLesson.id}`}>Next lesson</Link>
+              <Link to={`/courses/${courseSlug}/lessons/${nextLesson.slug || nextLesson.id}`}>Next lesson</Link>
             ) : (
               <Link to={`/courses/${courseSlug}/learn`}>Return to course</Link>
             )}
           </div>
         </main>
       </div>
+    </div>
+  );
+};
+
+const PublicContentItem = ({ item }) => {
+  const isRichContent = Boolean(item.content || item.youtubeUrl || item.resourceId);
+  return (
+    <article className={`public-content-item ${item.isLocked ? 'locked' : ''}`} id={`content-${item.id}`}>
+      <div>
+        <p className="activity-type-label">{contentTypeLabel[item.contentType] || item.contentType}</p>
+        <h3>{item.title}</h3>
+        {item.descriptionEn ? <p>{item.descriptionEn}</p> : null}
+      </div>
+      {item.isLocked ? (
+        <p className="locked-content-message">🔒 Purchase this lesson to unlock this content.</p>
+      ) : isRichContent ? (
+        <ActivityStudyContent activity={item} />
+      ) : (
+        <p>Learning content is being prepared.</p>
+      )}
+    </article>
+  );
+};
+
+export const LessonLearningPage = () => {
+  const { courseSlug, lessonSlug } = useParams();
+  const query = useQuery({
+    queryKey: queryKeys.content.publicLesson(courseSlug, lessonSlug),
+    queryFn: ({ signal }) => contentApi.publicLesson(courseSlug, lessonSlug, signal),
+  });
+  const course = query.data?.data?.course;
+  const lesson = query.data?.data?.lesson;
+  usePageSeo({
+    title: lesson ? `${lesson.title} — ${course?.title}` : 'ICT lesson',
+    description: lesson?.descriptionEn || lesson?.shortDescription || 'Explore ICT lesson content at A Plus ICT.',
+    path: `/courses/${courseSlug}/lessons/${lessonSlug}`,
+    structuredData: lesson && course ? {
+      '@context': 'https://schema.org', '@type': 'LearningResource', name: lesson.title,
+      isAccessibleForFree: lesson.freeContentCount > 0,
+    } : null,
+  });
+  if (query.isLoading) return <LoadingSkeleton label="Loading lesson" />;
+  if (query.isError) return <InlineError error={query.error} />;
+  if (!lesson) return <EmptyState title="This lesson is not available" />;
+  const topicCount = lesson.topics?.length || 0;
+  return (
+    <div className="lesson-workspace public-lesson-workspace">
+      <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to="/">Home</Link><span>/</span><Link to={`/courses/${courseSlug}`}>{course?.title}</Link><span>/</span><span>{lesson.title}</span></nav>
+      <section className="lesson-workspace-hero">
+        <div className="lesson-workspace-title">
+          <div><p className="eyebrow">Lesson {String(lesson.lessonNumber).padStart(2, '0')}</p><h1>{lesson.title}</h1><p>{lesson.descriptionEn || lesson.shortDescription}</p></div>
+          <span className="lesson-access">{lesson.premiumUnlocked ? 'Lesson unlocked' : 'Free and locked content'}</span>
+        </div>
+        <p className="lesson-topic-summary">{topicCount} topic{topicCount === 1 ? '' : 's'} · {lesson.freeContentCount} free items · {lesson.paidContentCount} locked items</p>
+        {!lesson.premiumUnlocked && lesson.unlockProduct ? <UnlockLessonButton lesson={lesson} /> : null}
+      </section>
+      <div className="public-lesson-layout">
+        <aside className="lesson-content-tree" aria-label="Lesson content navigation">
+          <p className="eyebrow">This lesson</p>
+          <h2>Content navigation</h2>
+          <nav>
+            <ol>
+              {lesson.topics?.map((topic, index) => (
+                <li key={topic.id}>
+                  <a href={`#topic-${topic.id}`}>{String(index + 1).padStart(2, '0')}. {topic.title}</a>
+                  {topic.contentItems?.length ? (
+                    <ul>
+                      {topic.contentItems.map((item) => (
+                        <li key={item.id}><a href={`#content-${item.id}`}>{item.title}</a></li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        </aside>
+        <section className="topic-learning-area" aria-label="Lesson topics">
+          {lesson.topics?.length ? lesson.topics.map((topic, index) => (
+            <section className="lesson-topic" id={`topic-${topic.id}`} key={topic.id}>
+              <p className="eyebrow">Topic {String(index + 1).padStart(2, '0')}</p><h2>{topic.title}</h2>
+              {topic.descriptionEn ? <p>{topic.descriptionEn}</p> : null}
+              <div className="public-content-list">{topic.contentItems.map((item) => <PublicContentItem item={item} key={item.id} />)}</div>
+            </section>
+          )) : <EmptyState title="Lesson content is being prepared" />}
+        </section>
+      </div>
+      <p className="lesson-back-link"><Link to={`/courses/${courseSlug}`}>Back to course details</Link></p>
     </div>
   );
 };

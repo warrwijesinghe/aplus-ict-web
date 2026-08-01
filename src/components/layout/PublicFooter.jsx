@@ -51,11 +51,11 @@ export const PublicFooter = () => {
         </section>
         <nav aria-label="Footer navigation">
           <Link to="/">Home</Link>
-          <Link to="/courses">Courses</Link>
-          <Link to="/resources">Resources</Link>
-          <Link to="/student-guide">Student Guide</Link>
+          <Link to="/courses">Course catalogue</Link>
           <Link to="/about">About Us</Link>
           <Link to="/contact">Contact Us</Link>
+          <Link to="/privacy-policy">Privacy Policy</Link>
+          <Link to="/terms">Terms</Link>
           {isAuthenticated ? (
             <Link to={destinationForUser(user)}>My Learning</Link>
           ) : (

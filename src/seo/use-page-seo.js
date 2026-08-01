@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 const siteName = 'A Plus ICT';
+const configuredSiteUrl = import.meta.env.VITE_PUBLIC_SITE_URL?.replace(/\/$/, '');
 
 const setMetaContent = (selector, content) => {
   let element = document.head.querySelector(selector);
@@ -29,7 +30,8 @@ export const usePageSeo = ({
 }) => {
   useEffect(() => {
     const pageTitle = title ? title + ' | ' + siteName : siteName;
-    const canonicalUrl = window.location.origin + path;
+    const canonicalUrl = (configuredSiteUrl || window.location.origin) + path;
+    const developmentNoIndex = import.meta.env.VITE_SITE_INDEXABLE === 'false';
 
     document.title = pageTitle;
     setMetaContent('meta[name="description"]', description);
@@ -38,7 +40,8 @@ export const usePageSeo = ({
     setMetaContent('meta[property="og:description"]', description);
     setMetaContent('meta[property="og:url"]', canonicalUrl);
     setMetaContent('meta[property="og:type"]', 'website');
-    setMetaContent('meta[name="robots"]', noIndex ? 'noindex, nofollow' : 'index, follow');
+    setMetaContent('meta[name="twitter:card"]', 'summary_large_image');
+    setMetaContent('meta[name="robots"]', noIndex || developmentNoIndex ? 'noindex, nofollow' : 'index, follow');
 
     let canonical = document.head.querySelector('link[rel="canonical"]');
     if (!canonical) {
