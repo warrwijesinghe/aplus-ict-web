@@ -19,13 +19,12 @@ import {
   CourseLearningPage,
   LessonLearningPage,
   PublicCourseDetailPage,
-  PublicCoursesPage,
   PublicHomePage,
   StudentGuidePage
 } from '../pages/PublicCoursePages.jsx';
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
 import { PrivacyPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
-import { OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
+import { AlIctPage, OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
 import {
   AdminDashboard,
   AdminListPage,
@@ -56,10 +55,10 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { path: '/', element: <PlatformHomePage /> },
-      { path: '/al-ict', element: <PublicHomePage /> },
+      { path: '/al-ict', element: <AlIctPage /> },
       { path: '/ol-ict', element: <OlIctPage /> },
       { path: '/school-ict', element: <SchoolIctPage /> },
-      { path: '/courses', element: <PublicCoursesPage /> },
+      { path: '/courses', element: <Navigate replace to="/#pathways" /> },
       { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
       { path: '/enroll/:courseSlug', element: <EnrollmentPage /> },
       { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },

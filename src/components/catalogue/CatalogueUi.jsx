@@ -24,13 +24,25 @@ export const AvailabilityBadge = ({ status }) => {
   );
 };
 
+const primaryCourseTitle = (course) => course.medium?.code === 'sinhala'
+  ? course.titleSi || course.title
+  : course.titleEn || course.title;
+const gradeLabel = (course) => {
+  const grade = String(course.grade || course.academicLevel?.code || '').match(/(?:GRADE_?)?(6|7|8|9|10|11|12|13)/)?.[1];
+  if (grade) return `Grade ${grade}`;
+  if (course.academicLevel?.code === 'AL') return 'Grades 12–13';
+  if (course.academicLevel?.code === 'OL') return 'Grades 10–11';
+  return null;
+};
+
 export const ActiveCourseCard = ({ course, continueLearning }) => (
   <article className="path-card active-path-card">
     <div className="path-card-topline">
       <MediumBadge medium={course.medium} />
       <AvailabilityBadge status={course.availabilityStatus} />
     </div>
-    <h3>{course.titleEn || course.title}</h3>
+    <p className="course-grade">{gradeLabel(course) || 'Government School ICT'}</p>
+    <h3 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{primaryCourseTitle(course)}</h3>
     {course.titleSi ? <p className="sinhala-copy" lang="si">{course.titleSi}</p> : null}
     <p>{course.shortDescriptionEn || course.shortDescription}</p>
     <p className="course-facts">
@@ -55,13 +67,18 @@ export const CatalogueCourseCard = ({ course }) => {
   return (
     <article className={`catalogue-course-card ${course.academicLevel?.code === 'AL' ? 'al-priority' : ''}`}>
       <img
-        alt={`${course.titleEn || course.title} course cover`}
+        alt={`${primaryCourseTitle(course)} course cover`}
         className="catalogue-course-image"
         loading="lazy"
+        onError={(event) => {
+          event.currentTarget.onerror = null;
+          event.currentTarget.src = '/images/course-card-default.jpg';
+        }}
         src={image}
       />
       <div className="path-card-topline"><MediumBadge medium={course.medium} /><AvailabilityBadge status={course.availabilityStatus} /></div>
-      <h3>{course.titleEn || course.title}</h3>
+      <p className="course-grade">{gradeLabel(course) || 'Government School ICT'}</p>
+      <h3 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{primaryCourseTitle(course)}</h3>
       {course.titleSi ? <p className="sinhala-copy" lang="si">{course.titleSi}</p> : null}
       <p>{course.shortDescriptionEn || course.shortDescription}</p>
       {!comingSoon && course.syllabusLessonCount != null ? <p className="course-facts">{course.syllabusLessonCount} published lessons</p> : null}

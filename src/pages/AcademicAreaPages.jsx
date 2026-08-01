@@ -1,5 +1,5 @@
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { Link, useSearchParams } from 'react-router-dom';
 import { contentApi } from '../api/content.api.js';
 import { queryKeys } from '../api/query-keys.js';
 import { CatalogueCourseCard } from '../components/catalogue/CatalogueUi.jsx';
@@ -7,64 +7,53 @@ import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/S
 import { usePageSeo } from '../seo/use-page-seo.js';
 
 const areas = {
-  AL: { path: '/al-ict', label: 'A/L ICT', grades: 'Grades 12–13', description: 'Examination-focused structured learning for A/L ICT.', heading: 'A/L ICT learning for confident exam preparation', journey: ['Explore your medium', 'Follow 13 syllabus competencies', 'Practise with structured lesson content'] },
-  OL: { path: '/ol-ict', label: 'O/L ICT', grades: 'Grades 10–11', description: 'A connected two-year ICT learning journey.', heading: 'Build from Grade 10 foundations to Grade 11 confidence', journey: ['Start with Grade 10 foundations', 'Progress to Grade 11 applications', 'Prepare with a connected learning path'] },
-  SCHOOL: { path: '/school-ict', label: 'Grade 6–9 ICT', grades: 'Grades 6–9', description: 'Practical, age-appropriate foundations for young ICT learners.', heading: 'Explore practical ICT skills from Grade 6 to Grade 9', journey: ['Choose your grade', 'Build practical computer skills', 'Grow confidently into the next grade'] }
+  SCHOOL: { path: '/school-ict', category: 'School ICT — Grades 6–9', grades: 'Grades 6–9', heading: 'Build practical ICT skills from Grade 6 to Grade 9', description: 'Choose the Government School grade and medium that fits your child’s current learning journey.', image: '/images/study-cta.jpg', journey: ['Choose the current grade', 'Choose Sinhala or English Medium', 'Learn through lessons and activities'] },
+  OL: { path: '/ol-ict', category: 'O/L ICT — Grades 10 & 11', grades: 'Grades 10–11', heading: 'Build ICT confidence from Grade 10 to Grade 11', description: 'A connected Government School ICT journey from Grade 10 foundations to Grade 11 application and examination readiness.', image: '/images/ict-practice.jpg', journey: ['Build Grade 10 foundations', 'Apply skills in Grade 11', 'Prepare for O/L ICT'] },
+  AL: { path: '/al-ict', category: 'A/L ICT — Grades 12 & 13', grades: 'Grades 12–13', heading: 'Master ICT from Grade 12 to Grade 13', description: 'Follow one structured, examination-focused Government School ICT syllabus across the complete A/L learning journey.', image: '/images/learning-hero.jpg', journey: ['Connect Grade 12 to Grade 13', 'Study the syllabus in sequence', 'Practise and track progress'] }
 };
-
-const coursesFor = (area) => ({ signal }) => contentApi.publicCourses({ academicLevel: area }, signal);
-const activeCourse = (courses, medium) => courses.find((course) => course.medium?.code === medium && course.availabilityStatus === 'active') || courses.find((course) => course.medium?.code === medium);
-
-const PathwayCard = ({ area, courses }) => {
+const areaForCourse = (course) => {
+  if (course.courseGroup) return course.courseGroup;
+  const level = String(course.academicLevel?.code || course.academicLevel || '').toUpperCase();
+  if (level === 'AL' || course.slug?.startsWith('al-')) return 'AL';
+  if (level === 'OL' || course.slug?.startsWith('ol-')) return 'OL';
+  return /GRADE_?[6-9]/.test(level) || course.slug?.startsWith('grade-') ? 'SCHOOL' : null;
+};
+const courseGrade = (course) => String(course.grade || course.academicLevel?.code || '').match(/(?:GRADE_?)?(6|7|8|9|10|11|12|13)/)?.[1];
+const mediumCode = (course) => course.medium?.code === 'sinhala' ? 'si' : course.medium?.code === 'english' ? 'en' : course.medium?.code;
+const PathwayCard = ({ area }) => {
   const info = areas[area];
-  const lessonCount = courses.reduce((total, course) => total + Number(course.syllabusLessonCount || 0), 0);
-  return <article className={'platform-pathway pathway-' + area.toLowerCase()}>
-    <div className="pathway-visual" aria-hidden="true"><span>{area === 'AL' ? 'A/L' : area === 'OL' ? '10–11' : '6–9'}</span><i /></div>
-    <p className="eyebrow">{info.grades}</p><h2>{info.label}</h2><p>{info.description}</p>
-    <div className="pathway-card-footer"><p className="course-facts">{courses.length ? `${courses.length} courses · ${lessonCount || 'Syllabus'} lessons` : 'Pathway being prepared'}</p><Link className="text-link" to={info.path}>Explore pathway <span aria-hidden="true">→</span><span className="sr-only">: {info.label}</span></Link></div>
-  </article>;
-};
-
-const FreeLessons = ({ courses }) => {
-  const active = courses.filter((course) => Number(course.freeContentCount) > 0).slice(0, 6);
-  const queries = useQueries({ queries: active.map((course) => ({ queryKey: queryKeys.content.publicCurriculum(course.slug), queryFn: ({ signal }) => contentApi.publicCurriculum(course.slug, signal), staleTime: 60_000 })) });
-  if (!active.length) return <EmptyState title="Free lessons are being prepared" />;
-  if (queries.some((query) => query.isLoading)) return <LoadingSkeleton label="Loading free lessons" />;
-  if (queries.some((query) => query.isError)) return <InlineError error={queries.find((query) => query.isError)?.error} />;
-  const lessons = queries.flatMap((query) => {
-    const course = query.data?.data;
-    return (course?.lessons || []).filter((lesson) => lesson.freeContentCount > 0).map((lesson) => ({ course, lesson }));
-  }).slice(0, 6);
-  return lessons.length ? <div className="free-lesson-grid">{lessons.map(({ course, lesson }) => <article key={lesson.id}>
-    <p className="eyebrow">{course.courseGroup || course.academicLevel?.nameEn} · {course.academicLevel?.nameEn} · {course.medium?.nameEn || course.medium?.name}</p>
-    <h3>{lesson.title}</h3><p>{lesson.freeContentCount} free learning item{lesson.freeContentCount === 1 ? '' : 's'} available</p>
-    <Link className="text-link" to={`/courses/${course.slug}/lessons/${lesson.slug}`}>Open free lesson <span aria-hidden="true">→</span></Link>
-  </article>)}</div> : <EmptyState title="Free lessons are being prepared" />;
+  return <Link className="platform-pathway" to={info.path}>
+    <img alt="" height="280" loading="lazy" src={info.image} width="480" />
+    <h2>{info.grades}</h2><p className="eyebrow">{info.category}</p><p>{info.description}</p>
+    <span className="pathway-card-footer">Explore {info.grades} <b aria-hidden="true">→</b></span>
+  </Link>;
 };
 
 export const PlatformHomePage = () => {
-  const catalogue = useQuery({ queryKey: queryKeys.content.publicCourses(), queryFn: ({ signal }) => contentApi.publicCourses({}, signal), staleTime: 60_000 });
-  const courses = catalogue.data?.data || [];
+  const catalogue = useQuery({ queryKey: queryKeys.content.publicCourses(), queryFn: ({ signal }) => contentApi.publicCourses({}, signal), staleTime: 60_000, retry: 1 });
   const siteUrl = (import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '');
-  usePageSeo({ title: 'ICT Courses from Grade 6 to A/L', description: 'Sinhala and English-medium ICT learning paths for Grade 6 to A/L students in Sri Lanka.', path: '/', imageAlt: 'Students learning ICT with A Plus ICT', structuredData: { '@context': 'https://schema.org', '@graph': [{ '@type': 'EducationalOrganization', name: 'A Plus ICT', url: siteUrl }, { '@type': 'WebSite', name: 'A Plus ICT', url: siteUrl }] } });
+  usePageSeo({ title: 'Government School ICT from Grade 6 to Grade 13', description: 'Structured Sri Lankan Government School ICT learning from Grade 6 to Grade 13 in Sinhala and English Medium.', path: '/', imageAlt: 'Students learning Government School ICT with A Plus ICT', structuredData: { '@context': 'https://schema.org', '@graph': [{ '@type': 'EducationalOrganization', name: 'A Plus ICT', url: siteUrl }, { '@type': 'WebSite', name: 'A Plus ICT', url: siteUrl }] } });
   return <>
-    <section className="hero platform-hero"><img alt="Sri Lankan students collaborating in an ICT lesson" className="hero-image" fetchPriority="high" height="900" loading="eager" src="/images/platform-learning-journey.webp" width="1600" /><div className="hero-copy"><p className="eyebrow">A Plus ICT Learning Platform · <span lang="si">ICT ඉගෙනුම් වේදිකාව</span></p><h1>ICT learning that grows with every stage</h1><p lang="si">6 ශ්‍රේණියේ සිට උසස් පෙළ දක්වා ඔබට ගැළපෙන ICT ඉගෙනුම් මාර්ගය තෝරන්න.</p><p>Choose your stage first. Then find the right grade, medium and structured learning path.</p><p className="hero-actions"><Link className="button" to="#pathways">Find your learning path <span aria-hidden="true">↓</span></Link><Link className="button secondary" to="/resources">Explore free resources</Link></p><div className="hero-stage-strip" aria-label="Academic pathways"><span>Grade 6–9</span><span>O/L · 10–11</span><span>A/L · 12–13</span></div></div></section>
-    <section className="home-section" id="pathways"><p className="eyebrow">Choose your pathway</p><h2>Start with the right academic stage</h2><p className="section-intro">Each pathway uses the same A Plus ICT learning platform, with its own grade and medium choices.</p>{catalogue.isLoading ? <LoadingSkeleton label="Loading pathways" /> : null}{catalogue.isError ? <InlineError error={catalogue.error} /> : null}{!catalogue.isLoading && !catalogue.isError ? <div className="platform-pathway-grid">{Object.keys(areas).map((area) => <PathwayCard area={area} courses={courses.filter((course) => course.courseGroup === area)} key={area} />)}</div> : null}</section>
-    <section className="home-section"><p className="eyebrow">Why A Plus ICT</p><h2>One learning path, built around your stage</h2><div className="steps-grid">{['Sinhala and English-medium learning', 'Structured lessons, videos, notes, activities and quizzes', 'Free and unlocked content in one path', 'Google sign-in and learning progress'].map((benefit, index) => <article key={benefit}><span>0{index + 1}</span><h3>{benefit}</h3></article>)}</div></section>
-    <section className="home-section"><p className="eyebrow">How it works</p><h2>Four simple steps</h2><div className="steps-grid">{['Select the academic stage', 'Select grade and medium', 'Sign in with Google', 'Learn and track progress'].map((step, index) => <article key={step}><span>0{index + 1}</span><h3>{step}</h3></article>)}</div></section>
-    <section className="home-section"><p className="eyebrow">Available now</p><h2>Featured free learning</h2><FreeLessons courses={courses} /></section>
-    <section className="home-section tutor-preview"><div className="tutor-image-frame"><img alt="WARR Wijesinghe" className="tutor-image" height="720" loading="lazy" src="/images/aplus-ict-tutor.png" width="720" /></div><div><p className="eyebrow">Your tutor</p><h2>WARR Wijesinghe</h2><p>ICT Educator · Software Engineer</p><p>Clear foundations and consistent practice help learners grow with confidence at every stage.</p><Link className="text-link" to="/about">Meet the tutor <span aria-hidden="true">→</span></Link></div></section>
-    <section className="final-home-cta"><div><p className="eyebrow">A Plus ICT</p><h2>Choose the right ICT learning path today</h2></div><div className="hero-actions">{Object.values(areas).map((area) => <Link className="button secondary" key={area.path} to={area.path}>{area.label}</Link>)}</div></section>
+    <section className="hero platform-hero"><img alt="Sri Lankan students collaborating in an ICT lesson" className="hero-image" fetchPriority="high" height="900" src="/images/platform-learning-journey.webp" width="1600" /><div className="hero-copy"><p className="eyebrow">Sri Lankan Government School ICT · <span lang="si">ICT ඉගෙනුම් වේදිකාව</span></p><h1>Government School ICT learning from Grade 6 to Grade 13</h1><p>Choose your grade and medium to follow structured digital learning with videos, notes, activities, quizzes, free and unlocked content, and progress tracking.</p><p className="hero-actions"><a className="button" href="#pathways">Choose Your Grade</a><a className="button secondary" href="#how-it-works">Learn How It Works</a></p></div></section>
+    <section className="home-section" id="pathways"><p className="eyebrow">Choose your grade range</p><h2>What Government School grade are you studying?</h2><p className="section-intro">Every stage is part of one continuous ICT learning journey.</p>{catalogue.isPending ? <LoadingSkeleton label="Loading pathways" /> : null}{catalogue.isError ? <InlineError error={catalogue.error} onRetry={catalogue.refetch} /> : null}<div className="platform-pathway-grid">{['SCHOOL', 'OL', 'AL'].map((area) => <PathwayCard area={area} key={area} />)}</div></section>
+    <section className="home-section"><p className="eyebrow">Why A Plus ICT</p><h2>Support for every Government School ICT step</h2><div className="benefits-grid">{[['Sinhala and English Medium', 'Choose the medium that best supports your learning.'], ['Grade-aligned learning', 'Stay focused on the ICT ideas relevant to your school grade.'], ['One lesson journey', 'Free and unlocked content sit together in the same ordered path.'], ['Progress tracking', 'Secure Google sign-in keeps your learning connected.']].map(([title, copy]) => <article key={title}><h3>{title}</h3><p>{copy}</p></article>)}</div></section>
+    <section className="home-section" id="how-it-works"><p className="eyebrow">How learning works</p><h2>Simple from the first choice to progress</h2><ol className="learning-timeline">{['Choose your grade', 'Choose Sinhala or English Medium', 'Sign in securely with Google', 'Learn and track your progress'].map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol></section>
+    <section className="home-section tutor-preview"><div className="tutor-image-frame"><img alt="WARR Wijesinghe, ICT Educator and Software Engineer" className="tutor-image" height="720" loading="lazy" src="/images/aplus-ict-tutor.png" width="720" /></div><div><p className="eyebrow">Your tutor</p><h2>WARR Wijesinghe</h2><p>ICT Educator · Software Engineer</p><p>Clear foundations, practical thinking and consistent study habits help students move confidently from one grade to the next.</p><Link className="text-link" to="/about">Meet the tutor →</Link></div></section>
   </>;
 };
 
 export const AcademicAreaPage = ({ area }) => {
-  const info = areas[area]; const catalogue = useQuery({ queryKey: queryKeys.content.publicCourses({ academicLevel: area }), queryFn: coursesFor(area), staleTime: 60_000 }); const courses = catalogue.data?.data || [];
-  usePageSeo({ title: `${info.label} Courses in Sri Lanka`, description: `${info.description} Choose a grade and Sinhala or English medium with A Plus ICT.`, path: info.path });
-  const grades = [...new Map(courses.map((course) => [course.academicLevel?.code, course.academicLevel])).values()].filter(Boolean);
-  return <><section className="area-hero"><p className="eyebrow">{info.grades} · Sinhala & English Medium</p><h1>{info.heading}</h1><p>{info.description} Choose the right grade and medium; individual courses always open through their dynamic course page.</p><div className="medium-actions">{['sinhala', 'english'].map((medium) => { const course = activeCourse(courses, medium); return <Link className="button" key={medium} to={course ? `/courses/${course.slug}` : '/courses'}>{medium === 'sinhala' ? 'Sinhala Medium' : 'English Medium'}</Link>; })}</div></section><section className="home-section"><p className="eyebrow">Learning journey</p><div className="steps-grid">{info.journey.map((item, index) => <article key={item}><span>0{index + 1}</span><h2>{item}</h2></article>)}</div></section><section className="home-section"><p className="eyebrow">Courses by grade</p><h2>Select your grade and medium</h2>{catalogue.isLoading ? <LoadingSkeleton label="Loading courses" /> : null}{catalogue.isError ? <InlineError error={catalogue.error} /> : null}{!catalogue.isLoading && !catalogue.isError && !courses.length ? <EmptyState title="Courses are being prepared" /> : null}{grades.map((grade) => <section className="course-level-group" key={grade.code}><h3>{grade.nameEn}</h3><div className="catalogue-course-grid">{courses.filter((course) => course.academicLevel?.code === grade.code).map((course) => <CatalogueCourseCard course={course} key={course.id} />)}</div></section>)}</section><section className="home-section"><p className="eyebrow">Learning access</p><h2>Videos, notes, activities, quizzes and progress</h2><p>Availability is shown per course and lesson. A syllabus can be visible while learning content is still being prepared.</p></section><section className="final-home-cta"><div><p className="eyebrow">A Plus ICT</p><h2>Find your ICT course</h2></div><Link className="button" to="/courses">View complete course catalogue</Link></section></>;
+  const info = areas[area]; const [params, setParams] = useSearchParams();
+  const catalogue = useQuery({ queryKey: queryKeys.content.publicCourses(), queryFn: ({ signal }) => contentApi.publicCourses({}, signal), staleTime: 60_000, retry: 1 });
+  const selectedGrade = params.get('grade') || ''; const selectedMedium = params.get('medium') || '';
+  const grades = area === 'AL' ? ['12', '13'] : area === 'OL' ? ['10', '11'] : ['6', '7', '8', '9'];
+  const courses = (catalogue.data?.data || []).filter((course) => areaForCourse(course) === area);
+  const filtered = courses.filter((course) => (!selectedGrade || area === 'AL' || courseGrade(course) === selectedGrade) && (!selectedMedium || mediumCode(course) === selectedMedium));
+  const setFilter = (key, value) => { const next = new URLSearchParams(params); value ? next.set(key, value) : next.delete(key); setParams(next); };
+  const hasSelection = selectedGrade || selectedMedium;
+  usePageSeo({ title: `${info.grades} Government School ICT`, description: `${info.description} Choose Sinhala or English Medium with A Plus ICT.`, path: info.path, image: info.image });
+  return <><section className="area-hero"><img alt="" height="600" src={info.image} width="1200" /><div><p className="eyebrow">{info.category}</p><h1>{info.heading}</h1><p>{info.description}</p></div></section><section className="home-section"><p className="eyebrow">Learning journey</p><div className="learning-timeline">{info.journey.map((item, index) => <div key={item}><span>{index + 1}</span>{item}</div>)}</div></section><section className="home-section"><p className="eyebrow">Choose your next step</p><h2>{area === 'AL' ? 'Choose your A/L ICT medium' : 'Choose your grade, then your medium'}</h2><div className="filter-bar" aria-label="Grade and medium selection">{area !== 'AL' ? <div>{grades.map((grade) => <button aria-pressed={selectedGrade === grade} className={selectedGrade === grade ? 'selected' : ''} key={grade} onClick={() => setFilter('grade', selectedGrade === grade ? '' : grade)} type="button">Grade {grade}</button>)}</div> : <p>One connected course supports Grade 12 and Grade 13.</p>}<div>{[['si', 'සිංහල මාධ්‍යය'], ['en', 'English Medium']].map(([code, label]) => <button aria-pressed={selectedMedium === code} className={selectedMedium === code ? 'selected' : ''} key={code} onClick={() => setFilter('medium', selectedMedium === code ? '' : code)} type="button">{label}</button>)}</div>{hasSelection ? <button className="text-link" onClick={() => setParams({})} type="button">Clear selection</button> : null}</div>{catalogue.isPending ? <LoadingSkeleton label={`Loading ${info.grades} courses`} /> : null}{catalogue.isError ? <InlineError error={catalogue.error} onRetry={catalogue.refetch} /> : null}{catalogue.isSuccess && !filtered.length ? <EmptyState title="Content for this selection is being prepared"><p>Choose another grade or medium to continue in this pathway.</p></EmptyState> : null}{filtered.length ? <div className="catalogue-course-grid">{filtered.map((course) => <CatalogueCourseCard course={course} key={course.id} />)}</div> : null}</section><section className="home-section"><p className="eyebrow">Learning access</p><h2>{area === 'SCHOOL' ? 'What your child will learn' : 'Free and unlocked learning in one path'}</h2><p>{area === 'SCHOOL' ? 'Safe and confident computer use, practical digital skills, grade-aligned ICT concepts, activities and visible progress.' : 'Available free chapters and unlocked content remain in the same lesson sequence, so learning can continue in order.'}</p>{area === 'OL' ? <div className="faq-list"><details><summary>How does the Grade 10 to Grade 11 journey connect?</summary><p>Choose the current grade to focus on its relevant ICT learning, then continue into the next stage when ready.</p></details></div> : null}</section></>;
 };
-
 export const AlIctPage = () => <AcademicAreaPage area="AL" />;
 export const OlIctPage = () => <AcademicAreaPage area="OL" />;
 export const SchoolIctPage = () => <AcademicAreaPage area="SCHOOL" />;

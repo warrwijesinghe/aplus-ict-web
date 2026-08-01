@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { contentApi } from '../../api/content.api.js';
@@ -13,6 +13,7 @@ export const PublicHeader = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isMemberOpen, setIsMemberOpen] = useState(false);
+  const headerRef = useRef(null);
   const profile = useQuery({
     queryKey: queryKeys.content.siteProfile,
     queryFn: ({ signal }) => contentApi.siteProfile(signal),
@@ -27,13 +28,21 @@ export const PublicHeader = () => {
     const onKeyDown = (event) => {
       if (event.key === 'Escape') closeMenu();
     };
+    const onPointerDown = (event) => {
+      if (isOpen && !headerRef.current?.contains(event.target)) closeMenu();
+    };
     document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('pointerdown', onPointerDown);
     document.body.classList.toggle('navigation-open', isOpen);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('pointerdown', onPointerDown);
       document.body.classList.remove('navigation-open');
     };
   }, [isOpen]);
+  useEffect(() => {
+    closeMenu();
+  }, [location.pathname, location.search]);
   const roles = user?.roles?.map((role) => (typeof role === 'string' ? role : role.code)) || [];
   const loginReturnTo = encodeURIComponent(location.pathname + location.search);
   const memberDestination = destinationForUser(user);
@@ -44,7 +53,7 @@ export const PublicHeader = () => {
     .slice(0, 2)
     .toUpperCase();
   return (
-    <header className="header">
+    <header className="header" ref={headerRef}>
       <Link className="brand" to="/">
         <BrandLogo brandName={brand?.brandName} />
       </Link>
@@ -63,20 +72,14 @@ export const PublicHeader = () => {
         <NavLink onClick={closeMenu} to="/">
           Home
         </NavLink>
-        <NavLink onClick={closeMenu} to="/al-ict">A/L ICT</NavLink>
-        <NavLink onClick={closeMenu} to="/ol-ict">O/L ICT</NavLink>
-        <NavLink onClick={closeMenu} to="/school-ict">Grade 6–9</NavLink>
+        <NavLink onClick={closeMenu} to="/school-ict">Grades 6–9</NavLink>
+        <NavLink onClick={closeMenu} to="/ol-ict">Grades 10–11</NavLink>
+        <NavLink onClick={closeMenu} to="/al-ict">Grades 12–13</NavLink>
         <NavLink onClick={closeMenu} to="/resources">
           Free Resources
         </NavLink>
-        <NavLink onClick={closeMenu} to="/student-guide">
-          Student Guide
-        </NavLink>
         <NavLink onClick={closeMenu} to="/about">
-          About Us
-        </NavLink>
-        <NavLink onClick={closeMenu} to="/contact">
-          Contact Us
+          About
         </NavLink>
         {isAuthenticated ? (
           <div className="member-menu">

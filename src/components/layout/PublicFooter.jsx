@@ -37,10 +37,10 @@ export const PublicFooter = () => {
           <p>{data?.shortDescription || 'Structured ICT learning from Grade 6 to A/L.'}</p>
         </section>
         <nav aria-label="Footer navigation">
-          <Link to="/">Home</Link><Link to="/al-ict">A/L ICT</Link><Link to="/ol-ict">O/L ICT</Link><Link to="/school-ict">Grade 6–9 ICT</Link><Link to="/courses">Courses</Link><Link to="/resources">Free Resources</Link><Link to="/student-guide">Student Guide</Link><Link to="/about">About</Link><Link to="/contact">Contact</Link><Link to="/privacy-policy">Privacy Policy</Link><Link to="/terms">Terms</Link>
-          {isAuthenticated ? <Link to={destinationForUser(user)}>My Learning</Link> : <a href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=/courses`}>Continue with Google</a>}
+          <Link to="/">Home</Link><Link to="/school-ict">Grades 6–9</Link><Link to="/ol-ict">Grades 10–11</Link><Link to="/al-ict">Grades 12–13</Link><Link to="/resources">Free Resources</Link><Link to="/student-guide">Student Guide</Link><Link to="/about">About</Link><Link to="/contact">Contact</Link><Link to="/privacy-policy">Privacy Policy</Link><Link to="/terms">Terms</Link>
+          {isAuthenticated ? <Link to={destinationForUser(user)}>My Learning</Link> : <a href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=/`}>Continue with Google</a>}
         </nav>
-        {data?.socialLinks?.length ? <nav aria-label="Social links">{data.socialLinks.map((item) => <SocialLink item={item} key={item.id} />)}</nav> : null}
+        {data?.socialLinks?.filter((item) => item.url && item.url !== '#').length ? <nav aria-label="Social links">{data.socialLinks.filter((item) => item.url && item.url !== '#').map((item) => <SocialLink item={item} key={item.id} />)}</nav> : null}
         {data?.contactChannels?.length ? <section><h2>Contact</h2>{data.contactChannels.map((item) => <p key={item.id}>{item.publicUrl ? <a href={item.publicUrl}>{item.label}</a> : item.label}</p>)}</section> : null}
       </div>
       <p>© {new Date().getFullYear()} A Plus ICT</p>

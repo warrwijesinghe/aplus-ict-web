@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { contentApi } from '../api/content.api.js';
 import { learningApi } from '../api/learning.api.js';
 import { resourceApi } from '../api/resource.api.js';
@@ -494,6 +494,7 @@ const SocialLinks = ({ links = [] }) => {
 };
 
 export const PublicCoursesPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   usePageSeo({
     title: 'ICT Course Catalogue in Sinhala and English',
     description:
@@ -505,7 +506,18 @@ export const PublicCoursesPage = () => {
     queryFn: ({ signal }) => contentApi.publicCourses({}, signal),
     staleTime: 60_000
   });
-  const groups = Object.values((catalogue.data?.data || []).reduce((result, course) => {
+  const stage = searchParams.get('stage');
+  const grade = searchParams.get('grade');
+  const medium = searchParams.get('medium');
+  const filteredCourses = (catalogue.data?.data || []).filter((course) => {
+    const level = String(course.academicLevel?.code || '').toLowerCase();
+    const courseStage = level === 'al' || course.slug?.startsWith('al-') ? 'al' : level === 'ol' || course.slug?.startsWith('ol-') ? 'ol' : /grade_?[6-9]/.test(level) || course.slug?.startsWith('grade-') ? 'school' : '';
+    const courseGrade = String(course.grade || level).match(/(?:grade_?)?(6|7|8|9|10|11|12|13)/)?.[1];
+    const courseMedium = course.medium?.code === 'sinhala' ? 'si' : course.medium?.code === 'english' ? 'en' : course.medium?.code;
+    return (!stage || courseStage === stage) && (!grade || courseGrade === grade) && (!medium || courseMedium === medium);
+  });
+  const clearFilters = () => setSearchParams({});
+  const groups = Object.values(filteredCourses.reduce((result, course) => {
     const code = course.academicLevel?.code;
     if (!code) return result;
     result[code] ||= { level: course.academicLevel, courses: [] };
@@ -518,9 +530,9 @@ export const PublicCoursesPage = () => {
       <p className="eyebrow">Course catalogue</p>
       <BilingualHeading as="h1" english="ICT Courses from Grade 6 to A/L" sinhala="6 ශ්‍රේණියේ සිට උසස් පෙළ දක්වා ICT පාඨමාලා" />
       <p className="section-intro">Choose your academic level and medium to view its course details, syllabus and available lessons.</p>
-      {catalogue.isLoading ? <LoadingSkeleton label="Loading courses" /> : null}
-      {catalogue.isError ? <InlineError error={catalogue.error} /> : null}
-      {!catalogue.isLoading && !catalogue.isError && !groups.length ? <EmptyState title="Courses are being prepared" /> : null}
+      {catalogue.isPending ? <LoadingSkeleton label="Loading courses" /> : null}
+      {catalogue.isError ? <InlineError error={catalogue.error} onRetry={catalogue.refetch} /> : null}
+      {catalogue.isSuccess && !groups.length ? <EmptyState title="No matching courses are available yet"><p>Try another grade or medium, or return to a pathway.</p>{(stage || grade || medium) ? <button className="button" onClick={clearFilters} type="button">Clear filters</button> : null}</EmptyState> : null}
       <div className="course-level-groups">{groups.map((group) => (
         <section className="course-level-group" key={group.level.code}>
           <BilingualHeading english={`${group.level.nameEn} ICT`} sinhala={`${group.level.nameSi} ICT`} />
