@@ -273,6 +273,81 @@ button:disabled {
   grid-template-columns: minmax(0, 1fr) minmax(360px, .92fr);
   overflow: hidden;
 }
+.public-hero {
+  background: #10253d;
+  border: 0;
+  border-radius: 1.35rem;
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(360px, 1.08fr);
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+}
+.public-hero-copy {
+  align-self: center;
+  color: white;
+  padding: clamp(2rem, 5vw, 4.75rem);
+  position: relative;
+  z-index: 2;
+}
+.public-hero-copy h1 { color: white; font-size: clamp(2.5rem, 4.3vw, 4.15rem); letter-spacing: -.045em; line-height: 1.04; margin-bottom: .8rem; max-width: 11ch; }
+.public-hero-copy > p:not(.eyebrow):not(.hero-language-note) { color: #dbe8f7; font-size: 1.08rem; line-height: 1.7; max-width: 46ch; }
+.public-hero-copy .eyebrow { color: #9fc8ee; }
+.hero-language-note { color: #ffb6be; font-family: 'Noto Sans Sinhala', Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1rem; font-weight: 700; margin: 0 0 1.1rem; }
+.public-hero-media { background: #17304d; min-height: 100%; position: relative; z-index: 1; }
+.public-hero-media::after { background: linear-gradient(90deg, rgba(16,37,61,.42), transparent 35%); content: ''; inset: 0; pointer-events: none; position: absolute; }
+.public-hero-media img { display: block; height: 100%; min-height: 440px; object-fit: cover; width: 100%; }
+.quiet-link { color: inherit; font-weight: 800; text-decoration: none; }
+.quiet-link:hover { text-decoration: underline; }
+.public-hero .quiet-link { color: white; padding: .75rem 0; }
+.trust-bar { border-bottom: 1px solid var(--color-border); border-top: 1px solid var(--color-border); display: flex; flex-wrap: wrap; gap: .5rem 2.25rem; justify-content: center; margin: 2.5rem auto 0; max-width: 1180px; padding: 1.05rem 0; }
+.trust-bar span { color: var(--color-primary-hover); font-size: .86rem; font-weight: 800; }
+.trust-bar span::before { color: var(--color-primary); content: '•'; margin-right: .45rem; }
+.landing-info-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.landing-info-grid article, .landing-selection { background: white; border: 1px solid var(--color-border); border-radius: 1rem; padding: clamp(1.25rem, 3vw, 2rem); }
+.landing-info-grid li { color: var(--color-text-muted); line-height: 1.65; margin-bottom: .5rem; }
+.lesson-price { align-items: baseline; display: flex; flex-wrap: wrap; gap: .45rem; margin: 1rem 0; }
+.lesson-price > span { color: var(--color-text-muted); font-size: .86rem; font-weight: 700; }
+.lesson-price strong { color: var(--color-primary-hover); font-size: 1.35rem; }
+.guided-selectors { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 1.25rem 0; }
+.guided-selectors fieldset { border: 1px solid var(--color-border); border-radius: .75rem; display: flex; flex-wrap: wrap; gap: .55rem; margin: 0; padding: 1rem; }
+.guided-selectors legend { color: var(--color-primary-hover); font-weight: 800; padding: 0 .3rem; }
+.guided-selectors button { min-height: 44px; }
+.guided-selectors button.selected { background: var(--color-primary); border-color: var(--color-primary); color: white; }
+.selected-course { max-width: 420px; }
+.selection-status { color: var(--color-text-muted); }
+.pathways-section > h2, .learning-steps > h2 { font-size: clamp(2rem, 3vw, 3rem); letter-spacing: -.04em; margin-bottom: .25rem; }
+.pathways-section > p:not(.eyebrow) { color: var(--color-text-muted); }
+.platform-pathway-grid { gap: 1rem; }
+.platform-pathway { background: #fff; border-color: #e2e7ef; box-shadow: 0 8px 22px rgba(16,37,61,.05); min-height: 285px; padding: 1.6rem; }
+.platform-pathway > img { display: none; }
+.pathway-number { color: #e72234; display: block; font-size: .85rem; font-weight: 900; letter-spacing: .12em; margin-bottom: 2.4rem; }
+.platform-pathway h3 { color: #10253d; font-size: 1.55rem; letter-spacing: -.03em; line-height: 1.13; margin-top: 0; }
+.platform-pathway .eyebrow { color: #64748b; letter-spacing: .08em; }
+.platform-pathway:hover { border-color: #e72234; box-shadow: 0 18px 35px rgba(16,37,61,.12); transform: translateY(-4px); }
+.pathway-card-footer { color: #b31828; font-weight: 850; }
+.value-section { align-items: center; background: #eef4fa; border-radius: 1.2rem; display: grid; gap: 2rem; grid-template-columns: 1.15fr .85fr; padding: clamp(1.75rem, 4vw, 3.25rem); }
+.value-section h2 { color: #10253d; font-size: clamp(1.9rem, 3vw, 3rem); letter-spacing: -.04em; max-width: 16ch; }
+.value-section p:not(.eyebrow) { color: var(--color-text-muted); line-height: 1.7; max-width: 50ch; }
+.value-section aside { background: white; border-radius: .9rem; padding: 1.25rem; }
+.value-section aside > span, .value-section small { color: var(--color-text-muted); display: block; font-size: .86rem; font-weight: 750; }
+.value-points { display: grid; gap: .65rem; }
+.value-points span { background: white; border-radius: .7rem; color: #10253d; font-weight: 750; padding: .85rem 1rem; }
+.value-points span::before { color: #e72234; content: '↗'; margin-right: .55rem; }
+.learning-steps > div { display: grid; gap: 1rem; grid-template-columns: repeat(4, 1fr); margin-top: 1.5rem; }
+.learning-steps article { border-top: 2px solid #d7e1ec; padding-top: 1rem; }
+.learning-steps article > span { color: #e72234; font-size: .8rem; font-weight: 900; letter-spacing: .1em; }
+.learning-steps h3 { color: #10253d; font-size: 1.1rem; margin: .55rem 0 .35rem; }
+.learning-steps p { color: var(--color-text-muted); font-size: .92rem; line-height: 1.6; margin: 0; }
+.tutor-panel { background: #10253d; border-radius: 1.2rem; color: white; padding: clamp(1.5rem, 4vw, 2.5rem); }
+.tutor-panel h2 { color: white; font-size: clamp(2rem, 3vw, 2.8rem); }
+.tutor-panel .eyebrow { color: #9fc8ee; }
+.tutor-panel p:not(.eyebrow) { color: #dbe8f7; line-height: 1.7; }
+.tutor-panel .tutor-role { color: #ffb6be; font-weight: 750; }
+.tutor-panel .quiet-link { color: white; }
+.course-picker { background: white; border: 1px solid var(--color-border); border-radius: 1.2rem; padding: clamp(1.5rem, 4vw, 2.5rem); }
+.resource-callout { background: #e72234; border-radius: 1.1rem; color: white; padding: 2rem; }
+.resource-callout .eyebrow, .resource-callout h2, .resource-callout .quiet-link { color: white; }
 .platform-hero-split .hero-copy { padding: clamp(2rem, 5vw, 5rem); }
 .platform-hero-split h1 { max-width: 12ch; }
 .platform-hero-split .hero-copy > p:not(.eyebrow):not(.hero-actions) { color: var(--color-text-muted); line-height: 1.7; max-width: 58ch; }
@@ -1351,7 +1426,7 @@ button:disabled {
   border: 1px solid var(--color-primary);
   color: var(--color-primary-hover);
 }
-.locked-quest-label {
+.locked-lesson-label {
   color: #5d6b7d;
   font-size: 0.8rem;
   font-weight: 800;
@@ -2208,6 +2283,12 @@ button:disabled {
   }
 }
 @media (max-width: 768px) {
+  .public-hero { grid-template-columns: 1fr; }
+  .public-hero-copy { order: 1; padding: clamp(1.5rem, 7vw, 2.5rem); }
+  .public-hero-copy h1 { max-width: 14ch; }
+  .public-hero-media { order: 2; }
+  .public-hero-media img { min-height: 240px; }
+  .landing-info-grid, .guided-selectors { grid-template-columns: 1fr; }
   .platform-hero-split { grid-template-columns: 1fr; }
   .platform-hero-split .hero-copy { order: 1; }
   .platform-hero-image { min-height: 250px; }
@@ -2443,3 +2524,24 @@ button:disabled {
   .path-card-actions .button { width: 100%; }
 }
 .lesson-card-status { align-items: flex-end; display: grid; gap: 0.45rem; justify-items: end; }
+
+/* Homepage learning-path cards: imagery gives each school stage a recognisable entry point. */
+.pathways-section > h2 { max-width: 19ch; }
+.platform-pathway {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+.platform-pathway > img {
+  aspect-ratio: 16 / 8;
+  display: block;
+  margin: 0;
+  object-fit: cover;
+  width: 100%;
+}
+.pathway-card-content { display: flex; flex: 1; flex-direction: column; padding: 1.35rem 1.4rem 1.45rem; }
+.pathway-card-content .pathway-number { margin-bottom: 1.35rem; }
+.pathway-card-content .eyebrow { margin-bottom: .55rem; }
+.pathway-card-content h3 { color: #10253d; font-size: clamp(1.35rem, 2vw, 1.7rem); line-height: 1.14; margin: 0 0 .7rem; }
+.pathway-card-content > p:not(.eyebrow) { color: var(--color-text-muted); line-height: 1.55; margin: 0; }
+.pathway-card-content .pathway-card-footer { margin-top: 1.25rem; }

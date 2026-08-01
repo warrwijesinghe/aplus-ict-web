@@ -23,8 +23,11 @@ test('shows the Grades 6–13 homepage position and all three pathway links', as
   vi.spyOn(contentApi, 'publicCourses').mockResolvedValue({ data: courses });
   vi.spyOn(resourceApi, 'publicDownloads').mockResolvedValue({ data: { items: [] } });
   renderWithProviders(<PlatformHomePage />);
-  expect(screen.getByRole('heading', { level: 1, name: /learn ict clearly/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 1, name: /school ict learning—anytime, anywhere/i })).toBeInTheDocument();
   expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+  expect(screen.getByLabelText(/school ict learning—anytime, anywhere/i)).toHaveClass('public-hero');
+  expect(screen.getByText('100% online learning')).toBeInTheDocument();
+  expect(screen.queryByText(/currently available courses/i)).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: /explore grades 6–9/i })).toHaveAttribute('href', '/school-ict');
   expect(screen.getByRole('link', { name: /explore o\/l ict/i })).toHaveAttribute('href', '/ol-ict');
   expect(screen.getByRole('link', { name: /explore a\/l ict/i })).toHaveAttribute('href', '/al-ict');

@@ -1,0 +1,80 @@
+/*
+ * A Plus ICT brand theme
+ * Source of truth: the A Plus ICT logo (red, black and white).
+ * Use these semantic tokens instead of introducing standalone UI colours.
+ */
+:root {
+  --aplus-red: #ff0000;
+  --aplus-red-dark: #c90000;
+  --aplus-red-soft: #fff0f0;
+  --aplus-black: #000000;
+  --aplus-ink: #1a1a1a;
+  --aplus-muted: #5c5c5c;
+  --aplus-line: #e8e8e8;
+  --aplus-white: #ffffff;
+
+  --color-primary: var(--aplus-red);
+  --color-primary-hover: var(--aplus-red-dark);
+  --color-primary-soft: var(--aplus-red-soft);
+  --color-navy: var(--aplus-black);
+  --color-navy-secondary: var(--aplus-ink);
+  --color-background: var(--aplus-white);
+  --color-surface: var(--aplus-white);
+  --color-text: var(--aplus-ink);
+  --color-text-muted: var(--aplus-muted);
+  --color-border: var(--aplus-line);
+  --color-success: var(--aplus-black);
+  --color-warning: var(--aplus-red-dark);
+  --color-error: var(--aplus-red-dark);
+}
+
+body { background: var(--aplus-white); color: var(--aplus-ink); }
+h1, h2, h3 { color: var(--aplus-black); }
+a { color: var(--aplus-red-dark); }
+
+.button { background: var(--aplus-red); border-color: var(--aplus-red); color: var(--aplus-white); }
+.button:hover { background: var(--aplus-red-dark); border-color: var(--aplus-red-dark); }
+.button.secondary { background: var(--aplus-white); border-color: var(--aplus-black); color: var(--aplus-black); }
+.button.secondary:hover { background: var(--aplus-red-soft); }
+
+/* Public brand surfaces */
+.header, .footer { background: var(--aplus-white); border-color: var(--aplus-line); }
+.header nav a.active, .header nav a:hover { color: var(--aplus-red); }
+.header-login { background: var(--aplus-red); border-color: var(--aplus-red); color: var(--aplus-white); }
+.header-login:hover { background: var(--aplus-red-dark); }
+
+.public-hero { background: var(--aplus-black); }
+.public-hero-copy h1 { color: var(--aplus-white); }
+.public-hero-copy .eyebrow, .hero-language-note { color: var(--aplus-red); }
+.public-hero-copy > p:not(.eyebrow):not(.hero-language-note) { color: var(--aplus-white); opacity: .82; }
+.public-hero .quiet-link { color: var(--aplus-white); }
+.public-hero-media { background: var(--aplus-black); }
+.public-hero-media::after { background: linear-gradient(90deg, rgba(0, 0, 0, .65), transparent 42%); }
+
+.trust-bar { border-color: var(--aplus-line); }
+.trust-bar span, .trust-bar span::before { color: var(--aplus-red-dark); }
+.eyebrow { color: var(--aplus-red-dark); }
+
+.platform-pathway { background: var(--aplus-white); border-color: var(--aplus-line); box-shadow: 0 8px 22px rgba(0, 0, 0, .06); }
+.platform-pathway:hover { border-color: var(--aplus-red); box-shadow: 0 18px 35px rgba(0, 0, 0, .12); }
+.pathway-card-content h3 { color: var(--aplus-black); }
+.pathway-card-content > p:not(.eyebrow), .pathways-section > p:not(.eyebrow) { color: var(--aplus-muted); }
+.pathway-number, .pathway-card-footer { color: var(--aplus-red-dark); }
+.platform-pathway .eyebrow { color: var(--aplus-muted); }
+
+.value-section { background: var(--aplus-red-soft); }
+.value-section h2, .value-points span { color: var(--aplus-black); }
+.value-section p:not(.eyebrow), .value-section aside > span, .value-section small { color: var(--aplus-muted); }
+.value-section aside, .value-points span { background: var(--aplus-white); }
+.value-points span::before { color: var(--aplus-red); }
+
+.tutor-panel { background: var(--aplus-black); }
+.tutor-panel h2, .tutor-panel .quiet-link { color: var(--aplus-white); }
+.tutor-panel .eyebrow, .tutor-panel .tutor-role { color: var(--aplus-red); }
+.tutor-panel p:not(.eyebrow) { color: var(--aplus-white); opacity: .82; }
+.course-picker, .landing-info-grid article { border-color: var(--aplus-line); }
+.course-online-value { color: var(--aplus-red-dark); font-weight: 800; line-height: 1.55; }
+.filter-bar button.selected, .guided-selectors button.selected { background: var(--aplus-red); border-color: var(--aplus-red); }
+.resource-callout { background: var(--aplus-red); }
+.resource-callout .eyebrow, .resource-callout h2, .resource-callout .quiet-link { color: var(--aplus-white); }
+.final-home-cta { background: var(--aplus-black); border-color: var(--aplus-black); }

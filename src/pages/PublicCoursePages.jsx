@@ -13,6 +13,8 @@ import { useOrderSelection } from '../features/store/selection-context.jsx';
 import { usePageSeo } from '../seo/use-page-seo.js';
 import { courseSeo, lessonSeo } from '../seo/public-seo-config.js';
 import { trackPublicEvent } from '../analytics/events.js';
+import { LessonPrice } from '../components/pricing/LessonPrice.jsx';
+import { academicAreaForCourse, lessonPurchaseText } from '../config/lesson-pricing.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
 import {
@@ -39,7 +41,7 @@ const counts = (course) => {
       {hasContent ? (
         <>
           <span>{freeContent} free content</span>
-          {paidContent ? <span>{paidContent} premium content</span> : null}
+          {paidContent ? <span>{paidContent} full lesson content items</span> : null}
         </>
       ) : (
         <span>Lesson content is coming soon</span>
@@ -113,7 +115,7 @@ const lessonAvailability = (lesson) => {
   if (!freeContent && !paidContent)
     return { className: 'coming', label: 'Lesson content coming soon' };
   if (freeContent && paidContent)
-    return { className: 'mixed', label: 'Free content + premium lesson content' };
+    return { className: 'mixed', label: 'Free content available + full lesson content' };
   if (freeContent) return { className: 'free', label: 'Free content available' };
   return { className: 'paid', label: 'Premium content' };
 };
@@ -219,7 +221,7 @@ const ActivityStudyContent = ({ activity }) => {
   );
 };
 
-const SyllabusLessonCard = ({ courseSlug, isEnrolled, lesson, progress }) => {
+const SyllabusLessonCard = ({ course, courseSlug, isEnrolled, lesson, progress }) => {
   const availability = lessonAvailability(lesson);
   const lessonStats = lessonProgress({ ...lesson, progress });
 
@@ -238,9 +240,10 @@ const SyllabusLessonCard = ({ courseSlug, isEnrolled, lesson, progress }) => {
         {lesson.shortDescription ? <p>{lesson.shortDescription}</p> : null}
         <div className="lesson-content-counts">
           {lesson.freeContentCount ? <span>{lesson.freeContentCount} free</span> : null}
-          {lesson.paidContentCount ? <span>{lesson.paidContentCount} premium</span> : null}
+          {lesson.paidContentCount ? <span>{lesson.paidContentCount} full lesson items</span> : null}
         </div>
         <span className={'lesson-access ' + availability.className}>{availability.label}</span>
+        <LessonPrice area={academicAreaForCourse(course)} course={course} product={lesson.unlockProduct} />
         {isEnrolled ? (
           <div className="card-progress">
             <div>
@@ -593,9 +596,11 @@ export const PublicCourseDetailPage = () => {
           <p className="eyebrow">{course.academicLevel?.nameEn || 'ICT'} · {course.medium?.nameEn || course.medium?.name || course.medium?.code}</p>
           <h1 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{courseHeading(course)}</h1>
           <p className="course-detail-description">{courseDescription(course)}</p>
+          <p className="course-online-value">Online school ICT learning—study this course anytime, from anywhere.</p>
           {counts(course)}
+          <LessonPrice area={academicAreaForCourse(course)} course={course} />
           <p className="course-detail-note">
-            Explore free content first. Your progress expands as you unlock premium lesson content.
+            Free content may be available first. Full lesson content is available after purchasing the lesson.
           </p>
           {comingSoon ? <p className="course-detail-note">Coming Soon — this course cannot be enrolled in or purchased yet.</p> : <div className="course-detail-actions"><Link className="button" to={enrollment.data ? `/courses/${course.slug}/learn` : `/enroll/${course.slug}`}>{enrollment.data ? 'Continue Learning' : isAuthenticated ? 'Enroll Free' : 'Login to Enroll'}</Link></div>}
         </div>
@@ -604,12 +609,13 @@ export const PublicCourseDetailPage = () => {
         <p className="eyebrow">Syllabus overview</p>
         <h2>Complete syllabus and lessons</h2>
         <p className="syllabus-intro">
-          View each published lesson, its topics, free content and paid lesson unlock where available.
+          View each published lesson, its topics, free content and full lesson access where available.
         </p>
         {lessons.length ? (
           <div className="syllabus-lesson-grid">
             {lessons.map((lesson) => (
               <SyllabusLessonCard
+                course={course}
                 courseSlug={courseSlug}
                 key={lesson.id}
                 lesson={lesson}
@@ -648,12 +654,12 @@ const ActivityRow = ({ activity, courseSlug }) => {
         <p>
           {activity.activityType} -{' '}
           {activity.isLocked
-            ? 'Locked - premium access'
-            : `${activity.accessPolicy === 'paid' ? 'Premium unlocked' : 'Free'} - ${status.replace('_', ' ')}`}
+            ? 'Locked — purchase required'
+            : `${activity.accessPolicy === 'paid' ? 'Purchased lesson' : 'Free content'} - ${status.replace('_', ' ')}`}
         </p>
       </div>
       {activity.isLocked ? (
-        <span className="locked-quest-label">Purchase access to continue</span>
+        <span className="locked-lesson-label">Buy lesson to continue</span>
       ) : (
         <div className="activity-actions">
           {hasStudyMaterial ? (
@@ -679,18 +685,7 @@ const ActivityRow = ({ activity, courseSlug }) => {
   );
 };
 
-const formatLessonPrice = (product) => {
-  const amount = Number(product.price);
-  if (!Number.isFinite(amount)) return product.currency || 'LKR';
-
-  return new Intl.NumberFormat('en-LK', {
-    currency: product.currency || 'LKR',
-    maximumFractionDigits: 0,
-    style: 'currency'
-  }).format(amount);
-};
-
-const UnlockLessonButton = ({ lesson }) => {
+const UnlockLessonButton = ({ course, lesson }) => {
   const navigate = useNavigate();
   const { add } = useOrderSelection();
 
@@ -699,7 +694,7 @@ const UnlockLessonButton = ({ lesson }) => {
   if (!lesson.unlockProduct)
     return (
       <p className="unlock-coming">
-        Premium content is being prepared for this lesson. Its unlock option will appear here once
+        Full lesson content is being prepared for this lesson. Its purchase option will appear here once
         it is published.
       </p>
     );
@@ -710,14 +705,13 @@ const UnlockLessonButton = ({ lesson }) => {
   };
 
   return (
-    <button className="unlock-lesson-button" onClick={unlockLesson} type="button">
-      <span>Purchase lesson access</span>
-      <strong>{formatLessonPrice(lesson.unlockProduct)}</strong>
+    <button className="unlock-lesson-button" onClick={() => { trackPublicEvent('lesson_purchase_started', { course_slug: course?.slug }); unlockLesson(); }} type="button">
+      <span>{lessonPurchaseText({ area: academicAreaForCourse(course), course, product: lesson.unlockProduct })} · <span lang="si">මෙම පාඩම මිලදී ගන්න</span></span>
     </button>
   );
 };
 
-const LearningLessonCard = ({ courseSlug, lesson }) => {
+const LearningLessonCard = ({ course, courseSlug, lesson }) => {
   const progress = lessonProgress(lesson);
   const availability = lessonAvailability(lesson);
   const hasActivities = Boolean(lesson.activities?.length);
@@ -752,8 +746,8 @@ const LearningLessonCard = ({ courseSlug, lesson }) => {
         ) : null}
         <div className="lesson-content-counts learning-content-counts">
           {lesson.freeContentCount ? <span>{lesson.freeContentCount} free activities</span> : null}
-          {lesson.paidContentCount ? <span>{lesson.paidContentCount} premium activities</span> : null}
-          {lesson.premiumUnlocked ? <span>Purchased access active</span> : null}
+          {lesson.paidContentCount ? <span>{lesson.paidContentCount} full lesson items</span> : null}
+          {lesson.premiumUnlocked ? <span>Purchased · මිලදීගෙන ඇත</span> : null}
         </div>
         <div className="lesson-progress">
           <div>
@@ -767,7 +761,8 @@ const LearningLessonCard = ({ courseSlug, lesson }) => {
           />
           <p>{progressMessage}</p>
         </div>
-        <UnlockLessonButton lesson={lesson} />
+        <LessonPrice area={academicAreaForCourse(course)} course={course} product={lesson.unlockProduct} />
+        <UnlockLessonButton course={course} lesson={lesson} />
         <Link className="lesson-workspace-link" to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
           {hasActivities ? 'Open lesson workspace' : 'View lesson details'}
         </Link>
@@ -831,13 +826,13 @@ export const CourseLearningPage = () => {
         <p className="course-progress-copy">
           {progress.data?.completedAccessibleActivities || 0} of{' '}
           {progress.data?.totalAccessibleActivities || 0} available learning activities completed. Every
-          premium unlock expands the total progress path.
+          purchased full lesson content expands the total progress path.
         </p>
         <progress max="100" value={progress.data?.progressPercent || 0} />
       </section>
       <div className="lms-lessons">
         {lessons.map((lesson) => (
-          <LearningLessonCard courseSlug={courseSlug} key={lesson.id} lesson={lesson} />
+          <LearningLessonCard course={course} courseSlug={courseSlug} key={lesson.id} lesson={lesson} />
         ))}
       </div>
     </>
@@ -982,7 +977,7 @@ export const LegacyLessonLearningPage = () => {
           ) : (
             <EmptyState title="Lesson content is being prepared" />
           )}
-          <UnlockLessonButton lesson={lesson} />
+          <UnlockLessonButton course={publicCourse} lesson={lesson} />
           <div className="lesson-workspace-navigation">
             {previousLesson ? (
               <Link to={`/courses/${courseSlug}/lessons/${previousLesson.slug || previousLesson.id}`}>
@@ -1053,7 +1048,8 @@ export const LessonLearningPage = () => {
           <span className="lesson-access">{lesson.premiumUnlocked ? 'Lesson unlocked' : 'Free and locked content'}</span>
         </div>
         <p className="lesson-topic-summary">{topicCount} topic{topicCount === 1 ? '' : 's'} · {lesson.freeContentCount} free items · {lesson.paidContentCount} locked items</p>
-        {!lesson.premiumUnlocked && lesson.unlockProduct ? <UnlockLessonButton lesson={lesson} /> : null}
+        <LessonPrice area={academicAreaForCourse(course)} course={course} product={lesson.unlockProduct} />
+        {!lesson.premiumUnlocked && lesson.unlockProduct ? <UnlockLessonButton course={course} lesson={lesson} /> : null}
       </section>
       <div className="public-lesson-layout">
         <aside className="lesson-content-tree" aria-label="Lesson content navigation">
