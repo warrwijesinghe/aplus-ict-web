@@ -263,6 +263,23 @@ button:disabled {
   background: linear-gradient(120deg, #171317 15%, #2a1a1d 56%, #e11d2e 155%);
   display: grid;
 }
+
+.platform-hero-split {
+  align-items: stretch;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, .92fr);
+  overflow: hidden;
+}
+.platform-hero-split .hero-copy { padding: clamp(2rem, 5vw, 5rem); }
+.platform-hero-split h1 { max-width: 12ch; }
+.platform-hero-split .hero-copy > p:not(.eyebrow):not(.hero-actions) { color: var(--color-text-muted); line-height: 1.7; max-width: 58ch; }
+.platform-hero-image { height: 100%; min-height: 480px; object-fit: cover; width: 100%; }
+.hero-sinhala { font-size: 1.04rem; line-height: 1.8; }
+.resource-preview-list { display: grid; gap: .65rem; margin: 1.25rem 0; max-width: 720px; padding-left: 1.25rem; }
+.resource-preview-list a { font-weight: 700; }
 .platform-hero { align-items: center; display: flex; min-height: clamp(500px, 62vh, 680px); padding: clamp(2rem, 5.5vw, 5.5rem); }
 .platform-hero .hero-copy { max-width: 46rem; }
 .platform-hero .hero-copy h1 { font-size: clamp(2.35rem, 4.5vw, 4.65rem); letter-spacing: -0.055em; line-height: 1.04; max-width: 13ch; }
@@ -1770,6 +1787,7 @@ button:disabled {
   max-width: 760px;
   padding: 1.25rem;
 }
+.benefits-grid:has(article:nth-child(4)) { grid-template-columns: repeat(4, 1fr); }
 .loading-skeleton { display: grid; gap: .65rem; min-height: 164px; }
 .loading-skeleton i { animation: skeleton-pulse 1.2s ease-in-out infinite alternate; background: #edf0f3; border-radius: .45rem; display: block; height: 1rem; }
 .loading-skeleton i:nth-child(3) { width: 82%; }.loading-skeleton i:nth-child(4) { width: 65%; }
@@ -2162,6 +2180,8 @@ button:disabled {
 }
 
 @media (max-width: 1024px) {
+  .platform-hero-split { grid-template-columns: 1fr 1fr; }
+  .benefits-grid:has(article:nth-child(4)) { grid-template-columns: repeat(2, 1fr); }
   .public-lesson-layout { grid-template-columns: 1fr; }
   .lesson-content-tree { position: static; }
   .lesson-content-tree > nav > ol { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
@@ -2188,6 +2208,9 @@ button:disabled {
   }
 }
 @media (max-width: 768px) {
+  .platform-hero-split { grid-template-columns: 1fr; }
+  .platform-hero-split .hero-copy { order: 1; }
+  .platform-hero-image { min-height: 250px; }
   .header {
     min-height: 62px;
   }
@@ -2310,6 +2333,7 @@ button:disabled {
   }
 }
 @media (max-width: 480px) {
+  .benefits-grid:has(article:nth-child(4)) { grid-template-columns: 1fr; }
   h1 {
     font-size: 2rem;
   }

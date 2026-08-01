@@ -4,7 +4,7 @@ const LegalPage = ({ kind }) => {
   const privacy = kind === 'privacy';
   const title = privacy ? 'Privacy Policy' : 'Terms of Use';
   usePageSeo({
-    title: `${title} | A Plus ICT`,
+    title,
     description: `${title} for A Plus ICT students and visitors.`,
     path: privacy ? '/privacy-policy' : '/terms'
   });

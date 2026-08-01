@@ -19,7 +19,6 @@ import {
   CourseLearningPage,
   LessonLearningPage,
   PublicCourseDetailPage,
-  PublicHomePage,
   StudentGuidePage
 } from '../pages/PublicCoursePages.jsx';
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';

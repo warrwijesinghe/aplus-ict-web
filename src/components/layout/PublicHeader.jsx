@@ -7,6 +7,7 @@ import { serviceUrls } from '../../api/service-urls.js';
 import { useAuth } from '../../auth/auth-context.jsx';
 import { destinationForUser } from '../../utils/route-destination.js';
 import { BrandLogo } from './BrandLogo.jsx';
+import { trackPublicEvent } from '../../analytics/events.js';
 
 export const PublicHeader = () => {
   const { isAuthenticated, user } = useAuth();
@@ -29,7 +30,7 @@ export const PublicHeader = () => {
       if (event.key === 'Escape') closeMenu();
     };
     const onPointerDown = (event) => {
-      if (isOpen && !headerRef.current?.contains(event.target)) closeMenu();
+      if ((isOpen || isMemberOpen) && !headerRef.current?.contains(event.target)) closeMenu();
     };
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('pointerdown', onPointerDown);
@@ -39,7 +40,7 @@ export const PublicHeader = () => {
       document.removeEventListener('pointerdown', onPointerDown);
       document.body.classList.remove('navigation-open');
     };
-  }, [isOpen]);
+  }, [isOpen, isMemberOpen]);
   useEffect(() => {
     closeMenu();
   }, [location.pathname, location.search]);
@@ -73,8 +74,8 @@ export const PublicHeader = () => {
           Home
         </NavLink>
         <NavLink onClick={closeMenu} to="/school-ict">Grades 6–9</NavLink>
-        <NavLink onClick={closeMenu} to="/ol-ict">Grades 10–11</NavLink>
-        <NavLink onClick={closeMenu} to="/al-ict">Grades 12–13</NavLink>
+        <NavLink onClick={closeMenu} to="/ol-ict">O/L ICT</NavLink>
+        <NavLink onClick={closeMenu} to="/al-ict">A/L ICT</NavLink>
         <NavLink onClick={closeMenu} to="/resources">
           Free Resources
         </NavLink>
@@ -93,7 +94,7 @@ export const PublicHeader = () => {
                 {initials}
               </span>
               <span className="member-menu-label">
-                {roles.includes('student') ? 'My learning' : 'Account'}
+                {roles.includes('student') ? 'My Learning' : 'Account'}
               </span>
             </button>
             {isMemberOpen ? (
@@ -103,7 +104,7 @@ export const PublicHeader = () => {
                   <span>{user?.email}</span>
                 </p>
                 <Link onClick={closeMenu} to={memberDestination}>
-                  My learning
+                  My Learning
                 </Link>
                 {roles.includes('student') ? (
                   <Link onClick={closeMenu} to="/student/profile">
@@ -120,9 +121,9 @@ export const PublicHeader = () => {
           <a
             className="header-login"
             href={serviceUrls.auth + '/api/v1/auth/google?returnTo=' + loginReturnTo}
-            onClick={closeMenu}
+            onClick={() => { trackPublicEvent('student_login_started'); closeMenu(); }}
           >
-            Start Learning
+            Student Login
           </a>
         )}
       </nav>

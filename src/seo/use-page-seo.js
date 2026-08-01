@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
+import { DEFAULT_OG_IMAGE, absoluteUrl, getPublicSeo, normalizePath, pageTitle } from './public-seo-config.js';
 
-const siteName = 'A Plus ICT';
 const configuredSiteUrl = import.meta.env.VITE_PUBLIC_SITE_URL?.replace(/\/$/, '');
 
 const setMetaContent = (selector, content) => {
@@ -18,38 +18,43 @@ const setMetaContent = (selector, content) => {
   element.setAttribute('content', content);
 };
 
-// Public routes use this small hook so titles, descriptions, social previews,
-// canonical URLs, and structured data stay close to the page they describe.
+const removeSchema = () => document.getElementById('page-structured-data')?.remove();
+
+// This complements the static public-route HTML generated after builds. Full SSR/SSG
+// can be introduced later if large-scale dynamic course and lesson indexing is needed.
 export const usePageSeo = ({
   description,
-  image = '/images/learning-hero.jpg',
+  image = DEFAULT_OG_IMAGE,
   imageAlt = 'A Plus ICT learning platform',
-  keywords = 'A/L ICT, Sri Lanka ICT lessons, A Plus ICT',
   noIndex = false,
   path,
   structuredData,
   title
 }) => {
   useEffect(() => {
-    const pageTitle = title ? title + ' | ' + siteName : siteName;
-    const canonicalUrl = (configuredSiteUrl || window.location.origin) + path;
-    const developmentNoIndex = !import.meta.env.PROD || import.meta.env.VITE_SITE_INDEXABLE === 'false';
-    const imageUrl = image.startsWith('http') ? image : (configuredSiteUrl || window.location.origin) + image;
+    const normalizedPath = normalizePath(path);
+    const defaults = getPublicSeo(normalizedPath);
+    const resolvedTitle = title || defaults?.title || 'A Plus ICT';
+    const resolvedDescription = description || defaults?.description || 'Structured school ICT learning from Grade 6 to A/L.';
+    const siteUrl = configuredSiteUrl || window.location.origin;
+    const documentTitle = pageTitle(resolvedTitle);
+    const canonicalUrl = absoluteUrl(normalizedPath, siteUrl);
+    const developmentNoIndex = !import.meta.env.PROD || import.meta.env.VITE_SITE_INDEXABLE !== 'true';
+    const imageUrl = image.startsWith('http') ? image : absoluteUrl(image, siteUrl);
 
-    document.title = pageTitle;
-    setMetaContent('meta[name="description"]', description);
-    setMetaContent('meta[name="keywords"]', keywords);
-    setMetaContent('meta[property="og:title"]', pageTitle);
-    setMetaContent('meta[property="og:description"]', description);
+    document.title = documentTitle;
+    setMetaContent('meta[name="description"]', resolvedDescription);
+    setMetaContent('meta[property="og:title"]', documentTitle);
+    setMetaContent('meta[property="og:description"]', resolvedDescription);
     setMetaContent('meta[property="og:url"]', canonicalUrl);
     setMetaContent('meta[property="og:type"]', 'website');
     setMetaContent('meta[property="og:image"]', imageUrl);
     setMetaContent('meta[property="og:image:alt"]', imageAlt);
     setMetaContent('meta[name="twitter:card"]', 'summary_large_image');
-    setMetaContent('meta[name="twitter:title"]', pageTitle);
-    setMetaContent('meta[name="twitter:description"]', description);
+    setMetaContent('meta[name="twitter:title"]', documentTitle);
+    setMetaContent('meta[name="twitter:description"]', resolvedDescription);
     setMetaContent('meta[name="twitter:image"]', imageUrl);
-    setMetaContent('meta[name="robots"]', noIndex || developmentNoIndex ? 'noindex, nofollow' : 'index, follow');
+    setMetaContent('meta[name="robots"]', noIndex || defaults?.noIndex || developmentNoIndex ? 'noindex, nofollow' : 'index, follow');
 
     let canonical = document.head.querySelector('link[rel="canonical"]');
     if (!canonical) {
@@ -61,7 +66,7 @@ export const usePageSeo = ({
 
     const existingSchema = document.getElementById('page-structured-data');
     if (!structuredData) {
-      existingSchema?.remove();
+      removeSchema();
       return;
     }
 
@@ -70,5 +75,5 @@ export const usePageSeo = ({
     schema.type = 'application/ld+json';
     schema.textContent = JSON.stringify(structuredData);
     if (!existingSchema) document.head.append(schema);
-  }, [description, image, imageAlt, keywords, noIndex, path, structuredData, title]);
+  }, [description, image, imageAlt, noIndex, path, structuredData, title]);
 };

@@ -541,7 +541,7 @@ export const StudentDashboard = EnrollmentDashboard;
       <p className="eyebrow">Member area</p>
       <h1>Welcome back, {user?.name || 'student'}.</h1>
       <p className="member-dashboard-intro">
-        Pick up your next A/L ICT quest, browse free course content, or manage your lesson unlocks.
+        Pick up your next A/L ICT activity, browse free course content, or manage your lesson access.
       </p>
       <div className="member-action-grid">
         <Link to="/courses">

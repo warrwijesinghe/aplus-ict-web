@@ -136,12 +136,7 @@ const FilterSelect = ({ label, name, options, value, onChange, format = labelFor
 );
 
 export const PublicResourcesPage = () => {
-  usePageSeo({
-    title: 'Free A/L and O/L ICT Resources',
-    description:
-      'Download free A/L and O/L ICT syllabuses, teachers guides, past papers, short notes, mind maps, and term papers.',
-    path: '/resources'
-  });
+  usePageSeo({ path: '/resources' });
   const [filters, setFilters] = useState(initialFilters);
   const query = useQuery({
     queryKey: queryKeys.content.publicDownloads(filters),
@@ -176,8 +171,7 @@ export const PublicResourcesPage = () => {
         <p className="eyebrow">Resource library</p>
         <h1>Free ICT resources for A/L and O/L learners</h1>
         <p>
-          Download published syllabuses, teachers guides, past papers, short notes, mind maps, and
-          term papers. Free resources do not require an account.
+          Browse published ICT learning material. Free resources do not require an account.
         </p>
       </section>
 
@@ -185,7 +179,7 @@ export const PublicResourcesPage = () => {
         <div className="resource-filter-intro">
           <h2>Find the material you need</h2>
           <p>
-            Use one or more filters. New resource types appear here automatically when published.
+            Use one or more filters. Published resource types appear here automatically.
           </p>
         </div>
         <div className="resource-filter-grid">
@@ -247,7 +241,7 @@ export const PublicResourcesPage = () => {
       ) : null}
       {query.isSuccess && !items.length ? (
         <EmptyState title="No resources match those filters">
-          <p>Clear your filters or choose the Government School ICT grade range that fits you.</p>
+          <p>Clear your filters or choose the school ICT grade range that fits you.</p>
           <button
             className="button secondary"
             onClick={() => setFilters(initialFilters)}
@@ -259,7 +253,7 @@ export const PublicResourcesPage = () => {
         </EmptyState>
       ) : null}
 
-      <section className="resources-cta"><div><p className="eyebrow">Keep learning</p><h2>Choose your Government School grade</h2></div><p className="pathway-links"><Link className="button secondary" to="/school-ict">Grades 6–9</Link><Link className="button secondary" to="/ol-ict">Grades 10–11</Link><Link className="button secondary" to="/al-ict">Grades 12–13</Link></p></section>
+      <section className="resources-cta"><div><p className="eyebrow">Keep learning</p><h2>Choose your school ICT grade</h2></div><p className="pathway-links"><Link className="button secondary" to="/school-ict">Grades 6–9</Link><Link className="button secondary" to="/ol-ict">O/L ICT</Link><Link className="button secondary" to="/al-ict">A/L ICT</Link></p></section>
     </>
   );
 };

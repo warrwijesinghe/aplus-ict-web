@@ -184,7 +184,7 @@ export const AdminContentPage = () => {
       <p className="eyebrow">Lesson content studio</p>
       <h1>Build a free-to-premium learning path</h1>
       <p className="admin-content-intro">
-        Students can complete free quests first. When you add paid quests and publish an active
+        Students can complete free activities first. When you add paid activities and publish an active
         lesson unlock product, the same lesson grows into its premium path.
       </p>
 
@@ -229,8 +229,8 @@ export const AdminContentPage = () => {
                 <span>Lesson {String(selectedLesson.lessonNumber).padStart(2, '0')}</span>
               </div>
               <p className="admin-progress-rule">
-                Progress counts only available quests. For example, 4 completed free quests out of
-                10 shows 40%; after unlocking 10 paid quests it becomes 4 out of 20, or 20%.
+                Progress counts only available activities. For example, 4 completed free activities out of
+                10 shows 40%; after purchasing access to 10 paid activities it becomes 4 out of 20, or 20%.
               </p>
               {lessonSections.length ? (
                 <ol className="admin-section-list">
@@ -251,17 +251,17 @@ export const AdminContentPage = () => {
                 </ol>
               ) : (
                 <p className="admin-content-empty">
-                  No content yet. Add the first free quest below.
+                  No content yet. Add the first free activity below.
                 </p>
               )}
             </article>
 
             <article className="admin-content-card">
-              <p className="eyebrow">{editingSectionId ? 'Editing quest' : 'New quest'}</p>
+              <p className="eyebrow">{editingSectionId ? 'Editing activity' : 'New activity'}</p>
               <h2>{editingSectionId ? 'Update lesson content' : 'Add lesson content'}</h2>
               <form className="admin-content-form" onSubmit={saveSection}>
                 <label>
-                  Quest title
+                  Activity title
                   <input
                     onChange={(event) =>
                       setSectionForm((current) => ({ ...current, title: event.target.value }))
@@ -362,7 +362,7 @@ export const AdminContentPage = () => {
                     }
                     type="checkbox"
                   />
-                  Publish this quest to students
+                  Publish this activity to students
                 </label>
                 {sectionMutation.error ? <InlineError error={sectionMutation.error} /> : null}
                 <div className="admin-form-actions">
@@ -370,8 +370,8 @@ export const AdminContentPage = () => {
                     {sectionMutation.isPending
                       ? 'Saving...'
                       : editingSectionId
-                        ? 'Save quest'
-                        : 'Add quest'}
+                        ? 'Save activity'
+                        : 'Add activity'}
                   </button>
                   {editingSectionId ? (
                     <button
@@ -393,9 +393,9 @@ export const AdminContentPage = () => {
           <aside className="admin-content-side">
             <article className="admin-content-card">
               <p className="eyebrow">Lesson unlock</p>
-              <h2>Premium vault price</h2>
+              <h2>Premium lesson access price</h2>
               <p>
-                One active product unlocks all paid quests in this lesson. This keeps today&apos;s
+                One active product unlocks all paid activities in this lesson. This keeps today&apos;s
                 sale lesson-by-lesson and leaves bundle offers for a later release.
               </p>
               {lessonProducts.length ? (

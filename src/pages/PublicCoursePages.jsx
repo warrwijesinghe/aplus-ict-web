@@ -11,6 +11,8 @@ import { ResourceImage } from '../components/resources/ResourceImage.jsx';
 import { useAuth } from '../auth/auth-context.jsx';
 import { useOrderSelection } from '../features/store/selection-context.jsx';
 import { usePageSeo } from '../seo/use-page-seo.js';
+import { courseSeo, lessonSeo } from '../seo/public-seo-config.js';
+import { trackPublicEvent } from '../analytics/events.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
 import {
@@ -40,7 +42,7 @@ const counts = (course) => {
           {paidContent ? <span>{paidContent} premium content</span> : null}
         </>
       ) : (
-        <span>Content quests are coming soon</span>
+        <span>Lesson content is coming soon</span>
       )}
     </p>
   );
@@ -109,9 +111,9 @@ const lessonAvailability = (lesson) => {
   const paidContent = Number(lesson.paidContentCount || 0);
 
   if (!freeContent && !paidContent)
-    return { className: 'coming', label: 'Content quests coming soon' };
+    return { className: 'coming', label: 'Lesson content coming soon' };
   if (freeContent && paidContent)
-    return { className: 'mixed', label: 'Free content + premium vault' };
+    return { className: 'mixed', label: 'Free content + premium lesson content' };
   if (freeContent) return { className: 'free', label: 'Free content available' };
   return { className: 'paid', label: 'Premium content' };
 };
@@ -210,7 +212,7 @@ const ActivityStudyContent = ({ activity }) => {
         </button>
       ) : null}
       {!activity.content && !videoUrl && !activity.resourceId ? (
-        <p>Study material will appear here when this quest is published.</p>
+        <p>Study material will appear here when this activity is published.</p>
       ) : null}
       {fileError ? <p className="activity-study-error">{fileError}</p> : null}
     </div>
@@ -248,7 +250,7 @@ const SyllabusLessonCard = ({ courseSlug, isEnrolled, lesson, progress }) => {
             <progress max="100" value={lessonStats.progressPercent} />
           </div>
         ) : null}
-        <Link className="lesson-card-link" to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
+        <Link className="lesson-card-link" onClick={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
           {isEnrolled ? 'Start lesson' : 'Preview lesson'}
         </Link>
       </div>
@@ -290,7 +292,7 @@ const CourseCard = ({ course }) => {
             <progress max="100" value={courseProgress?.progressPercent || 0} />
             <p>
               {courseProgress?.completedAccessibleActivities || 0} of{' '}
-              {courseProgress?.totalAccessibleActivities || 0} accessible quests complete
+              {courseProgress?.totalAccessibleActivities || 0} available activities complete
             </p>
           </div>
         ) : null}
@@ -333,35 +335,11 @@ export const PublicHomePage = () => {
   const englishCourse = courses.find((course) => course.medium?.code === 'english');
   const [selectedSlug, setSelectedSlug] = useState('');
   const selectedCourse = courses.find((course) => course.slug === selectedSlug) || sinhalaCourse || englishCourse;
-  const siteUrl = (import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '');
   const curriculum = useQuery({
     queryKey: queryKeys.content.publicCurriculum(selectedCourse?.slug || ''),
     queryFn: ({ signal }) => contentApi.publicCurriculum(selectedCourse.slug, signal),
     enabled: Boolean(selectedCourse?.slug),
     staleTime: 60_000
-  });
-  const courseSchema = courses.map((course) => ({
-    '@type': 'Course',
-    name: course.title,
-    description: courseDescription(course),
-    inLanguage: course.medium?.locale || (course.medium?.code === 'sinhala' ? 'si-LK' : 'en-LK'),
-    provider: { '@type': 'EducationalOrganization', name: 'A Plus ICT' },
-    url: `${siteUrl}/courses/${course.slug}`
-  }));
-  usePageSeo({
-    title: 'A/L ICT Courses in Sinhala & English | A Plus ICT Sri Lanka',
-    description: 'Structured A/L ICT courses in Sinhala and English with 13 lessons, free chapters, videos, notes, activities, quizzes and progress tracking.',
-    path: '/al-ict',
-    image: '/images/learning-hero.jpg',
-    imageAlt: 'A Plus ICT A/L ICT learning platform',
-    structuredData: {
-      '@context': 'https://schema.org',
-      '@graph': [
-        { '@type': 'EducationalOrganization', name: 'A Plus ICT', url: siteUrl, description: 'A Sri Lankan A/L ICT learning platform with structured courses and free learning resources.' },
-        { '@type': 'WebSite', name: 'A Plus ICT', url: siteUrl },
-        ...courseSchema
-      ]
-    }
   });
   const courseLink = (course) => (course ? `/courses/${course.slug}` : '/courses');
   const lessons = curriculum.data?.data?.lessons || [];
@@ -566,8 +544,8 @@ export const PublicCourseDetailPage = () => {
   const enrollment = useCourseEnrollment(query.data?.data?.id, isAuthenticated && Boolean(query.data?.data?.id));
   const course = query.data?.data;
   usePageSeo({
-    title: course?.title || 'A/L ICT Course',
-    description: course ? courseDescription(course) : 'Explore a structured A/L ICT learning path.',
+    title: course ? courseSeo(course).title : 'ICT Course',
+    description: course ? courseSeo(course).description : 'Explore a structured ICT learning path.',
     path: '/courses/' + courseSlug,
     structuredData: course
       ? {
@@ -675,7 +653,7 @@ const ActivityRow = ({ activity, courseSlug }) => {
         </p>
       </div>
       {activity.isLocked ? (
-        <span className="locked-quest-label">Unlock to continue</span>
+        <span className="locked-quest-label">Purchase access to continue</span>
       ) : (
         <div className="activity-actions">
           {hasStudyMaterial ? (
@@ -684,7 +662,7 @@ const ActivityRow = ({ activity, courseSlug }) => {
               onClick={() => setIsOpen((open) => !open)}
               type="button"
             >
-              {isOpen ? 'Hide quest' : 'Open quest'}
+              {isOpen ? 'Hide activity' : 'Open activity'}
             </button>
           ) : null}
           <button
@@ -692,7 +670,7 @@ const ActivityRow = ({ activity, courseSlug }) => {
             onClick={() => mutation.mutate()}
             type="button"
           >
-            {status === 'completed' ? 'Quest complete' : 'Complete quest'}
+            {status === 'completed' ? 'Activity complete' : 'Complete activity'}
           </button>
         </div>
       )}
@@ -733,7 +711,7 @@ const UnlockLessonButton = ({ lesson }) => {
 
   return (
     <button className="unlock-lesson-button" onClick={unlockLesson} type="button">
-      <span>Unlock the premium vault</span>
+      <span>Purchase lesson access</span>
       <strong>{formatLessonPrice(lesson.unlockProduct)}</strong>
     </button>
   );
@@ -749,7 +727,7 @@ const LearningLessonCard = ({ courseSlug, lesson }) => {
       ? progress.completedActivities +
         ' of ' +
         progress.totalAccessibleActivities +
-        ' accessible quests complete'
+        ' available activities complete'
       : 'Lesson content is being prepared.';
 
   return (
@@ -773,9 +751,9 @@ const LearningLessonCard = ({ courseSlug, lesson }) => {
           <p className="lesson-summary">{lesson.shortDescription}</p>
         ) : null}
         <div className="lesson-content-counts learning-content-counts">
-          {lesson.freeContentCount ? <span>{lesson.freeContentCount} free quests</span> : null}
-          {lesson.paidContentCount ? <span>{lesson.paidContentCount} premium quests</span> : null}
-          {lesson.premiumUnlocked ? <span>Premium vault unlocked</span> : null}
+          {lesson.freeContentCount ? <span>{lesson.freeContentCount} free activities</span> : null}
+          {lesson.paidContentCount ? <span>{lesson.paidContentCount} premium activities</span> : null}
+          {lesson.premiumUnlocked ? <span>Purchased access active</span> : null}
         </div>
         <div className="lesson-progress">
           <div>
@@ -843,7 +821,7 @@ export const CourseLearningPage = () => {
       <section className="lms-header">
         <div className="lms-progress-heading">
           <div>
-            <p className="eyebrow">Learning quest</p>
+            <p className="eyebrow">Learning activity</p>
             <h1>{course.title}</h1>
           </div>
           <strong className="course-progress-badge">
@@ -852,7 +830,7 @@ export const CourseLearningPage = () => {
         </div>
         <p className="course-progress-copy">
           {progress.data?.completedAccessibleActivities || 0} of{' '}
-          {progress.data?.totalAccessibleActivities || 0} accessible content quests completed. Every
+          {progress.data?.totalAccessibleActivities || 0} available learning activities completed. Every
           premium unlock expands the total progress path.
         </p>
         <progress max="100" value={progress.data?.progressPercent || 0} />
@@ -885,7 +863,7 @@ const LessonMapItem = ({ courseSlug, lesson, selectedLessonId }) => {
 };
 
 // The dedicated workspace keeps one lesson focused: learners can study,
-// complete individual quests, and see the next locked opportunity without
+// complete individual activities, and see the next locked opportunity without
 // losing their position in the wider course.
 export const LegacyLessonLearningPage = () => {
   const { courseSlug, lessonId } = useParams();
@@ -924,7 +902,7 @@ export const LegacyLessonLearningPage = () => {
         <p className="eyebrow">Student sign in</p>
         <h1>Sign in to open this lesson.</h1>
         <p>
-          Free quests are ready for you after Google sign-in. Your progress will save automatically.
+          Available free activities are ready for you after Google sign-in. Your progress will save automatically.
         </p>
         <a
           className="button"
@@ -954,7 +932,7 @@ export const LegacyLessonLearningPage = () => {
           <div>
             <p className="eyebrow">Lesson {String(lesson.lessonNumber).padStart(2, '0')}</p>
             <h1>{lesson.title}</h1>
-            <p>{lesson.shortDescription || 'Learn step by step, then mark each quest complete.'}</p>
+            <p>{lesson.shortDescription || 'Learn step by step, then mark each activity complete.'}</p>
           </div>
           <span className={'lesson-access ' + availability.className}>{availability.label}</span>
         </div>
@@ -966,7 +944,7 @@ export const LegacyLessonLearningPage = () => {
           <progress max="100" value={lessonStats.progressPercent} />
           <p>
             {lessonStats.completedActivities} of {lessonStats.totalAccessibleActivities} accessible
-            quests complete
+            activities complete
           </p>
         </div>
       </section>
@@ -990,7 +968,7 @@ export const LegacyLessonLearningPage = () => {
         <main className="lesson-study-panel">
           <div className="lesson-study-heading">
             <div>
-              <p className="eyebrow">Today&apos;s quests</p>
+              <p className="eyebrow">Today&apos;s activities</p>
               <h2>Learn, practise, complete</h2>
             </div>
             <span>{activities.length} content items</span>
@@ -1054,8 +1032,8 @@ export const LessonLearningPage = () => {
   const course = query.data?.data?.course;
   const lesson = query.data?.data?.lesson;
   usePageSeo({
-    title: lesson ? `${lesson.title} — ${course?.title}` : 'ICT lesson',
-    description: lesson?.descriptionEn || lesson?.shortDescription || 'Explore ICT lesson content at A Plus ICT.',
+    title: lesson ? lessonSeo(lesson, course).title : 'ICT Lesson',
+    description: lesson ? lessonSeo(lesson, course).description : 'Explore ICT lesson content at A Plus ICT.',
     path: `/courses/${courseSlug}/lessons/${lessonSlug}`,
     structuredData: lesson && course ? {
       '@context': 'https://schema.org', '@type': 'LearningResource', name: lesson.title,
@@ -1114,12 +1092,7 @@ export const LessonLearningPage = () => {
 };
 
 export const StudentGuidePage = () => {
-  usePageSeo({
-    title: 'Student Guide',
-    description:
-      'Learn how to start A/L ICT lessons, use free resources, and understand progress at A Plus ICT.',
-    path: '/student-guide'
-  });
+  usePageSeo({ path: '/student-guide' });
 
   return (
     <section className="prose-page guide-page">
@@ -1174,13 +1147,7 @@ export const StudentGuidePage = () => {
 };
 
 const SitePage = ({ contact }) => {
-  usePageSeo({
-    title: contact ? 'Contact A Plus ICT' : 'About A Plus ICT',
-    description: contact
-      ? 'Contact A Plus ICT through WhatsApp and follow our social channels for A/L ICT learning updates.'
-      : 'Discover A Plus ICT, a focused A/L ICT learning platform with structured courses and free resources.',
-    path: contact ? '/contact' : '/about'
-  });
+  usePageSeo({ path: contact ? '/contact' : '/about' });
   const query = useQuery({
     queryKey: queryKeys.content.siteProfile,
     queryFn: ({ signal }) => contentApi.siteProfile(signal)

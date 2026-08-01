@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { trackPublicEvent } from '../../analytics/events.js';
 
 export const BilingualHeading = ({ as = 'h2', english, sinhala }) => {
   const content = <>
@@ -41,7 +42,7 @@ export const ActiveCourseCard = ({ course, continueLearning }) => (
       <MediumBadge medium={course.medium} />
       <AvailabilityBadge status={course.availabilityStatus} />
     </div>
-    <p className="course-grade">{gradeLabel(course) || 'Government School ICT'}</p>
+    <p className="course-grade">{gradeLabel(course) || 'School ICT'}</p>
     <h3 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{primaryCourseTitle(course)}</h3>
     {course.titleSi ? <p className="sinhala-copy" lang="si">{course.titleSi}</p> : null}
     <p>{course.shortDescriptionEn || course.shortDescription}</p>
@@ -50,7 +51,7 @@ export const ActiveCourseCard = ({ course, continueLearning }) => (
     </p>
     <div className="path-card-actions">
       <Link className="button" to={`/courses/${course.slug}`}>
-        {continueLearning ? 'Continue My Learning' : 'Start Learning Free'}
+        {continueLearning ? 'Continue My Learning' : 'View available content'}
       </Link>
       <Link className="button secondary" to={`/courses/${course.slug}`}>View Course</Link>
     </div>
@@ -58,7 +59,6 @@ export const ActiveCourseCard = ({ course, continueLearning }) => (
 );
 
 export const CatalogueCourseCard = ({ course }) => {
-  const comingSoon = course.availabilityStatus === 'coming_soon';
   const isAlCourse = course.academicLevel?.code === 'AL' || course.slug?.startsWith('al-');
   const image = isAlCourse && course.medium?.code === 'sinhala'
     ? '/images/al-ict-sinhala.jfif'
@@ -78,12 +78,11 @@ export const CatalogueCourseCard = ({ course }) => {
         src={image}
       />
       <div className="path-card-topline"><MediumBadge medium={course.medium} /><AvailabilityBadge status={course.availabilityStatus} /></div>
-      <p className="course-grade">{gradeLabel(course) || 'Government School ICT'}</p>
+      <p className="course-grade">{gradeLabel(course) || 'School ICT'}</p>
       <h3 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{primaryCourseTitle(course)}</h3>
       {course.titleSi ? <p className="sinhala-copy" lang="si">{course.titleSi}</p> : null}
       <p>{course.shortDescriptionEn || course.shortDescription}</p>
-      {!comingSoon && course.syllabusLessonCount != null ? <p className="course-facts">{course.syllabusLessonCount} published lessons</p> : null}
-      <Link className="button secondary" to={`/courses/${course.slug}`}>View Course</Link>
+      <Link className="button secondary" onClick={() => trackPublicEvent('course_card_opened', { course_slug: course.slug })} to={`/courses/${course.slug}`}>View Course</Link>
     </article>
   );
 };
