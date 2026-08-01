@@ -347,7 +347,7 @@ export const PublicHomePage = () => {
   usePageSeo({
     title: 'A/L ICT Courses in Sinhala & English | A Plus ICT Sri Lanka',
     description: 'Structured A/L ICT courses in Sinhala and English with 13 lessons, free chapters, videos, notes, activities, quizzes and progress tracking.',
-    path: '/',
+    path: '/al-ict',
     image: '/images/learning-hero.jpg',
     imageAlt: 'A Plus ICT A/L ICT learning platform',
     structuredData: {

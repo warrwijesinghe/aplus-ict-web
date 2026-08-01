@@ -63,9 +63,9 @@ export const PublicHeader = () => {
         <NavLink onClick={closeMenu} to="/">
           Home
         </NavLink>
-        <NavLink onClick={closeMenu} to="/courses">
-          A/L Courses
-        </NavLink>
+        <NavLink onClick={closeMenu} to="/al-ict">A/L ICT</NavLink>
+        <NavLink onClick={closeMenu} to="/ol-ict">O/L ICT</NavLink>
+        <NavLink onClick={closeMenu} to="/school-ict">Grade 6–9</NavLink>
         <NavLink onClick={closeMenu} to="/resources">
           Free Resources
         </NavLink>
