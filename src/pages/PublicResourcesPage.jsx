@@ -24,7 +24,7 @@ const labelFor = (value) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-const levelLabel = (value) => (value === 'al' ? 'A/L ICT' : 'O/L ICT');
+const levelLabel = (value) => value === 'al' ? 'A/L ICT' : value === 'ol' ? 'O/L ICT' : value === 'school' ? 'School ICT' : value;
 
 const mediumLabel = (value) => {
   if (value === 'all') return 'All media';
@@ -168,16 +168,16 @@ export const PublicResourcesPage = () => {
   return (
     <>
       <section className="resources-heading">
-        <p className="eyebrow">Resource library</p>
-        <h1>Free ICT resources for A/L and O/L learners</h1>
+        <p className="eyebrow">Free ICT learning resources</p>
+        <h1>Free Resources for Smarter ICT Learning</h1>
         <p>
-          Browse published ICT learning material. Free resources do not require an account.
+          Access useful ICT notes, lesson materials, past-paper support, and revision resources organised by grade and syllabus area.
         </p>
       </section>
 
       <section aria-label="Resource filters" className="resource-filter-panel">
         <div className="resource-filter-intro">
-          <h2>Find the material you need</h2>
+          <h2>Find the resource you need</h2>
           <p>
             Use one or more filters. Published resource types appear here automatically.
           </p>
@@ -188,14 +188,14 @@ export const PublicResourcesPage = () => {
             <input
               name="search"
               onChange={updateFilter}
-              placeholder="For example, syllabus or Grade 12"
+              placeholder="For example, Grade 10 spreadsheets"
               type="search"
               value={filters.search}
             />
           </label>
           <FilterSelect
             format={levelLabel}
-            label="Level"
+            label="Learning level"
             name="academicLevel"
             onChange={updateFilter}
             options={available.academicLevels}

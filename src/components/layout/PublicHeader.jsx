@@ -54,7 +54,9 @@ export const PublicHeader = () => {
     .slice(0, 2)
     .toUpperCase();
   return (
-    <header className="header" ref={headerRef}>
+    <>
+      <div className="announcement-bar">Online ICT Learning for Grades 6–13 <span>·</span> Sinhala and English Medium</div>
+      <header className="header" ref={headerRef}>
       <Link className="brand" to="/">
         <BrandLogo brandName={brand?.brandName} />
       </Link>
@@ -127,6 +129,7 @@ export const PublicHeader = () => {
           </a>
         )}
       </nav>
-    </header>
+      </header>
+    </>
   );
 };

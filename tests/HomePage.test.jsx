@@ -3,15 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, test, vi } from 'vitest';
 import { contentApi } from '../src/api/content.api.js';
-import { resourceApi } from '../src/api/resource.api.js';
 import { AuthContext } from '../src/auth/auth-context.jsx';
 import { PublicHeader } from '../src/components/layout/PublicHeader.jsx';
 import { PlatformHomePage } from '../src/pages/AcademicAreaPages.jsx';
-
-const courses = [
-  { id: 'si', slug: 'al-ict-sinhala', title: 'සිංහල A/L ICT', titleSi: 'සිංහල A/L ICT', titleEn: 'A/L ICT Sinhala Medium', academicLevel: { code: 'AL' }, medium: { code: 'sinhala', nameEn: 'Sinhala Medium' }, availabilityStatus: 'active' },
-  { id: 'en', slug: 'al-ict-english', title: 'A/L ICT English Medium', titleEn: 'A/L ICT English Medium', academicLevel: { code: 'AL' }, medium: { code: 'english', nameEn: 'English Medium' }, availabilityStatus: 'active' }
-];
 
 const renderWithProviders = (ui, auth = { isAuthenticated: false, user: null }) => render(
   <MemoryRouter><AuthContext.Provider value={auth}><QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{ui}</QueryClientProvider></AuthContext.Provider></MemoryRouter>
@@ -19,14 +13,12 @@ const renderWithProviders = (ui, auth = { isAuthenticated: false, user: null }) 
 
 afterEach(() => vi.restoreAllMocks());
 
-test('shows the Grades 6–13 homepage position and all three pathway links', async () => {
-  vi.spyOn(contentApi, 'publicCourses').mockResolvedValue({ data: courses });
-  vi.spyOn(resourceApi, 'publicDownloads').mockResolvedValue({ data: { items: [] } });
+test('shows the Grades 6–13 homepage and direct learning-area links', () => {
   renderWithProviders(<PlatformHomePage />);
-  expect(screen.getByRole('heading', { level: 1, name: /school ict learning—anytime, anywhere/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 1, name: /study ict anytime. anywhere/i })).toBeInTheDocument();
   expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-  expect(screen.getByLabelText(/school ict learning—anytime, anywhere/i)).toHaveClass('public-hero');
-  expect(screen.getByText('100% online learning')).toBeInTheDocument();
+  expect(screen.getByLabelText(/study ict anytime. anywhere/i)).toHaveClass('public-hero');
+  expect(screen.getByText('Grades 6–13')).toBeInTheDocument();
   expect(screen.queryByText(/currently available courses/i)).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: /explore grades 6–9/i })).toHaveAttribute('href', '/school-ict');
   expect(screen.getByRole('link', { name: /explore o\/l ict/i })).toHaveAttribute('href', '/ol-ict');

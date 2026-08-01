@@ -72,12 +72,12 @@ const courseHeading = (course) => course?.medium?.code === 'sinhala'
 // Reuse the supplied learning imagery as lightweight lesson covers. The number
 // determines the image, so both Sinhala and English tracks stay visually aligned.
 const lessonImages = [
-  '/images/learning-hero.jpg',
-  '/images/al-ict-english.jpg',
-  '/images/course-card-default.jpg',
-  '/images/ict-practice.jpg',
-  '/images/study-cta.jpg',
-  '/images/al-ict-sinhala.jfif'
+  '/images/learning-places/focused-student.webp',
+  '/images/learning-places/lesson-study.webp',
+  '/images/learning-places/home-student.webp',
+  '/images/learning-places/online-session.webp',
+  '/images/learning-places/quiet-study.webp',
+  '/images/learning-places/happy-student.webp'
 ];
 
 const lessonImage = (lessonNumber) => lessonImages[(lessonNumber - 1) % lessonImages.length];
@@ -1190,7 +1190,7 @@ const SitePage = ({ contact }) => {
   return (
     <section className="prose-page about-page">
       <p className="eyebrow">About A Plus ICT</p>
-      <h1>{profile.brandName}</h1>
+      <h1>Online ICT Learning Built Around Real Student Life</h1>
       <div className="about-layout">
         <div className="about-tutor-frame">
           {profile.tutorResourceId ? (
@@ -1208,26 +1208,25 @@ const SitePage = ({ contact }) => {
           )}
         </div>
         <div className="about-copy">
-          <p>{profile.shortDescription}</p>
-          <h2>{profile.tutorName || 'Learn with a clearer ICT path'}</h2>
+          <p>Students do not always have the same timetable, location, device, or learning speed. A Plus ICT makes the Sri Lankan school ICT syllabus available through a flexible, organised, and student-friendly online learning experience.</p>
+          <h2>Our Mission</h2>
           <p>
-            {profile.tutorBio ||
-              'Focused course pathways, practical lesson activities, and useful study resources all live in one place.'}
+            To give every Sri Lankan school student a clear and accessible path to learn ICT—regardless of location, timetable, or learning speed.
           </p>
         </div>
       </div>
       <div className="about-value-grid">
         <article>
-          <h2>Structured pathways</h2>
-          <p>Move through lessons in a sequence that keeps each topic easy to follow.</p>
+          <h2>Accessible</h2>
+          <p>Students should be able to learn from commonly available devices.</p>
         </article>
         <article>
-          <h2>Free resources</h2>
-          <p>Find syllabus documents and study material without an unnecessary sign-in step.</p>
+          <h2>Flexible</h2>
+          <p>Learning should continue without depending on a fixed time or physical location.</p>
         </article>
         <article>
-          <h2>Clear progress</h2>
-          <p>See completed accessible activities at a glance when you return to learn.</p>
+          <h2>Structured and Understandable</h2>
+          <p>Every lesson belongs to a clear grade and sequence, with complex ICT concepts explained clearly.</p>
         </article>
       </div>
       <SocialLinks links={profile.socialLinks} />

@@ -59,12 +59,13 @@ export const ActiveCourseCard = ({ course, continueLearning }) => (
 );
 
 export const CatalogueCourseCard = ({ area, course }) => {
-  const isAlCourse = course.academicLevel?.code === 'AL' || course.slug?.startsWith('al-');
-  const image = isAlCourse && isSinhalaMedium(course)
-    ? '/images/al-ict-sinhala.jfif'
-    : isAlCourse && course.medium?.code === 'english'
-      ? '/images/al-ict-english.jpg'
-      : '/images/course-card-default.jpg';
+  const image = area === 'SCHOOL'
+    ? '/images/learning-places/school-desk.webp'
+    : area === 'OL'
+      ? '/images/learning-places/home-study-notes.webp'
+      : isSinhalaMedium(course)
+        ? '/images/learning-places/focused-student.webp'
+        : '/images/learning-places/lesson-study.webp';
   return (
     <article className={`catalogue-course-card ${course.academicLevel?.code === 'AL' ? 'al-priority' : ''}`}>
       <img
