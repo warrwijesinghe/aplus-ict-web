@@ -352,7 +352,7 @@ export const PublicHomePage = () => {
         <div className="hero-copy">
           <p className="eyebrow">A Plus ICT</p>
           <h1>ICT Learning from Grade 6 to A/L</h1>
-          <p className="hero-sinhala" lang="si">6 ශ්‍රේණියේ සිට උසස් පෙළ දක්වා ICT ඉගෙනීම.</p>
+          <p className="hero-sinhala" lang="si">6 ශ්‍රේණියේ සිට උසස් පෙළ දක්වා ICT ඉගෙනීම...</p>
           <p>
             Choose your grade and medium to explore the complete syllabus, lessons and learning content.
           </p>
