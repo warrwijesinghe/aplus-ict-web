@@ -14,8 +14,10 @@ import { usePageSeo } from '../seo/use-page-seo.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
 import {
+  AvailabilityBadge,
   BilingualHeading,
-  CatalogueCourseCard
+  CatalogueCourseCard,
+  MediumBadge
 } from '../components/catalogue/CatalogueUi.jsx';
 
 const freeContentTotal = (course) =>
@@ -317,76 +319,102 @@ const CourseGrid = () => {
 };
 
 export const PublicHomePage = () => {
-  usePageSeo({
-    title: 'A Plus ICT | Grade 6 to A/L ICT Courses in Sinhala and English',
-    description:
-      'Explore Sri Lankan ICT courses from Grade 6 to A/L in Sinhala and English medium. View complete syllabuses, structured lessons, videos, notes, activities and quizzes.',
-    path: '/',
-    structuredData: {
-      '@context': 'https://schema.org',
-      '@type': 'EducationalOrganization',
-      name: 'A Plus ICT',
-      description:
-        'A Sri Lankan A/L ICT learning platform with structured courses and free learning resources.'
-    }
-  });
   const catalogue = useQuery({
     queryKey: queryKeys.content.publicCourses(),
     queryFn: ({ signal }) => contentApi.publicCourses({}, signal),
     staleTime: 60_000
   });
-  const courses = catalogue.data?.data || [];
-  const courseGroups = Object.values(
-    courses.reduce((groups, course) => {
-        const code = course.academicLevel?.code;
-        if (!code) return groups;
-        groups[code] ||= { level: course.academicLevel, courses: [] };
-        groups[code].courses.push(course);
-        return groups;
-      }, {})
-  ).sort((a, b) => (a.level?.code || '').localeCompare(b.level?.code || '', undefined, { numeric: true }));
+  const courses = (catalogue.data?.data || []).filter((course) => course.academicLevel?.code === 'AL');
+  const sinhalaCourse = courses.find((course) => course.medium?.code === 'sinhala');
+  const englishCourse = courses.find((course) => course.medium?.code === 'english');
+  const [selectedSlug, setSelectedSlug] = useState('');
+  const selectedCourse = courses.find((course) => course.slug === selectedSlug) || sinhalaCourse || englishCourse;
+  const siteUrl = (import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, '');
+  const curriculum = useQuery({
+    queryKey: queryKeys.content.publicCurriculum(selectedCourse?.slug || ''),
+    queryFn: ({ signal }) => contentApi.publicCurriculum(selectedCourse.slug, signal),
+    enabled: Boolean(selectedCourse?.slug),
+    staleTime: 60_000
+  });
+  const courseSchema = courses.map((course) => ({
+    '@type': 'Course',
+    name: course.title,
+    description: courseDescription(course),
+    inLanguage: course.medium?.locale || (course.medium?.code === 'sinhala' ? 'si-LK' : 'en-LK'),
+    provider: { '@type': 'EducationalOrganization', name: 'A Plus ICT' },
+    url: `${siteUrl}/courses/${course.slug}`
+  }));
+  usePageSeo({
+    title: 'A/L ICT Courses in Sinhala & English | A Plus ICT Sri Lanka',
+    description: 'Structured A/L ICT courses in Sinhala and English with 13 lessons, free chapters, videos, notes, activities, quizzes and progress tracking.',
+    path: '/',
+    image: '/images/learning-hero.jpg',
+    imageAlt: 'A Plus ICT A/L ICT learning platform',
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@graph': [
+        { '@type': 'EducationalOrganization', name: 'A Plus ICT', url: siteUrl, description: 'A Sri Lankan A/L ICT learning platform with structured courses and free learning resources.' },
+        { '@type': 'WebSite', name: 'A Plus ICT', url: siteUrl },
+        ...courseSchema
+      ]
+    }
+  });
+  const courseLink = (course) => (course ? `/courses/${course.slug}` : '/courses');
+  const lessons = curriculum.data?.data?.lessons || [];
   return (
     <>
       <section className="hero al-ict-hero">
-        <img alt="Student learning online" className="hero-image" loading="eager" src="/images/learning-hero.jpg" />
+        <img alt="A student learning A/L ICT online" className="hero-image" fetchPriority="high" height="900" loading="eager" src="/images/learning-hero.jpg" width="1600" />
         <div className="hero-copy">
-          <p className="eyebrow">A Plus ICT</p>
-          <h1>ICT Learning from Grade 6 to A/L</h1>
-          <p className="hero-sinhala" lang="si">6 ශ්‍රේණියේ සිට උසස් පෙළ දක්වා ICT ඉගෙනීම...</p>
+          <p className="eyebrow">A/L ICT Learning Platform · <span lang="si">උසස් පෙළ ICT ඉගෙනුම් වේදිකාව</span></p>
+          <h1>Master A/L ICT with a clear, structured learning path</h1>
+          <p className="hero-sinhala" lang="si">සිංහල සහ ඉංග්‍රීසි මාධ්‍ය සඳහා පාඩම් 13ම ක්‍රමානුකූලව ඉගෙන ගන්න.</p>
           <p>
-            Choose your grade and medium to explore the complete syllabus, lessons and learning content.
+            Learn with videos, notes, activities and quizzes. Begin with free chapters, then save your progress as you continue.
           </p>
           <p className="hero-actions">
-            <Link className="button" to="/courses">
-              View Courses
+            <Link className="button" to={courseLink(sinhalaCourse)}>
+              Start Sinhala Medium · <span lang="si">සිංහල මාධ්‍යයෙන් ආරම්භ කරන්න</span>
+            </Link>
+            <Link className="button secondary" to={courseLink(englishCourse)}>
+              Start English Medium · <span lang="si">ඉංග්‍රීසි මාධ්‍යයෙන් ආරම්භ කරන්න</span>
             </Link>
           </p>
+          <Link className="hero-text-link" to="/resources">Explore free lessons · <span lang="si">නොමිලේ පාඩම් බලන්න</span></Link>
         </div>
       </section>
-      <section className="home-section featured-courses" id="courses">
-        <p className="eyebrow">Course catalogue</p>
-        <BilingualHeading english="Choose your ICT course" sinhala="ඔබගේ ICT පාඨමාලාව තෝරන්න" />
-        <p className="section-intro">
-          Every level has separate Sinhala and English-medium courses. A/L ICT is currently active; Grades 6–11 are coming soon.
-        </p>
-        {catalogue.isLoading ? <LoadingSkeleton label="Loading courses" /> : null}
+      <section aria-label="A/L ICT benefits" className="benefit-strip">
+        <div><strong>13</strong><span>Syllabus lessons<br /><small lang="si">විෂය නිර්දේශ පාඩම්</small></span></div>
+        <div><strong>සිං / EN</strong><span>Sinhala & English Medium<br /><small lang="si">මාධ්‍ය දෙක සඳහා</small></span></div>
+        <div><strong>✓</strong><span>Free chapters available<br /><small lang="si">නොමිලේ පාඩම්</small></span></div>
+        <div><strong>↗</strong><span>Learning progress tracking<br /><small lang="si">ප්‍රගතිය සුරකින්න</small></span></div>
+      </section>
+      <section className="home-section" id="courses">
+        <p className="eyebrow">Active A/L courses</p>
+        <BilingualHeading english="Choose your A/L ICT medium" sinhala="ඔබගේ A/L ICT මාධ්‍යය තෝරන්න" />
+        <p className="section-intro">Two separate learning paths, built around the same A/L ICT syllabus.</p>
+        {catalogue.isLoading ? <LoadingSkeleton label="Loading A/L courses" /> : null}
         {catalogue.isError ? <InlineError error={catalogue.error} /> : null}
-        {!catalogue.isLoading && !catalogue.isError && !courseGroups.length ? <EmptyState title="Courses are being prepared" /> : null}
-        <div className="course-level-groups">{courseGroups.map((group) => (
-          <section className="course-level-group" key={group.level.code}>
-            <BilingualHeading as="h2" english={`${group.level.nameEn} ICT`} sinhala={`${group.level.nameSi} ICT`} />
-            <div className="catalogue-course-grid">{group.courses.map((course) => <CatalogueCourseCard course={course} key={course.id} />)}</div>
-          </section>
-        ))}</div>
+        {!catalogue.isLoading && !catalogue.isError && !courses.length ? <EmptyState title="A/L ICT courses are being prepared" /> : null}
+        <div className="active-path-grid">{courses.slice(0, 2).map((course) => <HomeCourseCard course={course} key={course.id} />)}</div>
+      </section>
+      <section className="home-section syllabus-preview" id="syllabus">
+        <p className="eyebrow">A/L syllabus preview</p>
+        <h2>Explore the 13 A/L ICT lessons</h2>
+        <p className="section-intro">Lesson availability is shown clearly before you start.</p>
+        {courses.length > 1 ? <div className="syllabus-tabs" aria-label="Choose course medium">{courses.slice(0, 2).map((course) => <button aria-pressed={selectedCourse?.slug === course.slug} className={selectedCourse?.slug === course.slug ? 'selected' : ''} key={course.id} onClick={() => setSelectedSlug(course.slug)} type="button">{course.medium?.nameEn || course.medium?.name}</button>)}</div> : null}
+        {curriculum.isLoading ? <LoadingSkeleton label="Loading syllabus lessons" /> : null}
+        {curriculum.isError ? <InlineError error={curriculum.error} /> : null}
+        {!curriculum.isLoading && !curriculum.isError && selectedCourse && !lessons.length ? <EmptyState title="The syllabus is being prepared"><Link className="text-link" to={courseLink(selectedCourse)}>View the course page</Link></EmptyState> : null}
+        {lessons.length ? <><ol className="home-syllabus-list">{lessons.slice(0, 13).map((lesson) => <li key={lesson.id}><span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span><strong>{lesson.title}</strong><em>{lesson.freeContentCount ? '✓ Free content available' : '🔒 Advanced content'}</em></li>)}</ol><Link className="text-link" to={courseLink(selectedCourse)}>View the complete course syllabus <span aria-hidden="true">→</span></Link></> : null}
       </section>
       <section className="home-section learning-highlight" id="how-it-works">
         <p className="eyebrow">How learning works</p>
-        <BilingualHeading english="Simple steps. Meaningful progress." sinhala="සරල පියවර. අර්ථවත් ප්‍රගතිය." />
+        <BilingualHeading english="Start with a clear next step" sinhala="පැහැදිලි පියවරකින් ආරම්භ කරන්න" />
         <div className="steps-grid">
           <article>
             <span>01</span>
-            <h3>Choose your grade or examination and medium</h3>
-            <p lang="si">ඔබේ ශ්‍රේණිය හෝ විභාගය සහ මාධ්‍යය තෝරන්න.</p>
+            <h3>Choose Sinhala or English Medium</h3><p lang="si">සිංහල හෝ ඉංග්‍රීසි මාධ්‍යය තෝරන්න.</p>
           </article>
           <article>
             <span>02</span>
@@ -400,57 +428,26 @@ export const PublicHomePage = () => {
           </article>
           <article>
             <span>04</span>
-            <h3>Unlock advanced lessons when available</h3>
+            <h3>Unlock advanced content when required</h3>
             <p lang="si">ලබාගත හැකි විට උසස් පාඩම් අගුළු හරින්න.</p>
           </article>
         </div>
-      </section>
-      <section className="home-section benefits-section">
-        <p className="eyebrow">Why A Plus ICT</p>
-        <h2>Built for clear, focused learning.</h2>
-        <div className="benefits-grid">
-          <article>
-            <h3>Sinhala and English-medium courses</h3>
-            <p>Choose a clear path for your academic level and medium.</p>
-          </article>
-          <article>
-            <h3>Complete syllabus structure</h3>
-            <p>Lessons contain videos, notes, activities and quizzes.</p>
-          </article>
-          <article>
-            <h3>Free and paid content together</h3>
-            <p>Explore free content, then unlock a lesson when you need its paid material.</p>
-          </article>
-        </div>
-      </section>
-      <section className="home-section guide-preview">
-        <img
-          alt="Students practising ICT skills together"
-          className="guide-image"
-          loading="lazy"
-          src="/images/ict-practice.jpg"
-        />
-        <div>
-          <p className="eyebrow">Student guide</p>
-          <h2>New to the learning flow?</h2>
-          <p>Learn how sign-in, free activities, and learning progress work before you begin.</p>
-        </div>
-        <Link className="text-link" to="/student-guide">
-          Read the student guide <span aria-hidden="true">→</span>
-        </Link>
       </section>
       <section className="home-section tutor-preview">
         <div className="tutor-image-frame">
           <img
             alt="WARR Wijesinghe"
             className="tutor-image"
+            height="720"
+            loading="lazy"
             src="/images/aplus-ict-tutor.png"
+            width="720"
           />
         </div>
         <div>
           <p className="eyebrow">Meet your tutor</p>
           <h2>WARR Wijesinghe</h2>
-          <p>ICT educator · Software engineer</p>
+          <p>ICT Educator · Software Engineer</p>
           <p>
             Build a clear foundation, practise consistently, and move through every lesson with confidence.
           </p>
@@ -459,9 +456,25 @@ export const PublicHomePage = () => {
           </Link>
         </div>
       </section>
+      <section className="home-section access-comparison"><p className="eyebrow">One learning path</p><h2>Start free. Unlock more when you need it.</h2><p className="section-intro">Free and unlocked content stay together in the same lesson path.</p><div className="comparison-grid"><article><h3>Free access</h3><ul><li>Selected video chapters</li><li>Selected notes and activities</li><li>Progress tracking</li></ul></article><article><h3>Unlocked lesson access</h3><ul><li>Complete lesson content</li><li>Additional notes and activities</li><li>Complete lesson progress</li></ul></article></div></section>
+      <section className="home-section guide-preview"><img alt="Students practising ICT skills together" className="guide-image" loading="lazy" src="/images/ict-practice.jpg" /><div><p className="eyebrow">Student guide</p><h2>New to the learning flow?</h2><p>Learn how Google sign-in, free activities, and learning progress work before you begin.</p></div><Link className="text-link" to="/student-guide">Read the student guide <span aria-hidden="true">→</span></Link></section>
+      <section className="home-section coming-soon-section"><p className="eyebrow">Coming next</p><h2>O/L ICT is coming next</h2><p>Future learning paths for Grade 10 and Grade 11 are being prepared. Questions? <Link to="/contact">Contact A Plus ICT</Link>.</p></section>
+      <section className="home-section faq-section"><p className="eyebrow">FAQ</p><h2>Questions before you begin?</h2><div className="faq-list">{[['Can I start with free lessons?', 'Yes. Selected chapters and activities are available in the same course path.'], ['Are Sinhala and English Medium separate?', 'Yes. Choose the A/L ICT course that matches your medium.'], ['Do I need a Google account?', 'Yes. Google sign-in is used to open learning content and save progress.'], ['How is progress calculated?', 'Progress is based on the learning activities available to your account.'], ['Can I unlock lessons individually?', 'Where an unlock option is available, it is shown on the relevant lesson.'], ['What content is included in a lesson?', 'Lessons can include videos, notes, activities and quizzes.']].map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>
+      <section className="final-home-cta"><div><p className="eyebrow">A Plus ICT</p><h2>Start learning A/L ICT today</h2><p lang="si">අදම ඔබගේ A/L ICT ඉගෙනීම ආරම්භ කරන්න.</p></div><div className="hero-actions"><Link className="button" to={courseLink(sinhalaCourse)}>Start Sinhala Medium</Link><Link className="button secondary" to={courseLink(englishCourse)}>Start English Medium</Link></div></section>
     </>
   );
 };
+
+const HomeCourseCard = ({ course }) => (
+  <article className="path-card active-path-card home-course-card">
+    <img alt={`${course.title} course cover`} className="catalogue-course-image" height="360" loading="lazy" src={courseCardImage(course)} width="640" />
+    <div className="path-card-topline"><MediumBadge medium={course.medium} /><AvailabilityBadge status={course.availabilityStatus} /></div>
+    <h3>{course.titleEn || course.title}</h3>
+    {course.titleSi ? <p className="sinhala-copy" lang="si">{course.titleSi}</p> : null}
+    <p>{courseDescription(course)}</p><p className="course-facts">{course.syllabusLessonCount ?? 0} published lessons · {freeContentTotal(course)} free content items</p>
+    <Link className="button" to={`/courses/${course.slug}`}>Explore A/L ICT {course.medium?.nameEn || course.medium?.name}</Link>
+  </article>
+);
 
 const SocialLinks = ({ links = [] }) => {
   if (!links.length) return null;

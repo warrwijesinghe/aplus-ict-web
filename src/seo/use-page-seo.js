@@ -22,6 +22,8 @@ const setMetaContent = (selector, content) => {
 // canonical URLs, and structured data stay close to the page they describe.
 export const usePageSeo = ({
   description,
+  image = '/images/learning-hero.jpg',
+  imageAlt = 'A Plus ICT learning platform',
   keywords = 'A/L ICT, Sri Lanka ICT lessons, A Plus ICT',
   noIndex = false,
   path,
@@ -31,7 +33,8 @@ export const usePageSeo = ({
   useEffect(() => {
     const pageTitle = title ? title + ' | ' + siteName : siteName;
     const canonicalUrl = (configuredSiteUrl || window.location.origin) + path;
-    const developmentNoIndex = import.meta.env.VITE_SITE_INDEXABLE === 'false';
+    const developmentNoIndex = !import.meta.env.PROD || import.meta.env.VITE_SITE_INDEXABLE === 'false';
+    const imageUrl = image.startsWith('http') ? image : (configuredSiteUrl || window.location.origin) + image;
 
     document.title = pageTitle;
     setMetaContent('meta[name="description"]', description);
@@ -40,7 +43,12 @@ export const usePageSeo = ({
     setMetaContent('meta[property="og:description"]', description);
     setMetaContent('meta[property="og:url"]', canonicalUrl);
     setMetaContent('meta[property="og:type"]', 'website');
+    setMetaContent('meta[property="og:image"]', imageUrl);
+    setMetaContent('meta[property="og:image:alt"]', imageAlt);
     setMetaContent('meta[name="twitter:card"]', 'summary_large_image');
+    setMetaContent('meta[name="twitter:title"]', pageTitle);
+    setMetaContent('meta[name="twitter:description"]', description);
+    setMetaContent('meta[name="twitter:image"]', imageUrl);
     setMetaContent('meta[name="robots"]', noIndex || developmentNoIndex ? 'noindex, nofollow' : 'index, follow');
 
     let canonical = document.head.querySelector('link[rel="canonical"]');
@@ -62,5 +70,5 @@ export const usePageSeo = ({
     schema.type = 'application/ld+json';
     schema.textContent = JSON.stringify(structuredData);
     if (!existingSchema) document.head.append(schema);
-  }, [description, keywords, noIndex, path, structuredData, title]);
+  }, [description, image, imageAlt, keywords, noIndex, path, structuredData, title]);
 };

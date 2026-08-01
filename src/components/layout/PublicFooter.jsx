@@ -7,30 +7,19 @@ import { destinationForUser } from '../../utils/route-destination.js';
 import { serviceUrls } from '../../api/service-urls.js';
 import { BrandLogo } from './BrandLogo.jsx';
 
-const socialGlyphs = {
-  facebook: 'f',
-  instagram: '◎',
-  linkedin: 'in',
-  tiktok: '♪',
-  youtube: '▶',
-  whatsapp: '◔'
-};
+const SocialIcon = () => (
+  <svg aria-hidden="true" fill="none" focusable="false" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
+    <path d="M8.5 12h7M12 8.5v7" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+  </svg>
+);
 
-const SocialLink = ({ item }) => {
-  const glyph = socialGlyphs[item.platform?.toLowerCase()] || '↗';
-  return (
-    <a
-      aria-label={item.label || item.platform}
-      className="social-link"
-      href={item.url}
-      rel="noreferrer"
-      target="_blank"
-    >
-      <span aria-hidden="true">{glyph}</span>
-      <span>{item.label || item.platform}</span>
-    </a>
-  );
-};
+const SocialLink = ({ item }) => (
+  <a aria-label={item.label || item.platform} className="social-link" href={item.url} rel="noreferrer" target="_blank">
+    <span aria-hidden="true"><SocialIcon /></span>
+    <span>{item.label || item.platform}</span>
+  </a>
+);
 
 export const PublicFooter = () => {
   const { isAuthenticated, user } = useAuth();
@@ -44,43 +33,15 @@ export const PublicFooter = () => {
     <footer className="footer">
       <div className="footer-grid">
         <section>
-          <Link className="footer-brand" to="/">
-            <BrandLogo brandName={data?.brandName} variant="light" />
-          </Link>
+          <Link className="footer-brand" to="/"><BrandLogo brandName={data?.brandName} variant="light" /></Link>
           <p>{data?.shortDescription || 'A focused learning space for A/L ICT.'}</p>
         </section>
         <nav aria-label="Footer navigation">
-          <Link to="/">Home</Link>
-          <Link to="/courses">Course catalogue</Link>
-          <Link to="/about">About Us</Link>
-          <Link to="/contact">Contact Us</Link>
-          <Link to="/privacy-policy">Privacy Policy</Link>
-          <Link to="/terms">Terms</Link>
-          {isAuthenticated ? (
-            <Link to={destinationForUser(user)}>My Learning</Link>
-          ) : (
-            <a href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=/courses`}>
-              Continue with Google
-            </a>
-          )}
+          <Link to="/">Home</Link><Link to="/courses">A/L Courses</Link><Link to="/resources">Free Resources</Link><Link to="/student-guide">Student Guide</Link><Link to="/about">About</Link><Link to="/contact">Contact</Link><Link to="/privacy-policy">Privacy Policy</Link><Link to="/terms">Terms</Link>
+          {isAuthenticated ? <Link to={destinationForUser(user)}>My Learning</Link> : <a href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=/courses`}>Continue with Google</a>}
         </nav>
-        {data?.socialLinks?.length ? (
-          <nav aria-label="Social links">
-            {data.socialLinks.map((item) => (
-              <SocialLink item={item} key={item.id} />
-            ))}
-          </nav>
-        ) : null}
-        {data?.contactChannels?.length ? (
-          <section>
-            <h2>Contact</h2>
-            {data.contactChannels.map((item) => (
-              <p key={item.id}>
-                {item.publicUrl ? <a href={item.publicUrl}>{item.label}</a> : item.label}
-              </p>
-            ))}
-          </section>
-        ) : null}
+        {data?.socialLinks?.length ? <nav aria-label="Social links">{data.socialLinks.map((item) => <SocialLink item={item} key={item.id} />)}</nav> : null}
+        {data?.contactChannels?.length ? <section><h2>Contact</h2>{data.contactChannels.map((item) => <p key={item.id}>{item.publicUrl ? <a href={item.publicUrl}>{item.label}</a> : item.label}</p>)}</section> : null}
       </div>
       <p>© {new Date().getFullYear()} A Plus ICT</p>
     </footer>

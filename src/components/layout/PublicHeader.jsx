@@ -49,6 +49,7 @@ export const PublicHeader = () => {
         <BrandLogo brandName={brand?.brandName} />
       </Link>
       <button
+        aria-label="Toggle navigation menu"
         aria-controls="public-navigation"
         aria-expanded={isOpen}
         className="menu-toggle"
@@ -63,10 +64,13 @@ export const PublicHeader = () => {
           Home
         </NavLink>
         <NavLink onClick={closeMenu} to="/courses">
-          Courses
+          A/L Courses
         </NavLink>
         <NavLink onClick={closeMenu} to="/resources">
-          Resources
+          Free Resources
+        </NavLink>
+        <NavLink onClick={closeMenu} to="/student-guide">
+          Student Guide
         </NavLink>
         <NavLink onClick={closeMenu} to="/about">
           About Us
@@ -115,7 +119,7 @@ export const PublicHeader = () => {
             href={serviceUrls.auth + '/api/v1/auth/google?returnTo=' + loginReturnTo}
             onClick={closeMenu}
           >
-            Login
+            Start Learning
           </a>
         )}
       </nav>
