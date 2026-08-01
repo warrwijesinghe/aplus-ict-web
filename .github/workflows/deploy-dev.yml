@@ -1,29 +1,39 @@
-name: Deploy Web to mdev
+name: Deploy Web to MDEV
 
 on:
   push:
     branches:
       - dev
-  workflow_dispatch:
 
 concurrency:
   group: aplus-ict-web-mdev
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    name: Deploy Web
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy A Plus ICT web
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
-          username: ${{ secrets.DEV_SERVER_USER }}
-          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
-          port: ${{ secrets.DEV_SERVER_PORT }}
-          script_stop: true
-          command_timeout: 20m
-          script: |
-            cd /srv/aplus-ict/aplus-ict-web
-            ./scripts/deploy-dev.sh
+      - name: Configure SSH
+        env:
+          DEV_HOST: ${{ secrets.DEV_HOST }}
+          DEV_SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$DEV_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh-keyscan -H "$DEV_HOST" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy Web to MDEV
+        run: |
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            "${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}" \
+            "/srv/aplus-ict/deploy/deploy-web.sh"
