@@ -53,6 +53,7 @@ export const AdminContentPage = () => {
   const [editingSectionId, setEditingSectionId] = useState('');
   const [sectionForm, setSectionForm] = useState(emptySection);
   const [productForm, setProductForm] = useState(emptyProduct);
+  const [trackOrderDrafts, setTrackOrderDrafts] = useState({});
 
   const tracksQuery = useQuery({
     queryKey: ['admin', 'tracks'],
@@ -76,6 +77,14 @@ export const AdminContentPage = () => {
       client.invalidateQueries({ queryKey: ['admin', 'sections'] }),
       client.invalidateQueries({ queryKey: ['admin', 'products'] })
     ]);
+
+  const trackOrderMutation = useMutation({
+    mutationFn: ({ id, sortOrder }) => contentApi.adminUpdate('tracks', id, { sortOrder }),
+    onSuccess: () => Promise.all([
+      client.invalidateQueries({ queryKey: ['admin', 'tracks'] }),
+      client.invalidateQueries({ queryKey: ['content', 'public', 'courses'] })
+    ])
+  });
 
   const sectionMutation = useMutation({
     mutationFn: (payload) =>
@@ -111,6 +120,7 @@ export const AdminContentPage = () => {
   if (loadError) return <InlineError error={loadError} />;
 
   const tracks = dataRows(tracksQuery);
+  const orderedTracks = [...tracks].sort((first, second) => Number(first.sortOrder || 0) - Number(second.sortOrder || 0));
   const lessons = dataRows(lessonsQuery);
   const sections = dataRows(sectionsQuery);
   const products = dataRows(productsQuery);
@@ -126,6 +136,12 @@ export const AdminContentPage = () => {
     setSelectedLessonId('');
     setEditingSectionId('');
     setSectionForm(emptySection());
+  };
+
+  const saveTrackOrder = (track) => {
+    const value = Number(trackOrderDrafts[track.id] ?? track.sortOrder ?? 0);
+    if (!Number.isInteger(value) || value < 0) return;
+    trackOrderMutation.mutate({ id: track.id, sortOrder: value });
   };
 
   const chooseLesson = (event) => {
@@ -188,12 +204,36 @@ export const AdminContentPage = () => {
         lesson unlock product, the same lesson grows into its premium path.
       </p>
 
+      <article className="admin-content-card admin-track-order-card">
+        <p className="eyebrow">Homepage catalogue</p>
+        <h2>Course listing order</h2>
+        <p>Set a lower display order to show a published course earlier within its A/L, O/L, or Grades 6–9 section on the homepage.</p>
+        <ul className="admin-track-order-list">
+          {orderedTracks.map((track) => <li key={track.id}>
+            <strong>{track.title}</strong>
+            <label>
+              Display order
+              <input
+                min="0"
+                onChange={(event) => setTrackOrderDrafts((current) => ({ ...current, [track.id]: event.target.value }))}
+                type="number"
+                value={trackOrderDrafts[track.id] ?? String(track.sortOrder || 0)}
+              />
+            </label>
+            <button disabled={trackOrderMutation.isPending} onClick={() => saveTrackOrder(track)} type="button">
+              {trackOrderMutation.isPending ? 'Saving...' : 'Save order'}
+            </button>
+          </li>)}
+        </ul>
+        {trackOrderMutation.error ? <InlineError error={trackOrderMutation.error} /> : null}
+      </article>
+
       <div className="admin-content-picker">
         <label>
           Course track
           <select onChange={chooseTrack} value={selectedTrackId}>
             <option value="">Choose a Sinhala or English track</option>
-            {tracks.map((track) => (
+            {orderedTracks.map((track) => (
               <option key={track.id} value={track.id}>
                 {track.title}
               </option>

@@ -38,7 +38,7 @@ a { color: var(--aplus-red-dark); }
 .button.secondary:hover { background: var(--aplus-red-soft); }
 
 /* Public brand surfaces */
-.header, .footer { background: var(--aplus-white); border-color: var(--aplus-line); }
+.header { background: var(--aplus-white); border-color: var(--aplus-line); }
 .header nav a.active, .header nav a:hover { color: var(--aplus-red); }
 .header-login { background: var(--aplus-red); border-color: var(--aplus-red); color: var(--aplus-white); }
 .header-login:hover { background: var(--aplus-red-dark); }
@@ -78,3 +78,12 @@ a { color: var(--aplus-red-dark); }
 .resource-callout { background: var(--aplus-red); }
 .resource-callout .eyebrow, .resource-callout h2, .resource-callout .quiet-link { color: var(--aplus-white); }
 .final-home-cta { background: var(--aplus-black); border-color: var(--aplus-black); }
+
+/* Footer uses a dedicated dark surface so the logo, navigation and support
+   information retain dependable contrast in every public-page context. */
+.footer { background: var(--aplus-black); border-color: #303030; color: var(--aplus-white); }
+.footer h2, .footer a, .footer-brand { color: var(--aplus-white); }
+.footer p { color: #d6d6d6; }
+.footer a:hover { color: #ffb3b3; }
+.footer > p { border-color: rgba(255, 255, 255, .22); }
+.footer .social-link > span:first-child { background: rgba(255, 255, 255, .14); }

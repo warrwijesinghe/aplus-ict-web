@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { trackPublicEvent } from '../../analytics/events.js';
 import { LessonPrice } from '../pricing/LessonPrice.jsx';
-import { gradeForCourse, mediumForCourse } from '../../utils/academic-course.js';
+import { gradeForCourse, isComingSoon, mediumForCourse } from '../../utils/academic-course.js';
 
 export const BilingualHeading = ({ as = 'h2', english, sinhala }) => {
   const content = <>
@@ -85,8 +85,9 @@ const stableImageIndex = (value, length) => [...String(value || '')]
 export const CatalogueCourseCard = ({ area, course }) => {
   const imagePool = courseImagePools[area] || courseImagePools.AL;
   const image = imagePool[stableImageIndex(course.slug || course.id || primaryCourseTitle(course), imagePool.length)];
+  const comingSoon = isComingSoon(course);
   return (
-    <article className={`catalogue-course-card ${course.academicLevel?.code === 'AL' ? 'al-priority' : ''}`}>
+    <article className={`catalogue-course-card ${course.academicLevel?.code === 'AL' ? 'al-priority' : ''} ${comingSoon ? 'coming-soon-course' : ''}`}>
       <img
         alt={`${primaryCourseTitle(course)} course cover`}
         className="catalogue-course-image"

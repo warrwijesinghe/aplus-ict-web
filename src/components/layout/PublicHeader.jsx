@@ -59,10 +59,10 @@ export const PublicHeader = () => {
     .toUpperCase();
   return (
     <>
-      <div className="announcement-bar">Online ICT Learning for Grades 6–13 <span>·</span> Sinhala and English Medium</div>
+      <div className="announcement-bar"><span className="announcement-desktop">Online ICT Learning for Grades 6–13 · Sinhala &amp; English Medium</span><span className="announcement-mobile">Grades 6–13 · Sinhala &amp; English Medium</span></div>
       <header className={`header${location.pathname === '/' ? ' homepage-header' : ''}`} ref={headerRef}>
       <div className="public-header-inner">
-      <Link className="brand" to="/">
+      <Link aria-label="A Plus ICT home" className="brand" to="/">
         <BrandLogo brandName={brand?.brandName} />
       </Link>
       <button
@@ -78,9 +78,6 @@ export const PublicHeader = () => {
         <span aria-hidden="true">☰</span>
       </button>
       <nav aria-label="Main navigation" className={isOpen ? 'open' : ''} id="public-navigation" ref={navigationRef}>
-        <NavLink onClick={closeMenu} to="/">
-          Home
-        </NavLink>
         <NavLink onClick={closeMenu} to="/school-ict">Grades 6–9</NavLink>
         <NavLink onClick={closeMenu} to="/ol-ict">O/L ICT</NavLink>
         <NavLink onClick={closeMenu} to="/al-ict">A/L ICT</NavLink>
