@@ -1,12 +1,13 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { generatePublicSeo } from './scripts/generate-public-seo.mjs';
+import { fetchDynamicPublicPaths, generatePublicSeo } from './scripts/generate-public-seo.mjs';
 
 const publicSeoFiles = (env, mode) => ({
   name: 'public-seo-files',
-  closeBundle() {
-    generatePublicSeo({ env, mode });
+  async closeBundle() {
+    const dynamicPaths = await fetchDynamicPublicPaths(env.VITE_API_URL);
+    generatePublicSeo({ env, mode, dynamicPaths });
   }
 });
 

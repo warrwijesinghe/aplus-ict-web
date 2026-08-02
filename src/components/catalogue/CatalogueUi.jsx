@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { trackPublicEvent } from '../../analytics/events.js';
 import { LessonPrice } from '../pricing/LessonPrice.jsx';
+import { gradeForCourse, mediumForCourse } from '../../utils/academic-course.js';
 
 export const BilingualHeading = ({ as = 'h2', english, sinhala }) => {
   const content = <>
@@ -25,12 +26,12 @@ export const AvailabilityBadge = ({ status }) => {
   );
 };
 
-const isSinhalaMedium = (course) => ['sinhala', 'si'].includes(String(course.medium?.code || '').toLowerCase());
+const isSinhalaMedium = (course) => mediumForCourse(course) === 'si';
 const primaryCourseTitle = (course) => isSinhalaMedium(course)
   ? course.titleSi || course.title
   : course.titleEn || course.title;
 const gradeLabel = (course) => {
-  const grade = String(course.grade || course.academicLevel?.code || '').match(/(?:GRADE_?)?(6|7|8|9|10|11|12|13)/)?.[1];
+  const grade = gradeForCourse(course);
   if (grade) return `Grade ${grade}`;
   if (course.academicLevel?.code === 'AL') return 'Grades 12–13';
   if (course.academicLevel?.code === 'OL') return 'Grades 10–11';
@@ -47,42 +48,62 @@ export const ActiveCourseCard = ({ course, continueLearning }) => (
     <h3 lang={isSinhalaMedium(course) ? 'si' : undefined}>{primaryCourseTitle(course)}</h3>
     <p>{course.shortDescriptionEn || course.shortDescription}</p>
     <p className="course-facts">
-      {course.syllabusLessonCount ?? '—'} real lessons · {course.freeContentCount ?? 0} free content items
+      {course.syllabusLessonCount ? `${course.syllabusLessonCount} published lessons` : 'Course content coming soon'} · {course.freeContentCount ?? 0} free content items
     </p>
     <div className="path-card-actions">
       <Link className="button" to={`/courses/${course.slug}`}>
         {continueLearning ? 'Continue My Learning' : 'View available content'}
       </Link>
-      <Link className="button secondary" to={`/courses/${course.slug}`}>View Course</Link>
     </div>
   </article>
 );
 
+const courseImagePools = {
+  SCHOOL: [
+    '/images/learning-places/school-desk.webp',
+    '/images/learning-places/school-online-learning.webp',
+    '/images/learning-places/lesson-tablet-headphones.webp',
+    '/images/learning-places/lesson-laptop-focus.webp'
+  ],
+  OL: [
+    '/images/learning-places/study-desk.webp',
+    '/images/learning-places/ol-online-learning.webp',
+    '/images/learning-places/lesson-headset-laptop.webp',
+    '/images/learning-places/lesson-study-notes.webp'
+  ],
+  AL: [
+    '/images/learning-places/lesson-study.webp',
+    '/images/learning-places/al-online-learning.webp',
+    '/images/learning-places/lesson-focused-study.webp',
+    '/images/learning-places/lesson-cafe-learning.webp'
+  ]
+};
+
+const stableImageIndex = (value, length) => [...String(value || '')]
+  .reduce((total, character) => total + character.charCodeAt(0), 0) % length;
+
 export const CatalogueCourseCard = ({ area, course }) => {
-  const image = area === 'SCHOOL'
-    ? '/images/learning-places/school-desk.webp'
-    : area === 'OL'
-      ? '/images/learning-places/home-study-notes.webp'
-      : isSinhalaMedium(course)
-        ? '/images/learning-places/focused-student.webp'
-        : '/images/learning-places/lesson-study.webp';
+  const imagePool = courseImagePools[area] || courseImagePools.AL;
+  const image = imagePool[stableImageIndex(course.slug || course.id || primaryCourseTitle(course), imagePool.length)];
   return (
     <article className={`catalogue-course-card ${course.academicLevel?.code === 'AL' ? 'al-priority' : ''}`}>
       <img
         alt={`${primaryCourseTitle(course)} course cover`}
         className="catalogue-course-image"
+        height="240"
         loading="lazy"
         onError={(event) => {
           event.currentTarget.onerror = null;
           event.currentTarget.src = '/images/course-card-default.jpg';
         }}
         src={image}
+        width="400"
       />
       <div className="path-card-topline"><MediumBadge medium={course.medium} /><AvailabilityBadge status={course.availabilityStatus} /></div>
       <p className="course-grade">{gradeLabel(course) || 'School ICT'}</p>
       <h3 lang={isSinhalaMedium(course) ? 'si' : undefined}>{primaryCourseTitle(course)}</h3>
       <p>{course.shortDescriptionEn || course.shortDescription}</p>
-      <p className="course-facts">{course.syllabusLessonCount ? `${course.syllabusLessonCount} lessons` : 'Lessons available'} · Free content available</p>
+      <p className="course-facts">{course.syllabusLessonCount ? `${course.syllabusLessonCount} published lessons` : 'Course content coming soon'} · {course.freeContentCount ? 'Free content available' : 'Free content availability will be shown when published'}</p>
       <LessonPrice area={area} course={course} />
       <Link className="button secondary" onClick={() => trackPublicEvent('course_card_opened', { course_slug: course.slug })} to={`/courses/${course.slug}`}>View Course</Link>
     </article>

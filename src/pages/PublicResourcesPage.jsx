@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { queryKeys } from '../api/query-keys.js';
@@ -27,7 +27,7 @@ const labelFor = (value) =>
 const levelLabel = (value) => value === 'al' ? 'A/L ICT' : value === 'ol' ? 'O/L ICT' : value === 'school' ? 'School ICT' : value;
 
 const mediumLabel = (value) => {
-  if (value === 'all') return 'All media';
+  if (value === 'all') return 'All mediums';
   return value.charAt(0).toUpperCase() + value.slice(1) + ' medium';
 };
 
@@ -44,7 +44,7 @@ const initialFilters = {
   academicLevel: '',
   medium: '',
   resourceType: '',
-  accessPolicy: ''
+  accessPolicy: 'free'
 };
 
 const mergeFilterOptions = (defaults, dynamic = []) => [...new Set([...defaults, ...dynamic])];
@@ -138,11 +138,17 @@ const FilterSelect = ({ label, name, options, value, onChange, format = labelFor
 export const PublicResourcesPage = () => {
   usePageSeo({ path: '/resources' });
   const [filters, setFilters] = useState(initialFilters);
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(filters.search), 350);
+    return () => window.clearTimeout(timer);
+  }, [filters.search]);
+  const queryFilters = { ...filters, search: debouncedSearch };
   const query = useQuery({
-    queryKey: queryKeys.content.publicDownloads(filters),
+    queryKey: queryKeys.content.publicDownloads(queryFilters),
     queryFn: ({ signal }) =>
       resourceApi.publicDownloads(
-        Object.fromEntries(Object.entries(filters).filter(([, value]) => value)),
+        Object.fromEntries(Object.entries(queryFilters).filter(([, value]) => value)),
         signal
       )
   });
@@ -151,7 +157,7 @@ export const PublicResourcesPage = () => {
   // Keep A/L and O/L options visible even before the first resource for one
   // level is published. API-supplied values extend these sensible defaults.
   const available = {
-    academicLevels: mergeFilterOptions(['al', 'ol'], data?.filters?.academicLevels),
+    academicLevels: mergeFilterOptions(['school', 'al', 'ol'], data?.filters?.academicLevels),
     media: mergeFilterOptions(['sinhala', 'english'], data?.filters?.media?.filter((medium) => medium !== 'tamil' && medium !== 'all')),
     resourceTypes: mergeFilterOptions(
       Object.keys(resourceTypeLabels),
@@ -169,9 +175,9 @@ export const PublicResourcesPage = () => {
     <>
       <section className="resources-heading">
         <p className="eyebrow">Free ICT learning resources</p>
-        <h1>Free Resources for Smarter ICT Learning</h1>
+        <h1>Free ICT Resources for Grades 6–13</h1>
         <p>
-          Access useful ICT notes, lesson materials, past-paper support, and revision resources organised by grade and syllabus area.
+          Find syllabus documents, short notes, past papers, term papers, mind maps and revision materials organised by learning level and medium.
         </p>
       </section>
 
@@ -226,8 +232,9 @@ export const PublicResourcesPage = () => {
           />
         </div>
         <button className="filter-reset" onClick={() => setFilters(initialFilters)} type="button">
-          Clear filters
+          Reset filters
         </button>
+        <p className="active-filter-feedback" aria-live="polite">{items.length} resource{items.length === 1 ? '' : 's'} found{filters.search !== debouncedSearch ? ' · Updating search…' : ''}</p>
       </section>
 
       {query.isPending ? <LoadingSkeleton label="Loading resources" /> : null}

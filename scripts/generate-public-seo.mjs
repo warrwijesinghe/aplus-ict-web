@@ -31,7 +31,7 @@ const headFor = (path, data, siteUrl, indexable) => {
 
 const viteAssetTags = (html) => (html.match(/<(?:script|link)\b[^>]+(?:src|href)="(?:\/assets\/)[^"]+"[^>]*><\/script>|<link\b[^>]+href="\/assets\/[^"]+"[^>]*>/g) || []).join('\n    ');
 
-export const generatePublicSeo = ({ mode = 'production', env: suppliedEnv } = {}) => {
+export const generatePublicSeo = ({ mode = 'production', env: suppliedEnv, dynamicPaths = [] } = {}) => {
   const env = suppliedEnv || loadEnv(mode, root, '');
   const indexable = mode === 'production' && env.VITE_SITE_INDEXABLE === 'true';
   const siteUrl = (env.VITE_PUBLIC_SITE_URL || 'https://www.aplusict.lk').replace(/\/$/, '');
@@ -46,15 +46,44 @@ export const generatePublicSeo = ({ mode = 'production', env: suppliedEnv } = {}
     writeFileSync(target, html);
   }
 
+  const sitemapPaths = [...new Set([...PUBLIC_SITEMAP_PATHS, ...dynamicPaths])];
   const sitemap = indexable
-    ? `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PUBLIC_SITEMAP_PATHS.map((path) => `  <url><loc>${absoluteUrl(path, siteUrl)}</loc></url>`).join('\n')}\n</urlset>\n`
+    ? `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapPaths.map((path) => `  <url><loc>${absoluteUrl(path, siteUrl)}</loc></url>`).join('\n')}\n</urlset>\n`
     : '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n';
   writeFileSync(resolve(dist, 'sitemap.xml'), sitemap);
   writeFileSync(resolve(dist, 'robots.txt'), indexable ? `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n` : 'User-agent: *\nDisallow: /\n');
-  // Dynamic course and lesson URLs can be added here after reliable API-backed build-time data is available.
+};
+
+export const fetchDynamicPublicPaths = async (apiUrl) => {
+  if (!apiUrl) return [];
+  try {
+    const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/public/courses`, { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const payload = await response.json();
+    const courses = payload?.data || [];
+    const paths = [];
+    for (const course of courses) {
+      if (!course?.slug || course.availabilityStatus === 'coming_soon' || course.isPublic === false) continue;
+      paths.push(`/courses/${course.slug}`);
+      try {
+        const curriculumResponse = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/public/courses/${course.slug}/curriculum`, { signal: AbortSignal.timeout(5000) });
+        if (!curriculumResponse.ok) continue;
+        const curriculum = await curriculumResponse.json();
+        for (const lesson of curriculum?.data?.lessons || []) {
+          if (lesson?.slug && lesson.isPublished !== false && lesson.availabilityStatus !== 'coming_soon') paths.push(`/courses/${course.slug}/lessons/${lesson.slug}`);
+        }
+      } catch { /* A course page is still useful when its lesson feed is unavailable. */ }
+    }
+    return paths;
+  } catch (error) {
+    console.warn(`[seo] Public API unavailable for dynamic sitemap entries; using static sitemap only (${error.message}).`);
+    return [];
+  }
 };
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const mode = process.argv.includes('--mode') ? process.argv[process.argv.indexOf('--mode') + 1] : 'production';
-  generatePublicSeo({ mode });
+  const env = loadEnv(mode, root, '');
+  const dynamicPaths = await fetchDynamicPublicPaths(env.VITE_API_URL);
+  generatePublicSeo({ mode, env, dynamicPaths });
 }

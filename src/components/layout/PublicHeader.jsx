@@ -56,7 +56,7 @@ export const PublicHeader = () => {
   return (
     <>
       <div className="announcement-bar">Online ICT Learning for Grades 6–13 <span>·</span> Sinhala and English Medium</div>
-      <header className="header" ref={headerRef}>
+      <header className={`header${location.pathname === '/' ? ' homepage-header' : ''}`} ref={headerRef}>
       <Link className="brand" to="/">
         <BrandLogo brandName={brand?.brandName} />
       </Link>

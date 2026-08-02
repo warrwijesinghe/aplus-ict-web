@@ -15,6 +15,7 @@ import { courseSeo, lessonSeo } from '../seo/public-seo-config.js';
 import { trackPublicEvent } from '../analytics/events.js';
 import { LessonPrice } from '../components/pricing/LessonPrice.jsx';
 import { academicAreaForCourse, lessonPurchaseText } from '../config/lesson-pricing.js';
+import { courseBreadcrumbs, isComingSoon } from '../utils/academic-course.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
 import {
@@ -52,10 +53,17 @@ const counts = (course) => {
 
 // Course cards use local imagery while the catalogue is being populated. The default
 // keeps future courses presentable until an admin assigns API-managed resource metadata.
+const courseCardImages = [
+  '/images/learning-places/al-online-learning.webp',
+  '/images/learning-places/lesson-focused-study.webp',
+  '/images/learning-places/lesson-cafe-learning.webp',
+  '/images/learning-places/lesson-campus-call.webp'
+];
+
 const courseCardImage = (course) => {
-  if (course.medium?.code === 'sinhala') return '/images/al-ict-sinhala.jfif';
-  if (course.medium?.code === 'english') return '/images/al-ict-english.jpg';
-  return '/images/course-card-default.jpg';
+  const imageSeed = String(course.slug || course.id || course.title || 'course');
+  const imageIndex = [...imageSeed].reduce((total, character) => total + character.charCodeAt(0), 0) % courseCardImages.length;
+  return courseCardImages[imageIndex];
 };
 
 // Course descriptions can be filled in from the admin catalogue later. This
@@ -72,12 +80,16 @@ const courseHeading = (course) => course?.medium?.code === 'sinhala'
 // Reuse the supplied learning imagery as lightweight lesson covers. The number
 // determines the image, so both Sinhala and English tracks stay visually aligned.
 const lessonImages = [
-  '/images/learning-places/focused-student.webp',
-  '/images/learning-places/lesson-study.webp',
-  '/images/learning-places/home-student.webp',
-  '/images/learning-places/online-session.webp',
-  '/images/learning-places/quiet-study.webp',
-  '/images/learning-places/happy-student.webp'
+  '/images/learning-places/student-guide-learning.webp',
+  '/images/learning-places/practical-learning.webp',
+  '/images/learning-places/lesson-tablet-headphones.webp',
+  '/images/learning-places/lesson-laptop-focus.webp',
+  '/images/learning-places/lesson-campus-call.webp',
+  '/images/learning-places/lesson-headset-laptop.webp',
+  '/images/learning-places/lesson-study-notes.webp',
+  '/images/learning-places/lesson-webinar-notes.webp',
+  '/images/learning-places/lesson-focused-study.webp',
+  '/images/learning-places/lesson-cafe-learning.webp'
 ];
 
 const lessonImage = (lessonNumber) => lessonImages[(lessonNumber - 1) % lessonImages.length];
@@ -442,7 +454,7 @@ export const PublicHomePage = () => {
         </div>
       </section>
       <section className="home-section access-comparison"><p className="eyebrow">One learning path</p><h2>Start free. Unlock more when you need it.</h2><p className="section-intro">Free and unlocked content stay together in the same lesson path.</p><div className="comparison-grid"><article><h3>Free access</h3><ul><li>Selected video chapters</li><li>Selected notes and activities</li><li>Progress tracking</li></ul></article><article><h3>Unlocked lesson access</h3><ul><li>Complete lesson content</li><li>Additional notes and activities</li><li>Complete lesson progress</li></ul></article></div></section>
-      <section className="home-section guide-preview"><img alt="Students practising ICT skills together" className="guide-image" loading="lazy" src="/images/ict-practice.jpg" /><div><p className="eyebrow">Student guide</p><h2>New to the learning flow?</h2><p>Learn how Google sign-in, free activities, and learning progress work before you begin.</p></div><Link className="text-link" to="/student-guide">Read the student guide <span aria-hidden="true">→</span></Link></section>
+      <section className="home-section guide-preview"><img alt="Student taking notes while learning online" className="guide-image" loading="lazy" src="/images/learning-places/student-guide-learning.webp" /><div><p className="eyebrow">Student guide</p><h2>New to the learning flow?</h2><p>Learn how Google sign-in, free activities, and learning progress work before you begin.</p></div><Link className="text-link" to="/student-guide">Read the student guide <span aria-hidden="true">→</span></Link></section>
       <section className="home-section coming-soon-section"><p className="eyebrow">Coming next</p><h2>O/L ICT is coming next</h2><p>Future learning paths for Grade 10 and Grade 11 are being prepared. Questions? <Link to="/contact">Contact A Plus ICT</Link>.</p></section>
       <section className="home-section faq-section"><p className="eyebrow">FAQ</p><h2>Questions before you begin?</h2><div className="faq-list">{[['Can I start with free lessons?', 'Yes. Selected chapters and activities are available in the same course path.'], ['Are Sinhala and English Medium separate?', 'Yes. Choose the A/L ICT course that matches your medium.'], ['Do I need a Google account?', 'Yes. Google sign-in is used to open learning content and save progress.'], ['How is progress calculated?', 'Progress is based on the learning activities available to your account.'], ['Can I unlock lessons individually?', 'Where an unlock option is available, it is shown on the relevant lesson.'], ['What content is included in a lesson?', 'Lessons can include videos, notes, activities and quizzes.']].map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>
       <section className="final-home-cta"><div><p className="eyebrow">A Plus ICT</p><h2>Start learning A/L ICT today</h2><p lang="si">අදම ඔබගේ A/L ICT ඉගෙනීම ආරම්භ කරන්න.</p></div><div className="hero-actions"><Link className="button" to={courseLink(sinhalaCourse)}>Start Sinhala Medium</Link><Link className="button secondary" to={courseLink(englishCourse)}>Start English Medium</Link></div></section>
@@ -539,12 +551,12 @@ export const PublicCourseDetailPage = () => {
     queryKey: queryKeys.content.publicCurriculum(courseSlug),
     queryFn: ({ signal }) => contentApi.publicCurriculum(courseSlug, signal)
   });
+  const enrollment = useCourseEnrollment(query.data?.data?.id, isAuthenticated && Boolean(query.data?.data?.id));
   const learningProgress = useQuery({
     queryKey: queryKeys.learning.activityProgress(courseSlug),
     queryFn: ({ signal }) => learningApi.activityProgress(courseSlug, signal),
-    enabled: false
+    enabled: isAuthenticated && Boolean(enrollment.data)
   });
-  const enrollment = useCourseEnrollment(query.data?.data?.id, isAuthenticated && Boolean(query.data?.data?.id));
   const course = query.data?.data;
   usePageSeo({
     title: course ? courseSeo(course).title : 'ICT Course',
@@ -569,13 +581,13 @@ export const PublicCourseDetailPage = () => {
   if (query.isError || curriculum.isError) return <InlineError error={query.error || curriculum.error} onRetry={() => { query.refetch(); curriculum.refetch(); }} />;
   if (!course) return <EmptyState title="This course is not available" />;
   const lessons = curriculum.data?.data?.lessons || [];
-  const comingSoon = course.availabilityStatus === 'coming_soon';
+  const comingSoon = isComingSoon(course);
   const progressByLesson = new Map(
     (learningProgress.data?.lessons || []).map((lesson) => [lesson.id, lesson.progress])
   );
   return (
     <>
-      <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to="/">Home</Link><span>/</span><Link to="/al-ict">Grades 12–13</Link><span>/</span><span>A/L ICT</span><span>/</span><span>{course.medium?.nameEn || course.medium?.name || 'Course'}</span></nav>
+      <nav aria-label="Breadcrumb" className="breadcrumbs">{courseBreadcrumbs(course).map((item, index) => <span key={`${item.label}-${index}`}>{index ? <span aria-hidden="true">/</span> : null}{item.path ? <Link to={item.path}>{item.label}</Link> : <span>{item.label}</span>}</span>)}</nav>
       <section className="course-detail-hero">
         <div className="course-hero-image-frame">
           {course.heroResourceId ? (
@@ -785,12 +797,12 @@ export const CourseLearningPage = () => {
     queryKey: queryKeys.content.publicCurriculum(courseSlug),
     queryFn: ({ signal }) => contentApi.publicCurriculum(courseSlug, signal)
   });
+  const enrollment = useCourseEnrollment(curriculum.data?.data?.id, isAuthenticated && Boolean(curriculum.data?.data?.id));
   const progress = useQuery({
     queryKey: queryKeys.learning.activityProgress(courseSlug),
     queryFn: ({ signal }) => learningApi.activityProgress(courseSlug, signal),
-    enabled: false
+    enabled: isAuthenticated && Boolean(enrollment.data)
   });
-  const enrollment = useCourseEnrollment(curriculum.data?.data?.id, isAuthenticated && Boolean(curriculum.data?.data?.id));
   if (curriculum.isLoading || enrollment.isLoading) return <LoadingSkeleton />;
   if (curriculum.isError) return <InlineError error={curriculum.error} />;
   if (!isAuthenticated)
@@ -1020,12 +1032,15 @@ const PublicContentItem = ({ item }) => {
 
 export const LessonLearningPage = () => {
   const { courseSlug, lessonSlug } = useParams();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const query = useQuery({
     queryKey: queryKeys.content.publicLesson(courseSlug, lessonSlug),
     queryFn: ({ signal }) => contentApi.publicLesson(courseSlug, lessonSlug, signal),
   });
   const course = query.data?.data?.course;
   const lesson = query.data?.data?.lesson;
+  const enrollment = useCourseEnrollment(course?.id, isAuthenticated && Boolean(course?.id));
   usePageSeo({
     title: lesson ? lessonSeo(lesson, course).title : 'ICT Lesson',
     description: lesson ? lessonSeo(lesson, course).description : 'Explore ICT lesson content at A Plus ICT.',
@@ -1039,6 +1054,24 @@ export const LessonLearningPage = () => {
   if (query.isError) return <InlineError error={query.error} onRetry={query.refetch} />;
   if (!lesson) return <EmptyState title="This lesson is not available" />;
   const topicCount = lesson.topics?.length || 0;
+  if (!isAuthenticated) return (
+    <section className="login-cta">
+      <p className="eyebrow">Student sign in</p>
+      <h1>{lesson.title}</h1>
+      <p>{lesson.descriptionEn || lesson.shortDescription || 'Sign in to open this lesson and save your progress.'}</p>
+      <p>{topicCount} topics · {lesson.freeContentCount || 0} free items · {lesson.paidContentCount || 0} locked items</p>
+      {lesson.topics?.length ? <ul className="lesson-topic-preview">{lesson.topics.map((topic) => <li key={topic.id}>{topic.title}</li>)}</ul> : null}
+      <a className="button" href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Continue with Google to Start This Lesson</a>
+    </section>
+  );
+  if (enrollment.isPending) return <LoadingSkeleton label="Checking lesson access" />;
+  if (!enrollment.data) return (
+    <section className="login-cta">
+      <p className="eyebrow">Free enrollment</p><h1>Enroll Free to Open Available Lesson Content</h1>
+      <p>Free and unlocked content remain together in this lesson after enrollment.</p>
+      <Link className="button" to={`/enroll/${courseSlug}`}>Enroll Free to Start</Link>
+    </section>
+  );
   return (
     <div className="lesson-workspace public-lesson-workspace">
       <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to="/">Home</Link><span>/</span><Link to={`/courses/${courseSlug}`}>{course?.title}</Link><span>/</span><span>{lesson.title}</span></nav>
@@ -1158,8 +1191,8 @@ const SitePage = ({ contact }) => {
         <p className="eyebrow">Contact Us</p>
         <h1>Get in touch</h1>
         <p className="contact-intro">
-          Have a question about lessons, free resources, or choosing the right course? Reach out
-          through WhatsApp or follow A Plus ICT on your preferred platform.
+          Get help with course selection, lesson access, payment or enrollment, and general ICT
+          learning questions through the contact channels published below.
         </p>
         {profile.contactChannels?.length ? (
           <ul className="contact-list">
@@ -1209,6 +1242,8 @@ const SitePage = ({ contact }) => {
         </div>
         <div className="about-copy">
           <p>Students do not always have the same timetable, location, device, or learning speed. A Plus ICT makes the Sri Lankan school ICT syllabus available through a flexible, organised, and student-friendly online learning experience.</p>
+          <p><strong>Study ICT Anytime. Anywhere.</strong> Learn in Sinhala or English Medium, follow a structured sequence, and begin with available free content before unlocking more learning.</p>
+          <p>{profile.tutorName || 'WARR Wijesinghe'} is an ICT Educator, Software Engineer, and Founder of A Plus ICT.</p>
           <h2>Our Mission</h2>
           <p>
             To give every Sri Lankan school student a clear and accessible path to learn ICT—regardless of location, timetable, or learning speed.

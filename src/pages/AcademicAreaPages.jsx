@@ -1,19 +1,21 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { contentApi } from '../api/content.api.js';
 import { queryKeys } from '../api/query-keys.js';
 import { useAuth } from '../auth/auth-context.jsx';
 import { CatalogueCourseCard } from '../components/catalogue/CatalogueUi.jsx';
 import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/States.jsx';
 import { academicAreaForCourse } from '../config/lesson-pricing.js';
+import { gradeForCourse, mediumForCourse } from '../utils/academic-course.js';
 import { usePageSeo } from '../seo/use-page-seo.js';
 import { destinationForUser } from '../utils/route-destination.js';
+import { trackPublicEvent } from '../analytics/events.js';
 
 const AREAS = {
   SCHOOL: {
     path: '/school-ict',
-    image: '/images/learning-places/school-desk.webp',
+    image: '/images/learning-places/school-online-learning.webp',
     label: 'School ICT · Grades 6–9',
     title: 'Build Strong ICT Skills from Grade 6',
     description: 'Develop practical digital knowledge and a strong ICT foundation through lessons organised for each school grade.',
@@ -22,7 +24,7 @@ const AREAS = {
   },
   OL: {
     path: '/ol-ict',
-    image: '/images/learning-places/home-study-notes.webp',
+    image: '/images/learning-places/ol-online-learning.webp',
     label: 'G.C.E. O/L ICT · Grades 10–11',
     title: 'Master O/L ICT One Syllabus Unit at a Time',
     description: 'Understand theory, strengthen practical knowledge, and prepare for the examination through a clear, structured online learning path.',
@@ -31,7 +33,7 @@ const AREAS = {
   },
   AL: {
     path: '/al-ict',
-    image: '/images/learning-places/lesson-study.webp',
+    image: '/images/learning-places/al-online-learning.webp',
     label: 'G.C.E. A/L ICT · Grades 12–13',
     title: 'Learn All 13 A/L ICT Competencies at Your Own Pace',
     description: 'Follow the complete A/L ICT syllabus through clearly organised video lessons, learning materials, activities, and exam-focused guidance.',
@@ -41,16 +43,43 @@ const AREAS = {
 };
 
 const PATHWAYS = [
-  ['SCHOOL', 'Grades 6–9', 'School ICT', 'Build the ICT foundation needed for school, future examinations, and the modern digital world.', 'Explore Grades 6–9'],
-  ['OL', 'Grades 10–11', 'O/L ICT', 'Understand every syllabus unit, strengthen practical knowledge, and prepare confidently for the O/L examination.', 'Explore O/L ICT'],
-  ['AL', 'Grades 12–13', 'A/L ICT', 'Master the complete syllabus through structured explanations, activities, and exam-focused learning.', 'Explore A/L ICT']
+  {
+    area: 'SCHOOL',
+    stage: 'Grades 6–9',
+    title: 'School ICT',
+    titleSi: '6–9 ශ්‍රේණි ICT',
+    description: 'Build a strong ICT foundation through grade-based lessons, activities and practical digital skills.',
+    action: 'Choose My Grade',
+    actionSi: 'මගේ ශ්‍රේණිය තෝරන්න',
+    path: '/school-ict',
+    image: '/images/learning-places/school-desk.webp',
+    imageAlt: 'Younger student learning ICT using a laptop'
+  },
+  {
+    area: 'OL',
+    stage: 'Grades 10–11',
+    title: 'O/L ICT',
+    titleSi: 'සාමාන්‍ය පෙළ ICT',
+    description: 'Learn theory, practical ICT skills and examination-focused lessons for Grades 10 and 11.',
+    action: 'Explore O/L ICT',
+    actionSi: 'O/L ICT පාඨමාලා බලන්න',
+    path: '/ol-ict',
+    image: '/images/learning-places/study-desk.webp',
+    imageAlt: 'Student studying ICT notes beside a laptop'
+  },
+  {
+    area: 'AL',
+    stage: 'Grades 12–13',
+    title: 'A/L ICT',
+    titleSi: 'උසස් පෙළ ICT',
+    description: 'Master all 13 ICT competencies through structured lessons, activities and examination preparation.',
+    action: 'Explore A/L ICT',
+    actionSi: 'A/L ICT පාඨමාලා බලන්න',
+    path: '/al-ict',
+    image: '/images/learning-places/lesson-study.webp',
+    imageAlt: 'Advanced-level student learning ICT on a computer'
+  }
 ];
-
-const gradeForCourse = (course) => String(course.grade || course.academicLevel?.code || course.title || '').match(/(?:GRADE_?)?(6|7|8|9|10|11|12|13)/i)?.[1] || '';
-const mediumForCourse = (course) => {
-  const value = String(course.medium?.code || '').toLowerCase();
-  return ['sinhala', 'si'].includes(value) ? 'si' : ['english', 'en'].includes(value) ? 'en' : value;
-};
 
 const LessonPlayerPreview = () => (
   <div className="lesson-player-preview" aria-label="A Plus ICT lesson player preview">
@@ -82,17 +111,16 @@ const Hero = ({ area, home = false }) => {
       {home ? <p className="hero-trust">No fixed timetable · Learn from any device · Free lessons available</p> : null}
     </div>
     <div className="public-hero-media">
-      <img alt="Student learning online at home using a laptop" fetchPriority="high" height="900" src={home ? '/images/home-hero-learn-online.jpg' : info.image} width="1600" />
-      {home ? <LessonPlayerPreview /> : null}
+      <img alt="Student learning online with a laptop" fetchPriority="high" height="810" src={home ? '/images/learning-places/home-hero-student.webp' : info.image} width="1440" />
     </div>
   </section>;
 };
 
-const ValueStrip = () => <section className="benefit-strip" aria-label="A Plus ICT benefits">
-  <div><strong>Grades 6–13</strong><span>School, O/L and A/L ICT</span></div>
-  <div><strong>Two Mediums</strong><span>Sinhala and English Medium</span></div>
+const ValueStrip = () => <section className="benefit-strip" aria-label="A Plus ICT learning benefits">
+  <div><strong>Learn Anytime. Anywhere.</strong><span>Study at your own pace</span></div>
+  <div><strong>Grade 6 to A/L</strong><span>Complete School ICT pathway</span></div>
+  <div><strong>Sinhala &amp; English Medium</strong><span>Learn in your preferred medium</span></div>
   <div><strong>Any Device</strong><span>Phone, tablet or computer</span></div>
-  <div><strong>Your Own Pace</strong><span>Pause, replay and continue anytime</span></div>
 </section>;
 
 const CourseCards = ({ area, courses, loading, error, matches }) => {
@@ -102,27 +130,13 @@ const CourseCards = ({ area, courses, loading, error, matches }) => {
   return visible.length ? <div className="catalogue-course-grid landing-course-grid">{visible.map((course) => <CatalogueCourseCard area={area} course={course} key={course.id} />)}</div> : <EmptyState title="Courses will appear here as they are published"><p>Choose a different grade or medium, or check back soon.</p></EmptyState>;
 };
 
-const LearningPlacesGallery = () => <section className="home-section learning-places-section">
-  <div className="learning-places-intro">
-    <p className="eyebrow">Learning that moves with you</p>
-    <h2>Study Anytime. Anywhere.</h2>
-    <p>A quiet desk at home, a break outside, or a familiar place between plans—your ICT lesson is ready when you are.</p>
-  </div>
-  <div className="learning-places-gallery">
-    <article className="learning-place learning-place-feature"><img alt="Student studying online at home with headphones" loading="lazy" src="/images/learning-places/home-learning.webp" /><div><span>At home</span><h3>Your study space, your pace</h3></div></article>
-    <article className="learning-place"><img alt="Student learning outdoors using a laptop" loading="lazy" src="/images/learning-places/outdoor-study.webp" /><div><span>Outside</span><h3>Learn wherever you settle in</h3></div></article>
-    <article className="learning-place"><img alt="Student studying online in a cafe" loading="lazy" src="/images/learning-places/cafe-laptop.webp" /><div><span>Between plans</span><h3>Make time work for you</h3></div></article>
-    <article className="learning-place"><img alt="Student studying online from a comfortable sofa" loading="lazy" src="/images/learning-places/sofa-study.webp" /><div><span>Comfortably</span><h3>Continue from any device</h3></div></article>
-    <article className="learning-place"><img alt="Student joining an online learning session" loading="lazy" src="/images/learning-places/online-session.webp" /><div><span>Connected</span><h3>Keep every lesson within reach</h3></div></article>
-  </div>
-</section>;
-
 const HomeFaq = () => <section className="home-section faq-section"><p className="eyebrow">Frequently asked questions</p><h2>Everything you need to know before you start</h2><div className="faq-list">{[
   ['Who can learn with A Plus ICT?', 'A Plus ICT provides online ICT learning for students from Grade 6 through Grade 13, including School ICT, O/L ICT, and A/L ICT.'],
   ['Can I learn using a mobile phone?', 'Yes. The platform is designed to work across phones, tablets, laptops, and desktop computers.'],
   ['Are lessons available in Sinhala and English Medium?', 'Learning paths are organised separately for Sinhala Medium and English Medium students where content is available.'],
   ['Do I need an account for free lessons?', 'Students sign in using Google so lesson access and learning progress can be maintained.'],
-  ['Can I learn at any time?', 'Yes. Lessons are available online, allowing students to study according to their own schedules.']
+  ['Are free lessons available?', 'Available free lesson content is clearly shown before a student unlocks any paid lesson content.'],
+  ['How is progress calculated?', 'Progress is based only on activities that are available to your student account. Locked activities never reduce free-learning progress.']
 ].map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>;
 
 export const PlatformHomePage = () => {
@@ -131,14 +145,48 @@ export const PlatformHomePage = () => {
   return <>
     <Hero home />
     <ValueStrip />
-    <section className="home-section pathways-section" id="pathways"><p className="eyebrow">Choose your learning path</p><h2>ICT Learning for Every School Stage</h2><p>Choose your current grade and start with lessons created around the Sri Lankan school ICT syllabus.</p><div className="platform-pathway-grid">{PATHWAYS.map(([area, stage, title, description, action]) => <Link className="platform-pathway" key={area} to={AREAS[area].path}><img alt="" height="240" loading="lazy" src={AREAS[area].image} width="400" /><div className="pathway-card-content"><p className="eyebrow">{stage}</p><h3>{title}</h3><p>{description}</p><span className="pathway-card-footer">{action} <b aria-hidden="true">→</b></span></div></Link>)}</div></section>
-    <section className="home-section life-section"><div><p className="eyebrow">Learning that fits your life</p><h2>Your Timetable Should Not Limit Your Learning</h2><p>School, tuition, travel, and daily responsibilities can make it difficult to follow another fixed timetable. A Plus ICT lets you learn whenever you are ready.</p><p>Study after school. Continue at night. Revise during the weekend. Replay a difficult explanation until it becomes clear.</p><p className="hero-language-note" lang="si">වේලාව මඟහැරුණත් පාඩම මඟහැරෙන්නේ නැහැ.</p></div><div className="life-feature-list">{[['Learn on Your Schedule', 'Open the lesson when you have time and continue from where you stopped.'], ['Replay Until It Is Clear', 'Pause, rewind, and watch an explanation again without pressure.'], ['Learn on Any Device', 'Move between your phone, tablet, and computer while keeping the same learning journey.'], ['Follow Your Progress', 'See completed lessons and understand what you should study next.']].map(([heading, copy]) => <article key={heading}><h3>{heading}</h3><p>{copy}</p></article>)}</div></section>
-    <LearningPlacesGallery />
+    <section className="home-section pathways-section" id="pathways">
+      <p className="eyebrow">Choose Your Learning Path</p>
+      <h2>Start ICT Learning at Your School Stage</h2>
+      <p className="pathways-sinhala" lang="si">ඔබේ ශ්‍රේණියට ගැළපෙන ICT ඉගෙනුම් මාර්ගය තෝරන්න.</p>
+      <p className="pathways-intro">Choose your current school stage and continue to the correct grade and medium.</p>
+      <div className="learning-path-grid">{PATHWAYS.map((item) => <Link className={`learning-path-card learning-path-card-${item.area.toLowerCase()}`} key={item.area} onClick={() => trackPublicEvent('homepage_pathway_selected', { academic_area: item.area.toLowerCase() })} to={item.path}>
+        <div className="learning-path-image"><img alt={item.imageAlt} height="500" loading="lazy" src={item.image} width="760" /><span className="learning-path-stage">{item.stage}</span></div>
+        <div className="learning-path-content"><div className="learning-path-heading"><h3>{item.title}</h3><p className="learning-path-title-si" lang="si">{item.titleSi}</p></div><p className="learning-path-description">{item.description}</p><span className="learning-path-action"><span><strong>{item.action}</strong><small lang="si">{item.actionSi}</small></span><span className="learning-path-arrow" aria-hidden="true">→</span></span></div>
+      </Link>)}</div>
+    </section>
     <section className="home-section learning-steps"><p className="eyebrow">A simple learning journey</p><h2>Start Learning in Four Simple Steps</h2><div>{[['01', 'Choose Your Grade', 'Select School ICT, O/L ICT, or A/L ICT.'], ['02', 'Select Your Medium', 'Choose the Sinhala Medium or English Medium course available for your level.'], ['03', 'Sign In with Google', 'Use one secure student account to access free and purchased lessons.'], ['04', 'Learn and Continue', 'Watch lessons, use learning materials, complete activities, and track your progress.']].map(([number, heading, copy]) => <article key={number}><span>{number}</span><h3>{heading}</h3><p>{copy}</p></article>)}</div><p className="section-action"><a className="button" href="#pathways">Find My ICT Course</a></p></section>
-    <section className="home-section platform-features"><p className="eyebrow">More than video lessons</p><h2>Everything Organised in One Learning Platform</h2><div>{[['Structured Video Lessons', 'Follow lessons in the correct syllabus order instead of searching through unrelated videos.'], ['Notes and Learning Materials', 'Access lesson-related notes, PDFs, examples, and revision material from the same page.'], ['Free and Premium Learning', 'Start with available free content and unlock additional lessons when you are ready.'], ['One Continuous Lesson Path', 'Free and premium chapters remain in one organised lesson flow.'], ['Progress Tracking', 'See how much of the available course content you have completed.'], ['Easy Google Login', 'Access your learning account without remembering another password.']].map(([heading, copy]) => <article key={heading}><h3>{heading}</h3><p>{copy}</p></article>)}</div></section>
-    <section className="home-section scenario-section"><p className="eyebrow">Learn ICT around your day</p><h2>Ready when you are</h2><div>{[['Missed a class?', 'Open the lesson when you return home.'], ['A concept is difficult?', 'Replay the explanation and study it step by step.'], ['Preparing for an examination?', 'Return directly to the unit you need to revise.'], ['Travelling or away from home?', 'Continue learning from your phone or tablet.']].map(([heading, copy]) => <article key={heading}><h3>{heading}</h3><p>{copy}</p></article>)}</div><Link className="button" to="/free-lessons">Start Learning at Your Own Pace</Link></section>
-    <section className="home-section free-learning"><p className="eyebrow">Start before you pay</p><h2>Explore Free ICT Lessons and Resources</h2><p>Create your student account and begin with available free lessons, notes, and revision resources. Experience the learning platform before unlocking premium content.</p><div className="hero-actions"><Link className="button" to="/free-lessons">Start a Free Lesson</Link><Link className="button secondary" to="/resources">Browse Free Resources</Link></div></section>
-    <section className="home-section tutor-preview tutor-panel"><div className="tutor-image-frame"><img alt="WARR Wijesinghe, ICT Educator and Software Engineer" className="tutor-image" height="720" loading="lazy" src="/images/aplus-ict-tutor.png" width="720" /></div><div><p className="eyebrow">Guided by education and technology</p><h2>ICT Learning Designed by a Teacher and Software Engineer</h2><p>A Plus ICT is developed by WARR Wijesinghe to make school ICT easier to access, understand, and continue.</p><p>The objective is not simply to publish videos. It is to give every student a clear and organised path through school ICT.</p><Link className="quiet-link" to="/about">Learn About A Plus ICT →</Link></div></section>
+    <section className="home-section platform-features"><p className="eyebrow">One organised learning platform</p><h2>Everything you need in one lesson flow</h2><div>{[['Structured Video Lessons', 'Follow lessons in the correct syllabus order instead of searching through unrelated videos.'], ['Notes and PDFs', 'Keep lesson notes, PDFs, examples, and revision material together.'], ['Activities and Quizzes', 'Practise what you learn and see what to do next.'], ['Free and Unlocked Content', 'Begin with available free content and unlock more without leaving the lesson flow.'], ['Progress Tracking', 'Continue from where you stopped across your devices.']].map(([heading, copy]) => <article key={heading}><h3>{heading}</h3><p>{copy}</p></article>)}</div></section>
+    <section className="home-tutor-section" aria-labelledby="educator-title">
+      <div className="home-tutor-media">
+        <div className="home-tutor-image-frame">
+          <img alt="WARR Wijesinghe, ICT Educator and Founder of A Plus ICT" className="home-tutor-image" height="760" loading="lazy" src="/images/aplus-ict-tutor.png" width="620" />
+        </div>
+      </div>
+      <div className="home-tutor-content">
+        <p className="eyebrow">Meet Your ICT Educator</p>
+        <h2 id="educator-title">ICT Learning Designed by an Educator and Software Engineer</h2>
+        <p className="home-tutor-sinhala" lang="si">සංකීර්ණ ICT සංකල්ප සරලව, ක්‍රමානුකූලව ඉගෙන ගන්න.</p>
+        <div className="home-tutor-identity">
+          <h3>WARR Wijesinghe</h3>
+          <p>ICT Educator · Software Engineer · Founder, A Plus ICT</p>
+        </div>
+        <p className="home-tutor-intro">A Plus ICT combines classroom experience with software engineering to make the Sri Lankan school ICT syllabus easier to understand, practise and continue from anywhere.</p>
+        <ul className="home-tutor-benefits">
+          <li>Structured learning from Grade 6 to A/L</li>
+          <li>Sinhala and English Medium support</li>
+          <li>Lessons organised around the official school ICT syllabus</li>
+        </ul>
+        <div className="home-tutor-qualification">
+          <span>Selected Qualifications</span>
+          <p>B.Sc. Business Administration (Information Systems Special), USJP · Postgraduate Diploma, British Computer Society · CCNA · HDIT (UCSC)</p>
+        </div>
+        <Link className="home-tutor-action" to="/about">
+          <span><strong>Learn About A Plus ICT</strong><small lang="si">A Plus ICT ගැන වැඩිදුර දැනගන්න</small></span>
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+    </section>
     <HomeFaq />
     <section className="final-home-cta"><div><p className="eyebrow">Your next ICT lesson is ready when you are</p><h2>Start now and continue at your own pace.</h2><p lang="si">ඔබට පහසු වේලාවකින් අදම පටන් ගන්න.</p></div><div className="hero-actions"><a className="button secondary" href="#pathways">Choose Your Grade</a><Link className="quiet-link" to={isAuthenticated ? destinationForUser(user) : '/login'}>{isAuthenticated ? 'Continue Learning' : 'Student Login'} →</Link></div></section>
   </>;
@@ -151,15 +199,29 @@ const AreaSupport = ({ area }) => {
 };
 
 const AcademicLandingPage = ({ area }) => {
-  const [grade, setGrade] = useState('');
-  const [medium, setMedium] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const grade = searchParams.get('grade') || '';
+  const medium = searchParams.get('medium') || '';
   const info = AREAS[area];
   const catalogue = useQuery({ queryKey: queryKeys.content.publicCourses(), queryFn: ({ signal }) => contentApi.publicCourses({}, signal), staleTime: 60_000, retry: 1 });
   const courses = (catalogue.data?.data || []).filter((course) => academicAreaForCourse(course) === area);
   usePageSeo({ path: info.path, image: info.image, structuredData: { '@context': 'https://schema.org', '@type': 'CollectionPage', name: info.title } });
   const grades = area === 'SCHOOL' ? ['6', '7', '8', '9'] : area === 'OL' ? ['10', '11'] : [];
+  const updateSelection = (next) => {
+    const params = new URLSearchParams(searchParams);
+    Object.entries(next).forEach(([key, value]) => value ? params.set(key, value) : params.delete(key));
+    setSearchParams(params, { replace: true });
+  };
+  const resetSelection = () => setSearchParams({}, { replace: true });
+  useEffect(() => {
+    if (!grade && !medium) return;
+    const target = document.getElementById('course-selection');
+    if (!target) return;
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+  }, [grade, medium]);
   return <><Hero area={area} /><ValueStrip /><AreaSupport area={area} />
-    <section className="home-section course-picker" id="course-selection"><p className="eyebrow">Find your course</p><h2>{area === 'SCHOOL' ? 'Choose your grade and medium' : info.action}</h2><p>Select the available learning path that suits you.</p><div className="guided-selectors">{grades.length ? <fieldset><legend>Choose grade</legend>{grades.map((value) => <button aria-pressed={grade === value} className={grade === value ? 'selected' : ''} key={value} onClick={() => setGrade(value)} type="button">Grade {value}</button>)}</fieldset> : null}<fieldset><legend>Choose medium</legend><button aria-pressed={medium === 'si'} className={medium === 'si' ? 'selected' : ''} onClick={() => setMedium('si')} type="button" lang="si">සිංහල මාධ්‍යය</button><button aria-pressed={medium === 'en'} className={medium === 'en' ? 'selected' : ''} onClick={() => setMedium('en')} type="button">English Medium</button></fieldset></div><CourseCards area={area} courses={courses} error={catalogue.error} loading={catalogue.isPending} matches={(course) => (!grade || gradeForCourse(course) === grade) && (!medium || mediumForCourse(course) === medium)} /></section>
+    <section className="home-section course-picker" id="course-selection"><p className="eyebrow">Find your course</p><h2>{area === 'SCHOOL' ? 'Choose your grade and medium' : info.action}</h2><p>Select the available learning path that suits you.</p><div className="guided-selectors">{grades.length ? <fieldset><legend>Choose grade</legend>{grades.map((value) => <button aria-pressed={grade === value} className={grade === value ? 'selected' : ''} key={value} onClick={() => updateSelection({ grade: value })} type="button">Grade {value}</button>)}</fieldset> : null}<fieldset><legend>Choose medium</legend><button aria-pressed={medium === 'si'} className={medium === 'si' ? 'selected' : ''} onClick={() => updateSelection({ medium: 'si' })} type="button" lang="si">සිංහල මාධ්‍යය</button><button aria-pressed={medium === 'en'} className={medium === 'en' ? 'selected' : ''} onClick={() => updateSelection({ medium: 'en' })} type="button">English Medium</button>{grade || medium ? <button className="filter-reset" onClick={resetSelection} type="button">Reset selection</button> : null}</fieldset></div>{grade || medium ? <p className="active-filter-feedback" aria-live="polite">Showing {grade ? `Grade ${grade}` : 'all grades'} {medium ? `· ${medium === 'si' ? 'Sinhala Medium' : 'English Medium'}` : ''} courses.</p> : null}<CourseCards area={area} courses={courses} error={catalogue.error} loading={catalogue.isPending} matches={(course) => (!grade || gradeForCourse(course) === grade) && (!medium || mediumForCourse(course) === medium)} /></section>
     <section className="final-home-cta"><div><p className="eyebrow">Learn on your own terms</p><h2>{area === 'AL' ? 'Choose your medium and start your A/L ICT path.' : 'Your next ICT lesson is ready when you are.'}</h2></div><Link className="button secondary" to="/free-lessons">Start a Free Lesson</Link></section>
   </>;
 };

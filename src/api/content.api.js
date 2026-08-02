@@ -13,7 +13,7 @@ const inferredLevel = (course) => {
 };
 const normalizeCatalogueCourse = (course) => {
   const academicLevel = inferredLevel(course);
-  const active = course.availabilityStatus === 'active' || academicLevel?.code === 'AL';
+  const active = course.availabilityStatus === 'active';
   return {
     ...course,
     academicLevel,

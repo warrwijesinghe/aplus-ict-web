@@ -1,24 +1,11 @@
-// Commerce products should ultimately provide every public lesson price. Until
-// then, this single mapping keeps the confirmed academic-area prices consistent.
-export const LESSON_PRICE_LKR = Object.freeze({
-  SCHOOL: 1500,
-  OL: 2000,
-  AL: 2500
-});
+import { academicAreaForCourse } from '../utils/academic-course.js';
 
-export const academicAreaForCourse = (course = {}) => {
-  const level = String(course.courseGroup || course.academicLevel?.code || course.academicLevel || '').toUpperCase();
-  const slug = String(course.slug || '').toLowerCase();
-  if (level === 'AL' || slug.startsWith('al-')) return 'AL';
-  if (level === 'OL' || slug.startsWith('ol-') || /GRADE_?(10|11)/.test(level)) return 'OL';
-  if (level === 'SCHOOL' || /GRADE_?[6-9]/.test(level) || slug.startsWith('grade-')) return 'SCHOOL';
-  return null;
-};
+export { academicAreaForCourse };
 
-export const lessonPriceFor = ({ area, course, product } = {}) => {
+export const lessonPriceFor = ({ product } = {}) => {
   const apiPrice = Number(product?.price ?? product?.amount ?? product?.unitPrice);
   if (Number.isFinite(apiPrice) && apiPrice > 0) return apiPrice;
-  return LESSON_PRICE_LKR[area || academicAreaForCourse(course)] || null;
+  return null;
 };
 
 export const formatLkr = (amount) => Number.isFinite(Number(amount)) && Number(amount) > 0
