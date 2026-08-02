@@ -111,7 +111,8 @@ const Hero = ({ area, home = false }) => {
       {home ? <p className="hero-trust">No fixed timetable · Learn from any device · Free lessons available</p> : null}
     </div>
     <div className="public-hero-media">
-      <img alt="Student learning online with a laptop" fetchPriority="high" height="810" src={home ? '/images/learning-places/home-hero-student.webp' : info.image} width="1440" />
+      <img alt="Student learning online with a laptop" fetchPriority={home ? 'high' : undefined} height="810" loading={home ? 'eager' : undefined} sizes={home ? '(min-width: 1024px) 100vw, 100vw' : '(min-width: 768px) 50vw, 100vw'} src={home ? '/images/learning-places/home-hero-student.webp' : info.image} width="1440" />
+      {home ? <LessonPlayerPreview /> : null}
     </div>
   </section>;
 };
@@ -193,7 +194,7 @@ export const PlatformHomePage = () => {
 };
 
 const AreaSupport = ({ area }) => {
-  if (area === 'SCHOOL') return <section className="home-section grade-roadmap"><p className="eyebrow">Choose your grade</p><h2>Start with the grade you are in now</h2><div>{[['6', 'Start your ICT journey with basic computer concepts, safe technology use, and essential digital skills.'], ['7', 'Continue building practical knowledge and learn how digital systems are used in everyday life.'], ['8', 'Strengthen your understanding through structured concepts, activities, and practical applications.'], ['9', 'Prepare for upper-school ICT with stronger digital, logical, and problem-solving skills.']].map(([grade, copy]) => <Link key={grade} to="#course-selection"><span>Grade {grade}</span><p>{copy}</p><b>View Grade {grade} →</b></Link>)}</div></section>;
+  if (area === 'SCHOOL') return <section className="home-section grade-roadmap"><p className="eyebrow">Choose your grade</p><h2>Start with the grade you are in now</h2><div>{[['6', 'Start your ICT journey with basic computer concepts, safe technology use, and essential digital skills.'], ['7', 'Continue building practical knowledge and learn how digital systems are used in everyday life.'], ['8', 'Strengthen your understanding through structured concepts, activities, and practical applications.'], ['9', 'Prepare for upper-school ICT with stronger digital, logical, and problem-solving skills.']].map(([grade, copy]) => <Link key={grade} to={`/school-ict?grade=${grade}#course-selection`}><span>Grade {grade}</span><p>{copy}</p><b>View Grade {grade} →</b></Link>)}</div></section>;
   if (area === 'OL') return <section className="home-section checklist-section"><p className="eyebrow">Complete O/L ICT Preparation in One Place</p><h2>A clear path for Grades 10 and 11</h2><ul>{['Grade 10 and Grade 11 syllabus coverage', 'Sinhala Medium and English Medium learning paths', 'Structured video explanations', 'Notes and lesson materials', 'Practical ICT guidance', 'Revision and examination-focused content', 'Student progress tracking'].map((item) => <li key={item}>{item}</li>)}</ul></section>;
   return <section className="home-section competency-section"><p className="eyebrow">A clear path through the complete A/L ICT syllabus</p><h2>Every competency in official syllabus order</h2><p>Published competency cards show the available medium, chapters, free content, your progress after sign-in, and the next suitable action: Start, Continue, Review, or Unlock.</p></section>;
 };

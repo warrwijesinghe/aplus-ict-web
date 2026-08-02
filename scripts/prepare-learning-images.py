@@ -1,10 +1,12 @@
+import argparse
 from pathlib import Path
 
 from PIL import Image, ImageOps
 
 
-SOURCE = Path(r"C:\Users\I N T E L\Downloads")
-DESTINATION = Path(__file__).resolve().parents[1] / "public" / "images" / "learning-places"
+REPOSITORY = Path(__file__).resolve().parents[1]
+DEFAULT_SOURCE = REPOSITORY / "source-learning-images"
+DEFAULT_DESTINATION = REPOSITORY / "public" / "images" / "learning-places"
 
 IMAGES = {
     "home-student": "images (11).jfif",
@@ -31,20 +33,27 @@ IMAGES = {
 }
 
 
-def optimise(source: Path, destination: Path) -> None:
+def optimise(source: Path, destination: Path, max_size: int) -> None:
     with Image.open(source) as original:
         image = ImageOps.exif_transpose(original).convert("RGB")
-        image.thumbnail((1600, 1200), Image.Resampling.LANCZOS)
+        image.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
         image.save(destination, "WEBP", quality=82, method=6)
 
 
 def main() -> None:
-    DESTINATION.mkdir(parents=True, exist_ok=True)
+    parser = argparse.ArgumentParser(description="Prepare repository-local learning images as WebP.")
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE, help="Directory containing the source image filenames.")
+    parser.add_argument("--destination", type=Path, default=DEFAULT_DESTINATION, help="Directory for generated WebP images.")
+    parser.add_argument("--max-size", type=int, default=1600, help="Longest output edge in pixels.")
+    args = parser.parse_args()
+    source_directory = args.source.resolve()
+    destination_directory = args.destination.resolve()
+    destination_directory.mkdir(parents=True, exist_ok=True)
     for output_name, source_name in IMAGES.items():
-        source = SOURCE / source_name
+        source = source_directory / source_name
         if not source.exists():
-            raise FileNotFoundError(source)
-        optimise(source, DESTINATION / f"{output_name}.webp")
+            raise FileNotFoundError(f"Missing source image: {source}. Use --source to select the image directory.")
+        optimise(source, destination_directory / f"{output_name}.webp", args.max_size)
 
 
 if __name__ == "__main__":

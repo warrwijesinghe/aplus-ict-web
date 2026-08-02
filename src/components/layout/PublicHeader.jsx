@@ -15,19 +15,22 @@ export const PublicHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMemberOpen, setIsMemberOpen] = useState(false);
   const headerRef = useRef(null);
+  const menuButtonRef = useRef(null);
+  const navigationRef = useRef(null);
   const profile = useQuery({
     queryKey: queryKeys.content.siteProfile,
     queryFn: ({ signal }) => contentApi.siteProfile(signal),
     retry: false
   });
   const brand = profile.data?.data;
-  const closeMenu = () => {
+  const closeMenu = ({ restoreFocus = false } = {}) => {
     setIsOpen(false);
     setIsMemberOpen(false);
+    if (restoreFocus) requestAnimationFrame(() => menuButtonRef.current?.focus());
   };
   useEffect(() => {
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') closeMenu();
+      if (event.key === 'Escape' && isOpen) closeMenu({ restoreFocus: true });
     };
     const onPointerDown = (event) => {
       if ((isOpen || isMemberOpen) && !headerRef.current?.contains(event.target)) closeMenu();
@@ -35,6 +38,7 @@ export const PublicHeader = () => {
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('pointerdown', onPointerDown);
     document.body.classList.toggle('navigation-open', isOpen);
+    if (isOpen) requestAnimationFrame(() => navigationRef.current?.querySelector('a')?.focus());
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('pointerdown', onPointerDown);
@@ -57,21 +61,23 @@ export const PublicHeader = () => {
     <>
       <div className="announcement-bar">Online ICT Learning for Grades 6–13 <span>·</span> Sinhala and English Medium</div>
       <header className={`header${location.pathname === '/' ? ' homepage-header' : ''}`} ref={headerRef}>
+      <div className="public-header-inner">
       <Link className="brand" to="/">
         <BrandLogo brandName={brand?.brandName} />
       </Link>
       <button
-        aria-label="Toggle navigation menu"
+        aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
         aria-controls="public-navigation"
         aria-expanded={isOpen}
         className="menu-toggle"
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => isOpen ? closeMenu({ restoreFocus: true }) : setIsOpen(true)}
+        ref={menuButtonRef}
         type="button"
       >
         <span className="sr-only">Toggle navigation</span>
         <span aria-hidden="true">☰</span>
       </button>
-      <nav aria-label="Main navigation" className={isOpen ? 'open' : ''} id="public-navigation">
+      <nav aria-label="Main navigation" className={isOpen ? 'open' : ''} id="public-navigation" ref={navigationRef}>
         <NavLink onClick={closeMenu} to="/">
           Home
         </NavLink>
@@ -129,7 +135,9 @@ export const PublicHeader = () => {
           </a>
         )}
       </nav>
+      </div>
       </header>
+      {isOpen ? <button aria-label="Close navigation" className="navigation-backdrop" onClick={() => closeMenu({ restoreFocus: true })} type="button" /> : null}
     </>
   );
 };

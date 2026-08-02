@@ -98,8 +98,11 @@ const LessonImage = ({ lesson }) => (
   <img
     alt={'Lesson ' + lesson.lessonNumber + ': ' + lesson.title}
     className="lesson-card-image"
+    height="360"
     loading="lazy"
+    sizes="(min-width: 768px) 33vw, 100vw"
     src={lessonImage(lesson.lessonNumber)}
+    width="600"
   />
 );
 
@@ -289,8 +292,11 @@ const CourseCard = ({ course }) => {
         <img
           alt={`${course.title} course cover`}
           className="course-image"
+          height="360"
           loading="lazy"
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           src={courseCardImage(course)}
+          width="600"
         />
       </div>
       <div className="course-card-content">
@@ -600,7 +606,11 @@ export const PublicCourseDetailPage = () => {
             <img
               alt={`${course.title} course cover`}
               className="course-hero-image"
+              height="675"
+              loading="eager"
+              sizes="(min-width: 768px) 50vw, 100vw"
               src={courseCardImage(course)}
+              width="1200"
             />
           )}
         </div>
@@ -676,6 +686,8 @@ const ActivityRow = ({ activity, courseSlug }) => {
         <div className="activity-actions">
           {hasStudyMaterial ? (
             <button
+              aria-controls={`activity-content-${activity.id}`}
+              aria-expanded={isOpen}
               className="activity-open-button"
               onClick={() => setIsOpen((open) => !open)}
               type="button"
@@ -692,7 +704,7 @@ const ActivityRow = ({ activity, courseSlug }) => {
           </button>
         </div>
       )}
-      {isOpen && !activity.isLocked ? <ActivityStudyContent activity={activity} /> : null}
+      {isOpen && !activity.isLocked ? <div id={`activity-content-${activity.id}`}><ActivityStudyContent activity={activity} /></div> : null}
     </li>
   );
 };
@@ -1030,10 +1042,37 @@ const PublicContentItem = ({ item }) => {
   );
 };
 
+const LessonContents = ({ lesson, onNavigate, open, selectedHash, setOpen }) => (
+  <details className="lesson-content-tree" onToggle={(event) => setOpen(event.currentTarget.open)} open={open}>
+    <summary><span>This lesson</span><strong>Lesson contents</strong></summary>
+    <nav aria-label="Lesson content navigation">
+      <ol>
+        {lesson.topics?.map((topic, index) => {
+          const topicHash = `#topic-${topic.id}`;
+          return (
+            <li key={topic.id}>
+              <a aria-current={selectedHash === topicHash ? 'location' : undefined} href={topicHash} onClick={onNavigate}>{String(index + 1).padStart(2, '0')}. {topic.title}</a>
+              {topic.contentItems?.length ? (
+                <ul>
+                  {topic.contentItems.map((item) => {
+                    const itemHash = `#content-${item.id}`;
+                    return <li key={item.id}><a aria-current={selectedHash === itemHash ? 'location' : undefined} href={itemHash} onClick={onNavigate}>{item.title}</a></li>;
+                  })}
+                </ul>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  </details>
+);
+
 export const LessonLearningPage = () => {
   const { courseSlug, lessonSlug } = useParams();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const [contentsOpen, setContentsOpen] = useState(false);
   const query = useQuery({
     queryKey: queryKeys.content.publicLesson(courseSlug, lessonSlug),
     queryFn: ({ signal }) => contentApi.publicLesson(courseSlug, lessonSlug, signal),
@@ -1085,26 +1124,7 @@ export const LessonLearningPage = () => {
         {!lesson.premiumUnlocked && lesson.unlockProduct ? <UnlockLessonButton course={course} lesson={lesson} /> : null}
       </section>
       <div className="public-lesson-layout">
-        <aside className="lesson-content-tree" aria-label="Lesson content navigation">
-          <p className="eyebrow">This lesson</p>
-          <h2>Content navigation</h2>
-          <nav>
-            <ol>
-              {lesson.topics?.map((topic, index) => (
-                <li key={topic.id}>
-                  <a href={`#topic-${topic.id}`}>{String(index + 1).padStart(2, '0')}. {topic.title}</a>
-                  {topic.contentItems?.length ? (
-                    <ul>
-                      {topic.contentItems.map((item) => (
-                        <li key={item.id}><a href={`#content-${item.id}`}>{item.title}</a></li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </li>
-              ))}
-            </ol>
-          </nav>
-        </aside>
+        <LessonContents lesson={lesson} onNavigate={() => setContentsOpen(false)} open={contentsOpen} selectedHash={location.hash} setOpen={setContentsOpen} />
         <section className="topic-learning-area" aria-label="Lesson topics">
           {lesson.topics?.length ? lesson.topics.map((topic, index) => (
             <section className="lesson-topic" id={`topic-${topic.id}`} key={topic.id}>
