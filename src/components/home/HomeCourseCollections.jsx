@@ -40,6 +40,7 @@ const byCatalogueOrder = (first, second) => Number(first.sortOrder || 0) - Numbe
 const CourseCollection = ({ collection, courses }) => {
   const rowRef = useRef(null);
   const scrollCourses = (direction) => rowRef.current?.scrollBy({ behavior: 'smooth', left: direction * rowRef.current.clientWidth * 0.84 });
+  const gridClass = `home-course-grid-${courses.length > 2 ? 3 : 2}`;
 
   return <section className={`home-course-collection home-course-collection-${collection.area.toLowerCase()}`} id={collection.area === 'AL' ? 'pathways' : undefined}>
     <div className="home-course-collection-heading">
@@ -49,7 +50,7 @@ const CourseCollection = ({ collection, courses }) => {
       <p>{collection.description}</p>
     </div>
     {courses.length ? <>
-      <div className={`catalogue-course-grid home-course-grid home-course-grid-${courses.length > 2 ? 3 : 2}`} ref={rowRef}>
+      <div className={`catalogue-course-grid home-course-grid ${gridClass}`} ref={rowRef}>
         {courses.map((course) => <CatalogueCourseCard area={collection.area} course={course} key={course.id} />)}
       </div>
       <div className="home-course-collection-actions">

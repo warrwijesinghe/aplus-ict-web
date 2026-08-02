@@ -1,12 +1,10 @@
-import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { contentApi } from '../api/content.api.js';
 import { queryKeys } from '../api/query-keys.js';
 import { CatalogueCourseCard } from '../components/catalogue/CatalogueUi.jsx';
 import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/States.jsx';
 import { academicAreaForCourse } from '../config/lesson-pricing.js';
-import { gradeForCourse, mediumForCourse } from '../utils/academic-course.js';
 import { usePageSeo } from '../seo/use-page-seo.js';
 import { HomeHero } from '../components/home/HomeHero.jsx';
 import { PlatformExperience } from '../components/home/PlatformExperience.jsx';
@@ -22,7 +20,14 @@ const AREAS = {
     title: 'Build Strong ICT Skills from Grade 6',
     description: 'Develop practical digital knowledge and a strong ICT foundation through lessons organised for each school grade.',
     support: 'ICT පදනම නිවැරදිව ගොඩනගමූ.',
-    action: 'Choose Your Grade'
+    action: 'Choose Your Grade',
+    gallery: [
+      ['/images/learning-places/school-online-learning.webp', 'School student learning ICT online'],
+      ['/images/learning-places/young-learner.webp', 'Young student developing digital skills'],
+      ['/images/learning-places/practical-learning.webp', 'Student practising ICT skills'],
+      ['/images/learning-places/school-desk.webp', 'School student studying at a desk'],
+      ['/images/learning-places/video-learning.webp', 'Student following a video lesson']
+    ]
   },
   OL: {
     path: '/ol-ict',
@@ -31,7 +36,14 @@ const AREAS = {
     title: 'Master O/L ICT One Syllabus Unit at a Time',
     description: 'Understand theory, strengthen practical knowledge, and prepare for the examination through a clear, structured online learning path.',
     support: 'පාඩමෙන් පාඩමට විශ්වාසයෙන් ඉදිරියට යමු.',
-    action: 'Explore O/L ICT Courses'
+    action: 'Explore O/L ICT Courses',
+    gallery: [
+      ['/images/learning-places/ol-online-learning.webp', 'Student learning O/L ICT online'],
+      ['/images/learning-places/lesson-webinar-notes.webp', 'Student following an online ICT lesson'],
+      ['/images/learning-places/lesson-study.webp', 'Student reviewing ICT lesson material'],
+      ['/images/learning-places/headset-class.webp', 'Student attending an ICT class with headphones'],
+      ['/images/learning-places/focused-student.webp', 'Focused student preparing for ICT studies']
+    ]
   },
   AL: {
     path: '/al-ict',
@@ -40,7 +52,14 @@ const AREAS = {
     title: 'Learn All 13 A/L ICT Competencies at Your Own Pace',
     description: 'Follow the complete A/L ICT syllabus through clearly organised video lessons, learning materials, activities, and exam-focused guidance.',
     support: 'සංකීර්ණ ICT සංකල්ප සරලව තේරුම් ගනිමු.',
-    action: 'Choose Your Medium'
+    action: 'Choose Your Medium',
+    gallery: [
+      ['/images/learning-places/al-online-learning.webp', 'Student learning A/L ICT online'],
+      ['/images/learning-places/lesson-laptop-focus.webp', 'Student concentrating on an ICT lesson'],
+      ['/images/learning-places/lesson-study-notes.webp', 'Student studying ICT notes'],
+      ['/images/learning-places/lesson-headset-laptop.webp', 'Student learning with a laptop and headset'],
+      ['/images/learning-places/lesson-focused-study.webp', 'Student focused on A/L ICT study']
+    ]
   }
 };
 
@@ -58,30 +77,27 @@ export const PlatformHomePage = () => {
 
 const Hero = ({ area }) => {
   const info = AREAS[area];
-  return <section aria-labelledby={`${area.toLowerCase()}-hero-title`} className="public-hero">
-    <div className="public-hero-copy">
-      <p className="eyebrow">{info.label}</p>
-      <h1 id={`${area.toLowerCase()}-hero-title`}>{info.title}</h1>
-      <p className="hero-language-note" lang="si">{info.support}</p>
-      <p>{info.description}</p>
-      <div className="hero-actions"><a className="button" href="#course-selection">{info.action}</a><Link className="button secondary" to="/free-lessons">Start Learning Free</Link></div>
+  return <section aria-labelledby={`${area.toLowerCase()}-hero-title`} className="public-hero academic-landing-hero">
+    <div className="academic-landing-hero-inner">
+      <div className="public-hero-copy">
+        <p className="eyebrow">{info.label}</p>
+        <h1 id={`${area.toLowerCase()}-hero-title`}>{info.title}</h1>
+        <p className="hero-language-note" lang="si">{info.support}</p>
+        <p>{info.description}</p>
+        <div className="hero-actions"><a className="button" href="#course-selection">{info.action}</a><Link className="button secondary" to="/free-lessons">Start Learning Free</Link></div>
+      </div>
+      <div aria-label={`${info.label} student learning gallery`} className="public-hero-media academic-image-grid" role="group">
+        {info.gallery.map(([src, alt], index) => <img alt={alt} className={`academic-grid-image academic-grid-image-${index + 1}`} fetchPriority={index === 0 ? 'high' : undefined} height={index === 0 ? '810' : '600'} key={`${src}-${index}`} loading={index === 0 ? 'eager' : 'lazy'} sizes="(min-width: 1024px) 16vw, (min-width: 768px) 20vw, 50vw" src={src} width={index === 0 ? '1440' : '800'} />)}
+      </div>
     </div>
-    <div className="public-hero-media"><img alt="Student learning ICT online with a laptop" height="810" loading="lazy" sizes="(min-width: 768px) 50vw, 100vw" src={info.image} width="1440" /></div>
   </section>;
 };
 
-const ValueStrip = () => <section aria-label="A Plus ICT learning benefits" className="benefit-strip">
-  <div><strong>Learn Anytime. Anywhere.</strong><span>Study at your own pace</span></div>
-  <div><strong>Grade 6 to A/L</strong><span>Complete School ICT pathway</span></div>
-  <div><strong>Sinhala &amp; English Medium</strong><span>Learn in your preferred medium</span></div>
-  <div><strong>Any Device</strong><span>Phone, tablet or computer</span></div>
-</section>;
-
-const CourseCards = ({ area, courses, loading, error, matches }) => {
+const CourseCards = ({ area, courses, loading, error }) => {
   if (loading) return <LoadingSkeleton label="Loading published courses" />;
   if (error) return <InlineError error={error} />;
-  const visible = courses.filter(matches);
-  return visible.length ? <div className="catalogue-course-grid landing-course-grid">{visible.map((course) => <CatalogueCourseCard area={area} course={course} key={course.id} />)}</div> : <EmptyState title="Courses will appear here as they are published"><p>Choose a different grade or medium, or check back soon.</p></EmptyState>;
+  const gridColumns = courses.length > 2 ? 3 : 2;
+  return courses.length ? <div className={`catalogue-course-grid catalogue-course-grid-${gridColumns} landing-course-grid`}>{courses.map((course) => <CatalogueCourseCard area={area} course={course} key={course.id} />)}</div> : <EmptyState title="Courses will appear here as they are published"><p>Check back soon for the latest lessons.</p></EmptyState>;
 };
 
 
@@ -92,30 +108,12 @@ const AreaSupport = ({ area }) => {
 };
 
 const AcademicLandingPage = ({ area }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const grade = searchParams.get('grade') || '';
-  const medium = searchParams.get('medium') || '';
   const info = AREAS[area];
   const catalogue = useQuery({ queryKey: queryKeys.content.publicCourses(), queryFn: ({ signal }) => contentApi.publicCourses({}, signal), staleTime: 60_000, retry: 1 });
   const courses = (catalogue.data?.data || []).filter((course) => academicAreaForCourse(course) === area);
   usePageSeo({ path: info.path, image: info.image, structuredData: { '@context': 'https://schema.org', '@type': 'CollectionPage', name: info.title } });
-  const grades = area === 'SCHOOL' ? ['6', '7', '8', '9'] : area === 'OL' ? ['10', '11'] : [];
-  const updateSelection = (next) => {
-    const params = new URLSearchParams(searchParams);
-    Object.entries(next).forEach(([key, value]) => value ? params.set(key, value) : params.delete(key));
-    setSearchParams(params, { replace: true });
-  };
-  const resetSelection = () => setSearchParams({}, { replace: true });
-  useEffect(() => {
-    if (!grade && !medium) return;
-    const target = document.getElementById('course-selection');
-    if (!target) return;
-    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
-  }, [grade, medium]);
-  return <><Hero area={area} /><ValueStrip /><AreaSupport area={area} />
-    <section className="home-section course-picker" id="course-selection"><p className="eyebrow">Find your course</p><h2>{area === 'SCHOOL' ? 'Choose your grade and medium' : info.action}</h2><p>Select the available learning path that suits you.</p><div className="guided-selectors">{grades.length ? <fieldset><legend>Choose grade</legend>{grades.map((value) => <button aria-pressed={grade === value} className={grade === value ? 'selected' : ''} key={value} onClick={() => updateSelection({ grade: value })} type="button">Grade {value}</button>)}</fieldset> : null}<fieldset><legend>Choose medium</legend><button aria-pressed={medium === 'si'} className={medium === 'si' ? 'selected' : ''} onClick={() => updateSelection({ medium: 'si' })} type="button" lang="si">සිංහල මාධ්‍යය</button><button aria-pressed={medium === 'en'} className={medium === 'en' ? 'selected' : ''} onClick={() => updateSelection({ medium: 'en' })} type="button">English Medium</button>{grade || medium ? <button className="filter-reset" onClick={resetSelection} type="button">Reset selection</button> : null}</fieldset></div>{grade || medium ? <p className="active-filter-feedback" aria-live="polite">Showing {grade ? `Grade ${grade}` : 'all grades'} {medium ? `· ${medium === 'si' ? 'Sinhala Medium' : 'English Medium'}` : ''} courses.</p> : null}<CourseCards area={area} courses={courses} error={catalogue.error} loading={catalogue.isPending} matches={(course) => (!grade || gradeForCourse(course) === grade) && (!medium || mediumForCourse(course) === medium)} /></section>
-    <section className="final-home-cta"><div><p className="eyebrow">Learn on your own terms</p><h2>{area === 'AL' ? 'Choose your medium and start your A/L ICT path.' : 'Your next ICT lesson is ready when you are.'}</h2></div><Link className="button secondary" to="/free-lessons">Start a Free Lesson</Link></section>
+  return <><Hero area={area} />
+    <section className="home-section course-picker" id="course-selection"><p className="eyebrow">Available courses</p><h2>{area === 'SCHOOL' ? 'ICT courses for Grades 6–9' : info.action}</h2><CourseCards area={area} courses={courses} error={catalogue.error} loading={catalogue.isPending} /></section>
   </>;
 };
 

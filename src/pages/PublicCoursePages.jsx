@@ -19,10 +19,8 @@ import { courseBreadcrumbs, isComingSoon } from '../utils/academic-course.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
 import {
-  AvailabilityBadge,
   BilingualHeading,
-  CatalogueCourseCard,
-  MediumBadge
+  CatalogueCourseCard
 } from '../components/catalogue/CatalogueUi.jsx';
 
 const freeContentTotal = (course) =>
@@ -468,16 +466,7 @@ export const PublicHomePage = () => {
   );
 };
 
-const HomeCourseCard = ({ course }) => (
-  <article className="path-card active-path-card home-course-card">
-    <img alt={`${course.title} course cover`} className="catalogue-course-image" height="360" loading="lazy" src={courseCardImage(course)} width="640" />
-    <div className="path-card-topline"><MediumBadge medium={course.medium} /><AvailabilityBadge status={course.availabilityStatus} /></div>
-    <h3>{course.titleEn || course.title}</h3>
-    {course.titleSi ? <p className="sinhala-copy" lang="si">{course.titleSi}</p> : null}
-    <p>{courseDescription(course)}</p><p className="course-facts">{course.syllabusLessonCount ?? 0} published lessons · {freeContentTotal(course)} free content items</p>
-    <Link className="button" to={`/courses/${course.slug}`}>Explore A/L ICT {course.medium?.nameEn || course.medium?.name}</Link>
-  </article>
-);
+const HomeCourseCard = ({ course }) => <CatalogueCourseCard area="AL" course={course} />;
 
 const SocialLinks = ({ links = [] }) => {
   if (!links.length) return null;
@@ -539,7 +528,7 @@ export const PublicCoursesPage = () => {
       <div className="course-level-groups">{groups.map((group) => (
         <section className="course-level-group" key={group.level.code}>
           <BilingualHeading english={`${group.level.nameEn} ICT`} sinhala={`${group.level.nameSi} ICT`} />
-          <div className="catalogue-course-grid">{group.courses.map((course) => <CatalogueCourseCard course={course} key={course.id} />)}</div>
+          <div className={`catalogue-course-grid catalogue-course-grid-${group.courses.length > 2 ? 3 : 2}`}>{group.courses.map((course) => <CatalogueCourseCard course={course} key={course.id} />)}</div>
         </section>
       ))}</div>
     </section>
