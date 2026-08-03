@@ -773,39 +773,38 @@ export const PaymentPage = () => {
   const form = useForm({
     resolver: zodResolver(
       z.object({
-        customerReference: z.string().trim().min(1, 'Bank reference is required.').max(255),
-        proofResourceId: z.string().uuid().optional().or(z.literal(''))
+        reference: z.string().trim().max(255).optional(),
+        paymentSlip: z.any().refine((files) => files?.length === 1, 'Please attach your payment slip.')
       })
     )
   });
   const mutation = useMutation({
-    mutationFn: (values) =>
-      commerceApi.submitBankTransfer(orderId, {
-        ...values,
-        proofResourceId: values.proofResourceId || null
-      }),
+    mutationFn: (values) => {
+      const body = new FormData();
+      body.append('paymentSlip', values.paymentSlip[0]);
+      if (values.reference) body.append('reference', values.reference);
+      return commerceApi.submitBankTransfer(orderId, body);
+    },
     onSuccess: () => navigate(`/student/orders/${orderId}`)
   });
   return (
     <section className="form-card">
       <h1>Submit bank transfer</h1>
-      <p>Your payment remains pending until it is reviewed.</p>
+      <p>Your payment will show as <strong>Payment under review</strong> until an administrator confirms it.</p>
+      <p>Transfer the exact order amount to the bank account details supplied by A Plus ICT, then upload the receipt below.</p>
       <form onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
         <Field
-          error={form.formState.errors.customerReference}
-          label="Bank reference"
-          name="customerReference"
+          error={form.formState.errors.reference}
+          label="Bank/reference number (optional)"
+          name="reference"
           register={form.register}
         />
-        <Field
-          error={form.formState.errors.proofResourceId}
-          label="Proof resource ID (optional)"
-          name="proofResourceId"
-          register={form.register}
-        />
+        <label>Payment slip<input accept="image/jpeg,image/png,image/webp,application/pdf" type="file" {...form.register('paymentSlip')} /></label>
+        {form.formState.errors.paymentSlip ? <p className="field-error">{form.formState.errors.paymentSlip.message}</p> : null}
+        <p>Accepted files: JPEG, PNG, WebP, or PDF. Keep the file within the upload limit.</p>
         {mutation.error && <InlineError error={mutation.error} />}
         <button disabled={mutation.isPending} type="submit">
-          Submit transfer
+          {mutation.isPending ? 'Uploading payment slip…' : 'Submit payment for review'}
         </button>
       </form>
     </section>

@@ -12,10 +12,10 @@ export const EnrollmentDashboard = () => {
   const courses = useQuery({ queryKey: queryKeys.content.publicCourses, queryFn: ({ signal }) => contentApi.publicCourses(signal) });
   if (enrollments.isLoading || courses.isLoading) return <LoadingSkeleton />;
   if (enrollments.isError || courses.isError) return <InlineError error={enrollments.error || courses.error} />;
-  const catalogue = courses.data?.data || []; const mine = enrollments.data || []; const enrolled = mine.map((entry) => ({ entry, course: catalogue.find((course) => course.id === entry.courseId) })).filter((item) => item.course);
+  const catalogue = courses.data?.data || []; const mine = enrollments.data || []; const enrolled = mine.map((entry) => ({ entry, course: entry.course })).filter((item) => item.course);
   return <section className="member-dashboard"><p className="eyebrow">My learning</p><h1>Welcome back, {user?.name || 'student'}.</h1>
     {!enrolled.length ? <EmptyState title="You have not enrolled in a course yet"><Link className="button" to="/al-ict">Explore Grades 12–13 ICT</Link></EmptyState> : <><h2>My Courses</h2><div className="member-action-grid">{enrolled.map(({ entry, course }) => <Link key={entry.id} to={`/courses/${course.slug}/learn`}><span>ACTIVE</span><strong>{course.title}</strong><small>Enrollment active · Continue free learning</small></Link>)}</div><h2>Continue Learning</h2><p>Open an enrolled course to continue from your latest accessible chapter.</p><h2>My Purchased Lessons</h2><p>No paid lesson entitlements yet.</p><h2>Recent Activity</h2><p>Recent learning activity will appear after you start a chapter.</p></>}
-    <h2>Explore Courses</h2><div className="member-action-grid">{catalogue.filter((course) => !mine.some((entry) => entry.courseId === course.id)).map((course) => <Link key={course.id} to={`/enroll/${course.slug}`}><span>{course.medium?.name || course.medium?.code}</span><strong>{course.title}</strong><small>Enroll Free</small></Link>)}</div>
+    <h2>Explore Courses</h2><div className="member-action-grid">{catalogue.filter((course) => !mine.some((entry) => entry.courseTrackId === course.id)).map((course) => <Link key={course.id} to={`/enroll/${course.slug}`}><span>{course.medium?.name || course.medium?.code}</span><strong>{course.title}</strong><small>Enroll Free</small></Link>)}</div>
   </section>;
 };
 

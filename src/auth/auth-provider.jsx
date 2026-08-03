@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { authApi } from '../api/auth.api.js';
 import { configureRefreshQueue } from '../api/refresh-queue.js';
 import { queryClient } from '../app/query-client.js';
@@ -19,6 +19,9 @@ const isGoogleCallbackRoute = () => window.location.pathname === '/login/success
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isRestoringSession, setIsRestoringSession] = useState(true);
+  // Refresh tokens rotate on use. React Strict Mode re-runs effects in development,
+  // so a second restore request would otherwise invalidate the freshly issued token.
+  const hasStartedSessionRestore = useRef(false);
   const clearSession = useCallback(() => {
     authMemory.clear();
     setUser(null);
@@ -30,7 +33,7 @@ export const AuthProvider = ({ children }) => {
     const result = await authApi.refresh();
     authMemory.set(result.accessToken);
     const current = await authApi.me();
-    const user = normalizeUser(current.user);
+    const user = normalizeUser(current.user || current);
     setUser(user);
     return user;
   }, []);
@@ -45,6 +48,9 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
+    if (hasStartedSessionRestore.current) return;
+    hasStartedSessionRestore.current = true;
+
     refreshSession()
       .catch(clearSession)
       .finally(() => setIsRestoringSession(false));
@@ -53,7 +59,7 @@ export const AuthProvider = ({ children }) => {
     const result = await action(input);
     authMemory.set(result.accessToken);
     const current = await authApi.me();
-    const user = normalizeUser(current.user);
+    const user = normalizeUser(current.user || current);
     setUser(user);
     return user;
   }, []);
@@ -64,7 +70,7 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const current = await authApi.me();
-        const user = normalizeUser(current.user);
+        const user = normalizeUser(current.user || current);
         setUser(user);
         return user;
       } catch (error) {
