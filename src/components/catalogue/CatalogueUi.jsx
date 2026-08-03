@@ -154,7 +154,7 @@ export const CatalogueCourseCard = ({ area, course }) => {
   const sinhala = isSinhalaMedium(course);
 
   return (
-    <article className="catalogue-course-card">
+    <article className={`catalogue-course-card ${sinhala ? 'is-sinhala' : 'is-english'}`}>
       <img
         alt={`${title} course cover`}
         className="catalogue-course-image"
