@@ -38,8 +38,9 @@ export const PublicFooter = () => {
         </section>
         <section><h2>Learn</h2><nav aria-label="Learn"><Link to="/school-ict">Grades 6–9</Link><Link to="/ol-ict">O/L ICT</Link><Link to="/al-ict">A/L ICT</Link><Link to="/resources">Free Resources</Link></nav></section>
         <section><h2>Student Support</h2><nav aria-label="Student support"><Link to="/student-guide">Student Guide</Link>{isAuthenticated ? <Link to={destinationForUser(user)}>My Learning</Link> : <a href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=/`}>Student Login</a>}<Link to="/contact">Contact</Link></nav></section>
-        <section><h2>A Plus ICT</h2><nav aria-label="A Plus ICT"><Link to="/about">About</Link><Link to="/privacy-policy">Privacy Policy</Link><Link to="/terms">Terms of Use</Link></nav></section>
+        <section><h2>A Plus ICT</h2><nav aria-label="A Plus ICT"><Link to="/about">About</Link><Link to="/privacy-policy">Privacy Policy</Link><Link to="/terms">Terms and Conditions</Link><Link to="/refund-policy">Refund Policy</Link><Link to="/cancellation-policy">Cancellation Policy</Link><Link to="/payment-policy">Payment Policy</Link></nav></section>
         {data?.contactChannels?.length || data?.socialLinks?.filter((item) => item.url && item.url !== '#').length ? <section><h2>Contact</h2>{data?.contactChannels?.map((item) => <p key={item.id}>{item.publicUrl ? <a href={item.publicUrl}>{item.label}</a> : item.label}</p>)}{data?.socialLinks?.filter((item) => item.url && item.url !== '#').length ? <nav aria-label="Social links">{data.socialLinks.filter((item) => item.url && item.url !== '#').map((item) => <SocialLink item={item} key={item.id} />)}</nav> : null}</section> : null}
+        {data?.legalBusinessName ? <section className="footer-legal"><h2>Legal identity</h2><p>{data.relationshipStatement}</p><p>Company Registration No: {data.companyRegistrationNumber}</p><p>{data.registeredAddress?.line1},<br />{data.registeredAddress?.line2}, {data.registeredAddress?.city},<br />{data.registeredAddress?.country}</p></section> : null}
       </div>
       <p>© {new Date().getFullYear()} A Plus ICT</p>
     </footer>

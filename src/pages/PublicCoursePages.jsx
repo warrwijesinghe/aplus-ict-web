@@ -1219,6 +1219,7 @@ const SitePage = ({ contact }) => {
           <p>Contact details have not been published yet.</p>
         )}
         <SocialLinks links={profile.socialLinks} />
+        {profile.legalBusinessName ? <section><h2>Legal business details</h2><p><strong>{profile.legalBusinessName}</strong><br />Company Registration No: {profile.companyRegistrationNumber}<br />{profile.registeredAddress?.line1}, {profile.registeredAddress?.line2}, {profile.registeredAddress?.city}, {profile.registeredAddress?.country}</p></section> : null}
         <div className="contact-actions">
           {profile.contactChannels?.[0]?.publicUrl && (
             <a className="button" href={profile.contactChannels[0].publicUrl}>
@@ -1253,6 +1254,7 @@ const SitePage = ({ contact }) => {
           <p>Students do not always have the same timetable, location, device, or learning speed. A Plus ICT makes the Sri Lankan school ICT syllabus available through a flexible, organised, and student-friendly online learning experience.</p>
           <p><strong>Study ICT Anytime. Anywhere.</strong> Learn in Sinhala or English Medium, follow a structured sequence, and begin with available free content before unlocking more learning.</p>
           <p>{profile.tutorName || 'WARR Wijesinghe'} is an ICT Educator, Software Engineer, and Founder of A Plus ICT.</p>
+          {profile.legalBusinessName ? <><h2>Our operator</h2><p>{profile.relationshipStatement} The service is operated by <strong>{profile.legalBusinessName}</strong> (Company Registration No: {profile.companyRegistrationNumber}), registered at {profile.registeredAddress?.line1}, {profile.registeredAddress?.line2}, {profile.registeredAddress?.city}, {profile.registeredAddress?.country}.</p></> : null}
           <h2>Our Mission</h2>
           <p>
             To give every Sri Lankan school student a clear and accessible path to learn ICT—regardless of location, timetable, or learning speed.

@@ -22,7 +22,7 @@ import {
   StudentGuidePage
 } from '../pages/PublicCoursePages.jsx';
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
-import { PrivacyPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
+import { CancellationPolicyPage, PaymentPolicyPage, PrivacyPolicyPage, RefundPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
 import { AlIctPage, OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
 import {
   AdminDashboard,
@@ -69,6 +69,9 @@ export const router = createBrowserRouter([
       { path: '/contact', element: <ContactPage /> },
       { path: '/privacy-policy', element: <PrivacyPolicyPage /> },
       { path: '/terms', element: <TermsPage /> },
+      { path: '/refund-policy', element: <RefundPolicyPage /> },
+      { path: '/cancellation-policy', element: <CancellationPolicyPage /> },
+      { path: '/payment-policy', element: <PaymentPolicyPage /> },
       { path: '/courses/:courseId/curriculum', element: <CurriculumPage /> },
       { path: '/lessons/:lessonId/preview', element: <LessonPreviewPage /> },
       { path: '/store', element: <StorePage /> },

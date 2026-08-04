@@ -11,7 +11,10 @@ export const PUBLIC_ROUTE_SEO = {
   '/about': { title: 'About A Plus ICT | Flexible Online School ICT Learning', description: 'Learn how A Plus ICT provides structured and flexible online ICT education for Sri Lankan school students in Grades 6–13.' },
   '/contact': { title: 'Contact A Plus ICT', description: 'Contact A Plus ICT with questions about school ICT learning, courses and resources.' },
   '/privacy-policy': { title: 'Privacy Policy', description: 'Privacy Policy for A Plus ICT students and visitors.', noIndex: true },
-  '/terms': { title: 'Terms of Use', description: 'Terms of Use for A Plus ICT students and visitors.', noIndex: true }
+  '/terms': { title: 'Terms and Conditions', description: 'Terms and Conditions for A Plus ICT students and visitors.', noIndex: true },
+  '/refund-policy': { title: 'Refund Policy', description: 'Refund Policy for A Plus ICT customers.', noIndex: true },
+  '/cancellation-policy': { title: 'Cancellation Policy', description: 'Cancellation Policy for A Plus ICT customers.', noIndex: true },
+  '/payment-policy': { title: 'Payment Policy', description: 'Payment Policy for A Plus ICT customers.', noIndex: true }
 };
 
 export const PUBLIC_SITEMAP_PATHS = ['/', '/school-ict', '/ol-ict', '/al-ict', '/resources', '/student-guide', '/about', '/contact'];
