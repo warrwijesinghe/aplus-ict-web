@@ -4,8 +4,7 @@ export const TeacherLayout = () => (
     title="Teacher portal"
     links={[
       { to: '/teacher', label: 'Dashboard' },
-      { to: '/teacher/content', label: 'My content' },
-      { to: '/teacher/content/courses', label: 'Courses' }
+      { to: '/teacher/courses', label: 'Assigned courses' }
     ]}
   />
 );

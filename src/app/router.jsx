@@ -44,6 +44,8 @@ import {
   StudentDashboard,
   StudentLessonPage,
   TeacherContentPage,
+  TeacherCoursePage,
+  TeacherCoursesPage,
   TeacherDashboard,
   UnauthorizedPage
 } from '../pages/pages.jsx';
@@ -121,12 +123,14 @@ export const router = createBrowserRouter([
         ]
       },
       {
-        element: <RoleRoute roles={['teacher', 'admin', 'super_admin']} />,
+        element: <RoleRoute roles={['teacher', 'content_editor', 'admin', 'super_admin']} />,
         children: [
           {
             element: <TeacherLayout />,
             children: [
               { path: '/teacher', element: <TeacherDashboard /> },
+              { path: '/teacher/courses', element: <TeacherCoursesPage /> },
+              { path: '/teacher/courses/:trackId', element: <TeacherCoursePage /> },
               { path: '/teacher/content', element: <TeacherContentPage /> },
               { path: '/teacher/content/subjects', element: <TeacherContentPage /> },
               { path: '/teacher/content/courses', element: <TeacherContentPage /> }

@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { commerceApi } from '../api/commerce.api.js';
 import { contentApi } from '../api/content.api.js';
 import { learningApi } from '../api/learning.api.js';
+import { educatorApi } from '../api/educator.api.js';
 import { queryKeys } from '../api/query-keys.js';
 import { resourceApi } from '../api/resource.api.js';
 import { useAuth } from '../auth/auth-context.jsx';
@@ -843,7 +844,20 @@ const PlannedPage = ({ title }) => (
     </p>
   </>
 );
-export const TeacherDashboard = () => <PlannedPage title="Teacher dashboard" />;
+export const TeacherDashboard = () => <TeacherCoursesPage />;
+export const TeacherCoursesPage = () => {
+  const tracks = useQuery({ queryKey: ['educator', 'tracks'], queryFn: educatorApi.tracks });
+  if (tracks.isLoading) return <LoadingSkeleton />;
+  if (tracks.error) return <PageError error={tracks.error} />;
+  if (!tracks.data.length) return <EmptyState title="No course tracks have been assigned yet"><p>Ask an administrator to assign the course tracks you should manage.</p></EmptyState>;
+  return <><p className="eyebrow">Educator workspace</p><h1>Assigned course tracks</h1><div className="grid">{tracks.data.map(({ assignmentId, capabilities, track }) => <Card key={assignmentId}><h2>{track?.title || 'Assigned course'}</h2><p>{track?.Course?.titleEn || track?.Course?.title}</p><p>{track?.Medium?.name || 'Course track'}</p><p>{Object.entries(capabilities).filter(([, allowed]) => allowed).map(([name]) => name.replace(/^canManage/, 'Manage ').replace('canGradeAssignments', 'Grade assignments').replace('canViewStudents', 'View students')).join(' · ') || 'View assigned content'}</p><Link to={`/teacher/courses/${track.id}`}>Open workspace</Link></Card>)}</div></>;
+};
+export const TeacherCoursePage = () => {
+  const { trackId } = useParams(); const track = useQuery({ queryKey: ['educator', 'track', trackId], queryFn: () => educatorApi.track(trackId) });
+  if (track.isLoading) return <LoadingSkeleton />;
+  if (track.error) return <PageError error={track.error} />;
+  return <><p className="eyebrow">Assigned course track</p><h1>{track.data.title}</h1><p>{track.data.Course?.titleEn || track.data.Course?.title}</p><p>Content, question, quiz, and grading tools will appear here as those modules are delivered. This workspace never exposes unassigned course tracks.</p><Link to="/teacher/courses">Back to assigned courses</Link></>;
+};
 export const TeacherContentPage = () => <PlannedPage title="My content" />;
 export const AdminDashboard = () => <PlannedPage title="Administrator dashboard" />;
 export const AdminListPage = () => <PlannedPage title="Management" />;
