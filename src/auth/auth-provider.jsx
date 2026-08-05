@@ -66,6 +66,9 @@ export const AuthProvider = ({ children }) => {
   const completeGoogleLogin = useCallback(
     async (accessToken) => {
       setIsRestoringSession(true);
+      // Activity detail responses may contain authorized learning content. A
+      // Google account switch must never reuse that cache for the next user.
+      queryClient.removeQueries({ queryKey: ['learning'] });
       authMemory.set(accessToken);
 
       try {

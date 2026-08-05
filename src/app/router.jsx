@@ -22,6 +22,7 @@ import {
   StudentGuidePage
 } from '../pages/PublicCoursePages.jsx';
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
+import { StudentActivityPlayer } from '../components/learning/StudentLessonPlayer.jsx';
 import { CancellationPolicyPage, PaymentPolicyPage, PrivacyPolicyPage, RefundPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
 import { AlIctPage, OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
 import {
@@ -63,6 +64,7 @@ export const router = createBrowserRouter([
       { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
       { path: '/enroll/:courseSlug', element: <EnrollmentPage /> },
       { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
+      { path: '/courses/:courseSlug/lessons/:lessonSlug/activities/:activityId', element: <StudentActivityPlayer /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug', element: <LessonLearningPage /> },
       { path: '/resources', element: <PublicResourcesPage /> },
       { path: '/free-lessons', element: <PublicResourcesPage /> },

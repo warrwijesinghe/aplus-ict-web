@@ -18,6 +18,7 @@ import { academicAreaForCourse, lessonPurchaseText } from '../config/lesson-pric
 import { courseBreadcrumbs, isComingSoon } from '../utils/academic-course.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
+import { StudentCourseOverview } from '../components/learning/StudentLessonPlayer.jsx';
 import {
   BilingualHeading,
   CatalogueCourseCard
@@ -799,11 +800,6 @@ export const CourseLearningPage = () => {
     queryFn: ({ signal }) => contentApi.publicCurriculum(courseSlug, signal)
   });
   const enrollment = useCourseEnrollment(curriculum.data?.data?.id, isAuthenticated && Boolean(curriculum.data?.data?.id));
-  const progress = useQuery({
-    queryKey: queryKeys.learning.activityProgress(courseSlug),
-    queryFn: ({ signal }) => learningApi.activityProgress(courseSlug, signal),
-    enabled: isAuthenticated && Boolean(enrollment.data)
-  });
   if (curriculum.isLoading || enrollment.isLoading) return <LoadingSkeleton />;
   if (curriculum.isError) return <InlineError error={curriculum.error} />;
   if (!isAuthenticated)
@@ -822,34 +818,7 @@ export const CourseLearningPage = () => {
     );
   if (!enrollment.data)
     return <section className="login-cta"><p className="eyebrow">Free enrollment</p><h1>Enroll before you start learning.</h1><p>Enrollment enables free chapter access and progress tracking for this course.</p><Link className="button" to={`/enroll/${courseSlug}`}>Enroll Free</Link></section>;
-  const course = progress.data?.course || curriculum.data.data;
-  const lessons = progress.data?.lessons || curriculum.data.data.lessons;
-  return (
-    <>
-      <section className="lms-header">
-        <div className="lms-progress-heading">
-          <div>
-            <p className="eyebrow">Learning activity</p>
-            <h1>{course.title}</h1>
-          </div>
-          <strong className="course-progress-badge">
-            {progress.data?.progressPercent || 0}% complete
-          </strong>
-        </div>
-        <p className="course-progress-copy">
-          {progress.data?.completedAccessibleActivities || 0} of{' '}
-          {progress.data?.totalAccessibleActivities || 0} available learning activities completed. Every
-          purchased full lesson content expands the total progress path.
-        </p>
-        <progress max="100" value={progress.data?.progressPercent || 0} />
-      </section>
-      <div className="lms-lessons">
-        {lessons.map((lesson) => (
-          <LearningLessonCard course={course} courseSlug={courseSlug} key={lesson.id} lesson={lesson} />
-        ))}
-      </div>
-    </>
-  );
+  return <StudentCourseOverview courseSlug={courseSlug} />;
 };
 
 const LessonMapItem = ({ courseSlug, lesson, selectedLessonId }) => {

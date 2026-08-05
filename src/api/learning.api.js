@@ -19,6 +19,10 @@ export const learningApi = {
       .then(data),
   completeActivity: (activityId) =>
     learningClient.post(`/api/v1/learning/activities/${activityId}/complete`).then(data),
+  player: (courseSlug, signal) => learningClient.get(`/api/v1/learning/courses/${courseSlug}/player`, { signal }).then(data),
+  continue: (courseSlug, signal) => learningClient.get(`/api/v1/learning/courses/${courseSlug}/continue`, { signal }).then(data),
+  playerActivity: (courseSlug, lessonSlug, activityId, signal) => learningClient.get(`/api/v1/learning/courses/${courseSlug}/lessons/${lessonSlug}/activities/${activityId}`, { signal }).then(data),
+  setManualCompletion: (courseSlug, lessonSlug, activityId, completed) => learningClient.patch(`/api/v1/learning/courses/${courseSlug}/lessons/${lessonSlug}/activities/${activityId}/completion`, { completed }).then(data),
   adminEnrolments: (params, signal) =>
     learningClient.get('/api/v1/admin/learning/enrolments', { params, signal }).then(data)
 };
