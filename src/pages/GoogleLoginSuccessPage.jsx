@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/auth-context.jsx';
 import { destinationForUser } from '../utils/route-destination.js';
+import { isProfileComplete, studentLearningApi } from '../features/student/student-learning.js';
 
 // Google returns the API access token in the fragment. It is never rendered or
 // logged; it is immediately removed before the authenticated user is loaded.
@@ -25,10 +26,16 @@ export const GoogleLoginSuccessPage = () => {
     }
 
     completeGoogleLogin(token)
-      .then((user) => {
+      .then(async (user) => {
         const intended = sessionStorage.getItem('aplus-return-to');
         sessionStorage.removeItem('aplus-return-to');
-        navigate(intended || destinationForUser(user), { replace: true });
+        const destination = intended || destinationForUser(user);
+        const isStudent = (user.roles || [user.role]).includes('student');
+        if (isStudent && !isProfileComplete(await studentLearningApi.profile())) {
+          navigate(`/complete-profile?returnTo=${encodeURIComponent(destination)}`, { replace: true });
+          return;
+        }
+        navigate(destination, { replace: true });
       })
       .catch(() =>
         setError('We could not complete your sign-in. Please try Google sign-in again.')

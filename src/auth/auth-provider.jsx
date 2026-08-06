@@ -69,6 +69,7 @@ export const AuthProvider = ({ children }) => {
       // Activity detail responses may contain authorized learning content. A
       // Google account switch must never reuse that cache for the next user.
       queryClient.removeQueries({ queryKey: ['learning'] });
+      queryClient.removeQueries({ queryKey: ['student'] });
       authMemory.set(accessToken);
 
       try {

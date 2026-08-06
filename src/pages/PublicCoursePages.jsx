@@ -237,6 +237,7 @@ const ActivityStudyContent = ({ activity }) => {
 const SyllabusLessonCard = ({ course, courseSlug, isEnrolled, lesson, progress }) => {
   const availability = lessonAvailability(lesson);
   const lessonStats = lessonProgress({ ...lesson, progress });
+  const comingSoon = isComingSoon(course);
 
   return (
     <article className="syllabus-lesson-card">
@@ -266,9 +267,13 @@ const SyllabusLessonCard = ({ course, courseSlug, isEnrolled, lesson, progress }
             <progress max="100" value={lessonStats.progressPercent} />
           </div>
         ) : null}
-        <Link className="lesson-card-link" onClick={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
-          {isEnrolled ? 'Start lesson' : 'Preview lesson'}
-        </Link>
+        {comingSoon ? (
+          <span className="lesson-card-link" role="status">Lesson preview coming soon</span>
+        ) : (
+          <Link className="lesson-card-link" onClick={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
+            {isEnrolled ? 'Start lesson' : 'Preview lesson'}
+          </Link>
+        )}
       </div>
     </article>
   );

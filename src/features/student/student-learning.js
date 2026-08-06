@@ -10,6 +10,7 @@ export const studentLearningApi = {
   enrollments: () => learningClient.get('/api/v1/student/enrolments').then(unwrap),
   enrollment: (courseId) => learningClient.get(`/api/v1/courses/${courseId}/enrollment`).then(unwrap),
   enroll: (course) => learningClient.post(`/api/v1/student/courses/${course.id}/enrol`).then(unwrap),
+  unenroll: (courseTrackId) => learningClient.delete(`/api/v1/student/courses/${courseTrackId}/enrolment`).then(unwrap),
   dashboard: () => learningClient.get('/api/v1/student/dashboard').then(unwrap),
   learningHistory: (params = {}) => learningClient.get('/api/v1/student/learning-history', { params }).then(unwrap),
   activityProgress: (courseSlug) =>
@@ -18,4 +19,4 @@ export const studentLearningApi = {
     learningClient.post(`/api/v1/learning/activities/${activityId}/complete`).then(unwrap),
 };
 
-export const isProfileComplete = (profile) => Boolean(profile?.isComplete || (profile?.fullName && profile?.mobileNumber && profile?.whatsAppNumber && profile?.gradeOrExamYear && profile?.schoolName && profile?.district && profile?.preferredMedium));
+export const isProfileComplete = (profile) => Boolean(profile?.isComplete || (profile?.fullName && profile?.dateOfBirth && profile?.address && profile?.city && profile?.mobileNumber && profile?.whatsAppNumber && profile?.schoolName && profile?.gender));
