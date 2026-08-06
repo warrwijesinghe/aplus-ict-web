@@ -10,7 +10,7 @@ import { StudentLayout } from '../layouts/StudentLayout.jsx';
 import { TeacherLayout } from '../layouts/TeacherLayout.jsx';
 import { GoogleLoginSuccessPage } from '../pages/GoogleLoginSuccessPage.jsx';
 import { EnrollmentPage } from '../pages/EnrollmentPage.jsx';
-import { EnrollmentDashboard, StudentProfilePage } from '../pages/StudentExperiencePages.jsx';
+import { CompleteProfilePage, LearningHistoryPage, MyCoursesPage, ProfileCompletionGuard, StudentDashboard, StudentProfilePage } from '../pages/StudentExperiencePages.jsx';
 import { AdminContentPage } from '../pages/AdminContentPage.jsx';
 import { LogoutPage } from '../pages/LogoutPage.jsx';
 import {
@@ -38,12 +38,9 @@ import {
   OrdersPage,
   PaymentPage,
   ProductDetailPage,
-  ProfilePage,
   ProgressPage,
   ServiceUnavailablePage,
   StorePage,
-  StudentCoursesPage,
-  StudentDashboard,
   StudentLessonPage,
   TeacherContentPage,
   TeacherCoursePage,
@@ -102,17 +99,24 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
-      { path: '/dashboard', element: <EnrollmentDashboard /> },
-      { path: '/dashboard/courses', element: <EnrollmentDashboard /> },
-      { path: '/dashboard/profile', element: <StudentProfilePage /> },
       {
         element: <RoleRoute roles={['student']} />,
         children: [
+          { path: '/complete-profile', element: <CompleteProfilePage /> },
+          { path: '/profile', element: <StudentProfilePage /> },
           {
-            element: <StudentLayout />,
+            element: <ProfileCompletionGuard />,
             children: [
+              { path: '/dashboard', element: <StudentDashboard /> },
+              { path: '/dashboard/courses', element: <MyCoursesPage /> },
+              { path: '/dashboard/profile', element: <StudentProfilePage /> },
+              { path: '/my-courses', element: <MyCoursesPage /> },
+              { path: '/learning-history', element: <LearningHistoryPage /> },
+              {
+                element: <StudentLayout />,
+                children: [
               { path: '/student', element: <StudentDashboard /> },
-              { path: '/student/courses', element: <StudentCoursesPage /> },
+              { path: '/student/courses', element: <MyCoursesPage /> },
               { path: '/student/courses/:courseId', element: <ProgressPage /> },
               { path: '/student/courses/:courseId/progress', element: <ProgressPage /> },
               { path: '/student/courses/:courseTrackId/grades', element: <StudentGradebook /> },
@@ -121,7 +125,9 @@ export const router = createBrowserRouter([
               { path: '/student/orders/new', element: <NewOrderPage /> },
               { path: '/student/orders/:orderId', element: <OrderDetailPage /> },
               { path: '/student/orders/:orderId/payment', element: <PaymentPage /> },
-              { path: '/student/profile', element: <ProfilePage /> }
+              { path: '/student/profile', element: <StudentProfilePage /> }
+                ]
+              }
             ]
           }
         ]

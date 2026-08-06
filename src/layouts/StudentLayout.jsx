@@ -3,10 +3,11 @@ export const StudentLayout = () => (
   <PortalLayout
     title="My learning"
     links={[
-      { to: '/student', label: 'Dashboard' },
-      { to: '/student/courses', label: 'My courses' },
+      { to: '/dashboard', label: 'Dashboard' },
+      { to: '/my-courses', label: 'My courses' },
+      { to: '/learning-history', label: 'Learning history' },
       { to: '/student/orders', label: 'My orders' },
-      { to: '/student/profile', label: 'Profile' }
+      { to: '/profile', label: 'Profile' }
     ]}
   />
 );

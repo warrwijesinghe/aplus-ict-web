@@ -1,26 +1,55 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { contentApi } from '../api/content.api.js';
-import { queryKeys } from '../api/query-keys.js';
+import { Link, Navigate, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/auth-context.jsx';
-import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/States.jsx';
-import { useStudentEnrollments, useStudentProfile, useUpdateStudentProfile } from '../features/student/hooks.js';
+import { EmptyState, InlineError, LoadingSkeleton, StatusBadge } from '../components/common/States.jsx';
+import { isProfileComplete } from '../features/student/student-learning.js';
+import { useLearningHistory, useStudentDashboard, useStudentProfile, useUpdateStudentProfile } from '../features/student/hooks.js';
 
-export const EnrollmentDashboard = () => {
-  const { user } = useAuth(); const enrollments = useStudentEnrollments();
-  const courses = useQuery({ queryKey: queryKeys.content.publicCourses, queryFn: ({ signal }) => contentApi.publicCourses(signal) });
-  if (enrollments.isLoading || courses.isLoading) return <LoadingSkeleton />;
-  if (enrollments.isError || courses.isError) return <InlineError error={enrollments.error || courses.error} />;
-  const catalogue = courses.data?.data || []; const mine = enrollments.data || []; const enrolled = mine.map((entry) => ({ entry, course: entry.course })).filter((item) => item.course);
+const districts = ['Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle', 'Gampaha', 'Hambantota', 'Jaffna', 'Kalutara', 'Kandy', 'Kegalle', 'Kilinochchi', 'Kurunegala', 'Mannar', 'Matale', 'Matara', 'Monaragala', 'Mullaitivu', 'Nuwara Eliya', 'Polonnaruwa', 'Puttalam', 'Ratnapura', 'Trincomalee', 'Vavuniya'];
+const validPhone = /^(?:\+94|0)?7\d{8}$/;
+const formatDate = (value) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'Not started';
+const targetPath = (course) => course?.continueLearning ? `/courses/${course.slug}/lessons/${course.continueLearning.lessonSlug}/activities/${course.continueLearning.activityId}` : `/courses/${course?.slug}/learn`;
+
+export const ProfileCompletionGuard = ({ children }) => {
+  const { user, isRestoringSession } = useAuth(); const profile = useStudentProfile(); const location = useLocation();
+  if (isRestoringSession || profile.isLoading) return <LoadingSkeleton label="Checking your student profile" />;
+  if (!user || !['student'].includes(user.role)) return children || <Outlet />;
+  if (location.pathname === '/complete-profile' || location.pathname === '/profile') return children || <Outlet />;
+  return isProfileComplete(profile.data) ? children || <Outlet /> : <Navigate replace to={`/complete-profile?returnTo=${encodeURIComponent(location.pathname)}`} />;
+};
+
+export const StudentDashboard = () => {
+  const { user } = useAuth(); const data = useStudentDashboard();
+  if (data.isLoading) return <LoadingSkeleton />;
+  if (data.error) return <InlineError error={data.error} />;
+  const dashboard = data.data; const continuation = dashboard.continueLearning;
   return <section className="member-dashboard"><p className="eyebrow">My learning</p><h1>Welcome back, {user?.name || 'student'}.</h1>
-    {!enrolled.length ? <EmptyState title="You have not enrolled in a course yet"><Link className="button" to="/al-ict">Explore Grades 12–13 ICT</Link></EmptyState> : <><h2>My Courses</h2><div className="member-action-grid">{enrolled.map(({ entry, course }) => <Link key={entry.id} to={`/courses/${course.slug}/learn`}><span>ACTIVE</span><strong>{course.title}</strong><small>Enrollment active · Continue free learning</small></Link>)}</div><h2>Continue Learning</h2><p>Open an enrolled course to continue from your latest accessible chapter.</p><h2>My Purchased Lessons</h2><p>No paid lesson entitlements yet.</p><h2>Recent Activity</h2><p>Recent learning activity will appear after you start a chapter.</p></>}
-    <h2>Explore Courses</h2><div className="member-action-grid">{catalogue.filter((course) => !mine.some((entry) => entry.courseTrackId === course.id)).map((course) => <Link key={course.id} to={`/enroll/${course.slug}`}><span>{course.medium?.name || course.medium?.code}</span><strong>{course.title}</strong><small>Enroll Free</small></Link>)}</div>
+    {continuation ? <article className="student-dashboard-feature"><p className="eyebrow">Continue learning</p><h2>{continuation.title}</h2><p>{continuation.continueLearning?.title || 'Pick up where you left off.'}</p><Link className="button" to={targetPath(continuation)}>Continue Learning</Link></article> : <EmptyState title="Choose your first course"><Link className="button" to="/al-ict">Explore courses</Link></EmptyState>}
+    <section><div className="member-section-heading"><h2>My Courses</h2><Link to="/my-courses">View all</Link></div><div className="student-course-grid">{dashboard.courses.slice(0, 3).map((course) => <article key={course.enrolmentId} className="student-course-card"><StatusBadge status={course.status} /><h3>{course.title}</h3><p>{course.academicLevel || 'ICT'} · {course.medium}</p><strong>{course.progress.percentage}% complete</strong><progress max="100" value={course.progress.percentage} /><small>{course.progress.completedCount} of {course.progress.requiredCount} activities · {formatDate(course.lastLearningAt)}</small><Link to={targetPath(course)}>Continue Learning</Link></article>)}</div></section>
+    <section className="student-dashboard-grid"><article><h2>Recent Quiz Results</h2>{dashboard.recentQuizResults.length ? dashboard.recentQuizResults.map((item) => <p key={`${item.courseTrackId}-${item.quizId}`}>{item.courseTitle}: {item.title} — {item.percentage}%</p>) : <p>No quiz results yet.</p>}</article><article><h2>Pending Grades</h2>{dashboard.pendingGrades.length ? dashboard.pendingGrades.map((item) => <p key={`${item.courseTrackId}-${item.quizId}`}>{item.courseTitle}: {item.title}</p>) : <p>No grades are waiting.</p>}</article><article><h2>Recent Learning</h2>{dashboard.recentLearning.length ? dashboard.recentLearning.slice(0, 4).map((item) => <p key={item.id}>{item.eventType.replaceAll('_', ' ')} <small>{formatDate(item.occurredAt)}</small></p>) : <p>Your learning activity will appear here.</p>}</article></section>
   </section>;
 };
 
-export const StudentProfilePage = () => {
-  const { user } = useAuth(); const profile = useStudentProfile(); const update = useUpdateStudentProfile(); const form = useForm({ values: profile.data || {} });
-  if (profile.isLoading) return <LoadingSkeleton />;
-  return <section className="form-card enrollment-form"><p className="eyebrow">My profile</p><h1>Student information</h1><p>Google email (read-only): <strong>{user?.email}</strong></p><form onSubmit={form.handleSubmit((values) => update.mutate({ ...values, googleEmail: user?.email }))}><label>Full name<input {...form.register('fullName')} /></label><label>Mobile number<input {...form.register('mobileNumber')} /></label><label>WhatsApp number<input {...form.register('whatsAppNumber')} /></label><label>A/L examination year<input type="number" {...form.register('examYear')} /></label><label>School name<input {...form.register('schoolName')} /></label><label>District<input {...form.register('district')} /></label><label>Town<input {...form.register('town')} /></label><label>Parent or guardian contact<input {...form.register('guardianContactNumber')} /></label><label>Preferred medium<select {...form.register('preferredMedium')}><option value="">Select</option><option value="sinhala">Sinhala Medium</option><option value="english">English Medium</option></select></label>{update.error && <InlineError error={update.error} />}<button disabled={update.isPending} type="submit">{update.isPending ? 'Saving…' : 'Save profile'}</button></form></section>;
+export const MyCoursesPage = () => {
+  const courses = useStudentDashboard();
+  if (courses.isLoading) return <LoadingSkeleton />; if (courses.error) return <InlineError error={courses.error} />;
+  return <section><p className="eyebrow">My courses</p><h1>Continue your learning</h1>{courses.data.courses.length ? <div className="student-course-grid">{courses.data.courses.map((course) => <article key={course.enrolmentId} className="student-course-card"><StatusBadge status={course.status} /><h2>{course.title}</h2><p>{course.academicLevel || 'ICT'} · {course.medium} · {course.enrolmentType}</p><progress max="100" value={course.progress.percentage} /><p><strong>{course.progress.percentage}%</strong> — {course.progress.completedCount} of {course.progress.requiredCount} required activities</p><p>Last learning: {formatDate(course.lastLearningAt)}</p><Link className="button" to={targetPath(course)}>Continue Learning</Link></article>)}</div> : <EmptyState title="You have no courses yet"><Link className="button" to="/al-ict">Explore courses</Link></EmptyState>}</section>;
 };
+
+export const LearningHistoryPage = () => {
+  const history = useLearningHistory(); if (history.isLoading) return <LoadingSkeleton />; if (history.error) return <InlineError error={history.error} />;
+  return <section><p className="eyebrow">Learning history</p><h1>Your recent learning</h1>{history.data.items.length ? <ol className="learning-history-list">{history.data.items.map((item) => <li key={item.id}><strong>{item.eventType.replaceAll('_', ' ')}</strong><span>{item.course?.title || 'Course'} · {formatDate(item.occurredAt)}</span></li>)}</ol> : <EmptyState title="No learning history yet" />}</section>;
+};
+
+export const StudentProfilePage = ({ completion = false }) => {
+  const { user } = useAuth(); const profile = useStudentProfile(); const update = useUpdateStudentProfile(); const navigate = useNavigate(); const [search] = useSearchParams(); const form = useForm({ defaultValues: { fullName: user?.name || '', whatsAppSame: true, preferredMedium: '' } });
+  useEffect(() => { if (profile.data) form.reset({ ...profile.data, gradeOrExamYear: profile.data.gradeOrExamYear || '', whatsAppSame: profile.data.whatsAppNumber === profile.data.mobileNumber }); }, [form, profile.data]);
+  if (profile.isLoading) return <LoadingSkeleton />;
+  const submit = async (values) => { const saved = await update.mutateAsync({ ...values, whatsAppNumber: values.whatsAppSame ? values.mobileNumber : values.whatsAppNumber }); const requested = search.get('returnTo'); if (completion && saved.isComplete) navigate(requested?.startsWith('/') ? requested : '/dashboard', { replace: true }); };
+  return <section className="form-card enrollment-form"><p className="eyebrow">{completion ? 'One more step' : 'My profile'}</p><h1>{completion ? 'Complete your student profile' : 'Student information'}</h1><p>Google email (read-only): <strong>{user?.email}</strong></p><form onSubmit={form.handleSubmit(submit)}><label>Full name<input {...form.register('fullName', { required: 'Enter your full name' })} /></label><label>Mobile number<input {...form.register('mobileNumber', { required: 'Enter your mobile number', validate: (value) => validPhone.test(value.replace(/[\s-]/g, '')) || 'Enter a valid Sri Lankan mobile number' })} /></label><label><input type="checkbox" {...form.register('whatsAppSame')} /> WhatsApp number is the same as mobile</label><label>WhatsApp number<input {...form.register('whatsAppNumber')} /></label><label>Grade or examination year<input type="number" {...form.register('gradeOrExamYear', { required: 'Enter your examination year' })} /></label><label>School name<input {...form.register('schoolName', { required: 'Enter your school name' })} /></label><label>District<select {...form.register('district', { required: 'Select your district' })}><option value="">Select district</option>{districts.map((district) => <option key={district} value={district}>{district}</option>)}</select></label><label>Preferred medium<select {...form.register('preferredMedium', { required: 'Select a medium' })}><option value="">Select</option><option value="sinhala">Sinhala Medium</option><option value="english">English Medium</option></select></label><label>Parent or guardian contact (optional)<input {...form.register('guardianContactNumber')} /></label><label>How did you hear about us? (optional)<input {...form.register('referralSource')} /></label>{Object.values(form.formState.errors).map((error) => <p className="field-error" key={error.message}>{error.message}</p>)}{update.error && <InlineError error={update.error} />}<button disabled={update.isPending} type="submit">{update.isPending ? 'Saving…' : completion ? 'Save and continue' : 'Save profile'}</button></form></section>;
+};
+
+export const CompleteProfilePage = () => <StudentProfilePage completion />;
+
+export const EnrollmentDashboard = () => <StudentDashboard />;

@@ -3563,6 +3563,20 @@ body.navigation-open { overscroll-behavior: none; }
 .player-next-previous { align-items: center; border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1rem; }
 .player-next-previous a { font-weight: 800; }
 .student-quiz, .student-quiz-attempt, .quiz-result { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: .75rem; padding: clamp(1rem, 3vw, 1.5rem); }
+.student-dashboard-feature, .student-course-card, .student-dashboard-grid > article { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: .85rem; padding: clamp(1rem, 3vw, 1.5rem); }
+.student-dashboard-feature { margin: 1.5rem 0 2rem; }
+.student-course-grid, .student-dashboard-grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.student-course-card { display: flex; flex-direction: column; gap: .7rem; min-width: 0; }
+.student-course-card h2, .student-course-card h3 { margin: 0; }
+.student-course-card p, .student-course-card small { color: var(--color-text-muted); margin: 0; }
+.student-course-card a { font-weight: 800; margin-top: auto; }
+.student-course-card progress { accent-color: var(--color-primary); width: 100%; }
+.member-section-heading { align-items: center; display: flex; justify-content: space-between; margin: 1.5rem 0 1rem; }
+.member-section-heading h2 { margin: 0; }
+.learning-history-list { display: grid; gap: .8rem; list-style: none; margin: 1.5rem 0; padding: 0; }
+.learning-history-list li { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: .65rem; display: grid; gap: .25rem; padding: 1rem; }
+.learning-history-list span { color: var(--color-text-muted); }
+.field-error { color: var(--color-error); font-weight: 700; }
 .quiz-details, .quiz-result dl { display: grid; gap: .75rem; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 1.25rem 0; }
 .quiz-details div, .quiz-result dl div { background: var(--color-primary-soft); border-radius: .5rem; padding: .7rem; }
 .quiz-details dt, .quiz-result dt { color: var(--color-text-muted); font-size: .8rem; }
@@ -3604,4 +3618,5 @@ body.navigation-open { overscroll-behavior: none; }
   .quiz-attempt-layout { grid-template-columns: 1fr; }
   .quiz-navigator { grid-template-columns: repeat(auto-fit, minmax(2.5rem, 1fr)); order: 2; }
   .quiz-matching label { grid-template-columns: 1fr; }
+  .student-course-grid, .student-dashboard-grid { grid-template-columns: 1fr; }
 }
