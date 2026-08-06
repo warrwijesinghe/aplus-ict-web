@@ -19,7 +19,10 @@ export const queryKeys = {
     activityProgress: (slug) => ['learning', 'activity-progress', slug],
     player: (slug) => ['learning', 'player', slug],
     continue: (slug) => ['learning', 'continue', slug],
-    playerActivity: (courseSlug, lessonSlug, activityId) => ['learning', 'player', courseSlug, lessonSlug, activityId]
+    playerActivity: (courseSlug, lessonSlug, activityId) => ['learning', 'player', courseSlug, lessonSlug, activityId],
+    quiz: (quizId) => ['learning', 'quiz', quizId],
+    quizAttempt: (attemptId) => ['learning', 'quiz-attempt', attemptId],
+    quizResult: (attemptId) => ['learning', 'quiz-result', attemptId]
   },
   commerce: {
     products: (params = {}) => ['commerce', 'products', params],

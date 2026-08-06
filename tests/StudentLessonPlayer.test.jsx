@@ -22,7 +22,7 @@ describe('student lesson activity renderers', () => {
       [{ type: 'external_link', externalUrl: 'https://example.com' }, 'Open external learning resource'],
       [{ type: 'practical_activity', instructions: '<p>Build a worksheet</p>' }, 'Build a worksheet'],
       [{ type: 'assignment', instructions: 'Read the brief' }, 'Student submission is not available yet.'],
-      [{ type: 'quiz', instructions: 'Quiz introduction' }, 'Quiz attempts are not available yet.'],
+      [{ type: 'quiz', instructions: 'Quiz introduction' }, 'This Quiz has not been configured yet.'],
       [{ type: 'embed' }, 'This learning activity is not supported in the student player yet.'],
     ];
     cases.forEach(([activity, expected]) => {

@@ -8,6 +8,7 @@ import { safeExternalUrl } from '../../utils/safe-url.js';
 import { useAuth } from '../../auth/auth-context.jsx';
 import { serviceUrls } from '../../api/service-urls.js';
 import { EmptyState, InlineError, LoadingSkeleton } from '../common/States.jsx';
+import { StudentQuiz } from './StudentQuiz.jsx';
 
 const typeNames = { label: 'Label', page: 'Page', rich_text: 'Study note', video: 'Video', image: 'Image', pdf: 'PDF', file: 'File', download: 'Download', external_link: 'External link', embed: 'Embed', practical_activity: 'Practical activity', assignment: 'Assignment', quiz: 'Quiz' };
 const playerPath = (courseSlug, target) => target ? `/courses/${courseSlug}/lessons/${target.lessonSlug}/activities/${target.activityId}` : `/courses/${courseSlug}/learn`;
@@ -71,11 +72,12 @@ const ExternalLinkActivity = ({ activity }) => {
 };
 const PracticalActivity = ({ activity }) => <div className="player-practical"><HtmlContent html={activity.instructions || activity.content} />{activity.config?.expectedOutput ? <p><strong>Expected outcome:</strong> {activity.config.expectedOutput}</p> : null}{activity.config?.requiredSoftware?.length ? <p><strong>Suggested software:</strong> {activity.config.requiredSoftware.join(', ')}</p> : null}</div>;
 const FutureActivity = ({ activity }) => <div className="player-future"><p>{activity.instructions || activity.descriptionEn || 'This activity is being prepared.'}</p><p><strong>{activity.type === 'quiz' ? 'Quiz attempts are not available yet.' : 'Student submission is not available yet.'}</strong></p></div>;
+const QuizActivity = ({ activity }) => activity.quizId ? <StudentQuiz quizId={activity.quizId} /> : <p role="alert">This Quiz has not been configured yet.</p>;
 const UnsupportedActivity = () => <p role="status">This learning activity is not supported in the student player yet.</p>;
 
 export const ActivityRenderer = ({ activity }) => {
   if (activity.isLocked) return <section className="player-lock" role="status"><h2>Premium activity</h2><p>This activity is part of the Exam Success Pack. Its learning content is kept private until access is confirmed.</p><Link className="button secondary" to="/store">View Exam Success Pack</Link></section>;
-  const renderers = { label: LabelActivity, page: ({ activity: item }) => <HtmlContent html={item.content} />, rich_text: ({ activity: item }) => <HtmlContent html={item.content} />, video: VideoActivity, image: ImageActivity, pdf: PdfActivity, file: FileActivity, download: ({ activity: item }) => <FileActivity activity={item} download />, external_link: ExternalLinkActivity, practical_activity: PracticalActivity, assignment: FutureActivity, quiz: FutureActivity, embed: UnsupportedActivity };
+  const renderers = { label: LabelActivity, page: ({ activity: item }) => <HtmlContent html={item.content} />, rich_text: ({ activity: item }) => <HtmlContent html={item.content} />, video: VideoActivity, image: ImageActivity, pdf: PdfActivity, file: FileActivity, download: ({ activity: item }) => <FileActivity activity={item} download />, external_link: ExternalLinkActivity, practical_activity: PracticalActivity, assignment: FutureActivity, quiz: QuizActivity, embed: UnsupportedActivity };
   const Renderer = renderers[activity.type] || UnsupportedActivity;
   return <Renderer activity={activity} />;
 };

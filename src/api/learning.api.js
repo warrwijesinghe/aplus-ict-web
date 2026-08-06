@@ -23,6 +23,12 @@ export const learningApi = {
   continue: (courseSlug, signal) => learningClient.get(`/api/v1/learning/courses/${courseSlug}/continue`, { signal }).then(data),
   playerActivity: (courseSlug, lessonSlug, activityId, signal) => learningClient.get(`/api/v1/learning/courses/${courseSlug}/lessons/${lessonSlug}/activities/${activityId}`, { signal }).then(data),
   setManualCompletion: (courseSlug, lessonSlug, activityId, completed) => learningClient.patch(`/api/v1/learning/courses/${courseSlug}/lessons/${lessonSlug}/activities/${activityId}/completion`, { completed }).then(data),
+  quiz: (quizId, signal) => learningClient.get(`/api/v1/student/quizzes/${quizId}`, { signal }).then(data),
+  startQuizAttempt: (quizId) => learningClient.post(`/api/v1/student/quizzes/${quizId}/attempts`).then(data),
+  quizAttempt: (attemptId, signal) => learningClient.get(`/api/v1/student/quiz-attempts/${attemptId}`, { signal }).then(data),
+  saveQuizAnswer: (attemptId, questionId, answer) => learningClient.put(`/api/v1/student/quiz-attempts/${attemptId}/answers/${questionId}`, answer).then(data),
+  submitQuizAttempt: (attemptId) => learningClient.post(`/api/v1/student/quiz-attempts/${attemptId}/submit`).then(data),
+  quizResult: (attemptId, signal) => learningClient.get(`/api/v1/student/quiz-attempts/${attemptId}/result`, { signal }).then(data),
   adminEnrolments: (params, signal) =>
     learningClient.get('/api/v1/admin/learning/enrolments', { params, signal }).then(data)
 };
