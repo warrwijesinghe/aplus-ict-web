@@ -30,5 +30,7 @@ export const commerceApi = {
   studentOrders: (params, signal) => commerceClient.get('/api/v1/student/orders', { params, signal }).then((response) => response.data.data),
   studentOrder: (id, signal) => commerceClient.get(`/api/v1/student/orders/${id}`, { signal }).then((response) => response.data.data),
   createStudentOrder: (productId) => commerceClient.post('/api/v1/student/orders', { productId }, { headers: headers() }).then((response) => response.data.data),
-  cancelStudentOrder: (id) => commerceClient.post(`/api/v1/student/orders/${id}/cancel`).then((response) => response.data.data)
+  cancelStudentOrder: (id) => commerceClient.post(`/api/v1/student/orders/${id}/cancel`).then((response) => response.data.data),
+  initiateDirectPay: (id) => commerceClient.post(`/api/v1/student/orders/${id}/payments/directpay`).then((response) => response.data.data),
+  paymentStatus: (id, refresh = false) => commerceClient.get(`/api/v1/student/orders/${id}/payment-status`, { params: refresh ? { refresh: 'true' } : {} }).then((response) => response.data.data)
 };

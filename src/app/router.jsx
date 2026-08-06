@@ -23,7 +23,7 @@ import {
 } from '../pages/PublicCoursePages.jsx';
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
 import { StudentActivityPlayer } from '../components/learning/StudentLessonPlayer.jsx';
-import { ExamSuccessPackPage, StudentOrderDetailPage, StudentOrdersPage } from '../pages/ExamSuccessPackPage.jsx';
+import { DirectPayReturnPage, ExamSuccessPackPage, StudentOrderDetailPage, StudentOrdersPage } from '../pages/ExamSuccessPackPage.jsx';
 import { StudentGradebook } from '../components/learning/StudentGradebook.jsx';
 import { CancellationPolicyPage, PaymentPolicyPage, PrivacyPolicyPage, RefundPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
 import { AlIctPage, OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
@@ -127,6 +127,8 @@ export const router = createBrowserRouter([
               { path: '/student/orders/new', element: <StudentOrdersPage /> },
               { path: '/student/orders/:orderId', element: <StudentOrderDetailPage /> },
               { path: '/student/orders/:orderId/payment', element: <StudentOrderDetailPage /> },
+              { path: '/payments/directpay/return', element: <DirectPayReturnPage /> },
+              { path: '/payments/directpay/cancel', element: <DirectPayReturnPage cancelled /> },
               { path: '/student/profile', element: <StudentProfilePage /> }
                 ]
               }
