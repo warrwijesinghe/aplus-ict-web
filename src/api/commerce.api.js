@@ -25,5 +25,10 @@ export const commerceApi = {
   submitBankTransfer: (id, body) =>
     commerceClient
       .post(`/api/v1/orders/${id}/payments/bank-transfer`, body, { headers: headers() })
-      .then(unwrap)
+      .then(unwrap),
+  examSuccessPack: (lessonId, signal) => commerceClient.get(`/api/v1/student/lessons/${lessonId}/exam-success-pack`, { signal }).then((response) => response.data.data),
+  studentOrders: (params, signal) => commerceClient.get('/api/v1/student/orders', { params, signal }).then((response) => response.data.data),
+  studentOrder: (id, signal) => commerceClient.get(`/api/v1/student/orders/${id}`, { signal }).then((response) => response.data.data),
+  createStudentOrder: (productId) => commerceClient.post('/api/v1/student/orders', { productId }, { headers: headers() }).then((response) => response.data.data),
+  cancelStudentOrder: (id) => commerceClient.post(`/api/v1/student/orders/${id}/cancel`).then((response) => response.data.data)
 };

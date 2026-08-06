@@ -9,7 +9,6 @@ import { queryKeys } from '../api/query-keys.js';
 import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/States.jsx';
 import { ResourceImage } from '../components/resources/ResourceImage.jsx';
 import { useAuth } from '../auth/auth-context.jsx';
-import { useOrderSelection } from '../features/store/selection-context.jsx';
 import { usePageSeo } from '../seo/use-page-seo.js';
 import { courseSeo, lessonSeo } from '../seo/public-seo-config.js';
 import { trackPublicEvent } from '../analytics/events.js';
@@ -701,7 +700,6 @@ const ActivityRow = ({ activity, courseSlug }) => {
 
 const UnlockLessonButton = ({ course, lesson }) => {
   const navigate = useNavigate();
-  const { add } = useOrderSelection();
 
   if (!lesson.hasPaidContent || lesson.premiumUnlocked) return null;
 
@@ -714,8 +712,7 @@ const UnlockLessonButton = ({ course, lesson }) => {
     );
 
   const unlockLesson = () => {
-    add(lesson.unlockProduct);
-    navigate('/student/orders/new');
+    navigate(`/courses/${course.slug}/lessons/${lesson.slug || lesson.id}/exam-success-pack`);
   };
 
   return (

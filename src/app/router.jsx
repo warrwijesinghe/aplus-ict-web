@@ -23,6 +23,7 @@ import {
 } from '../pages/PublicCoursePages.jsx';
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
 import { StudentActivityPlayer } from '../components/learning/StudentLessonPlayer.jsx';
+import { ExamSuccessPackPage, StudentOrderDetailPage, StudentOrdersPage } from '../pages/ExamSuccessPackPage.jsx';
 import { StudentGradebook } from '../components/learning/StudentGradebook.jsx';
 import { CancellationPolicyPage, PaymentPolicyPage, PrivacyPolicyPage, RefundPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
 import { AlIctPage, OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
@@ -112,6 +113,7 @@ export const router = createBrowserRouter([
               { path: '/dashboard/profile', element: <StudentProfilePage /> },
               { path: '/my-courses', element: <MyCoursesPage /> },
               { path: '/learning-history', element: <LearningHistoryPage /> },
+              { path: '/courses/:courseSlug/lessons/:lessonSlug/exam-success-pack', element: <ExamSuccessPackPage /> },
               {
                 element: <StudentLayout />,
                 children: [
@@ -121,10 +123,10 @@ export const router = createBrowserRouter([
               { path: '/student/courses/:courseId/progress', element: <ProgressPage /> },
               { path: '/student/courses/:courseTrackId/grades', element: <StudentGradebook /> },
               { path: '/student/lessons/:lessonId', element: <StudentLessonPage /> },
-              { path: '/student/orders', element: <OrdersPage /> },
-              { path: '/student/orders/new', element: <NewOrderPage /> },
-              { path: '/student/orders/:orderId', element: <OrderDetailPage /> },
-              { path: '/student/orders/:orderId/payment', element: <PaymentPage /> },
+              { path: '/student/orders', element: <StudentOrdersPage /> },
+              { path: '/student/orders/new', element: <StudentOrdersPage /> },
+              { path: '/student/orders/:orderId', element: <StudentOrderDetailPage /> },
+              { path: '/student/orders/:orderId/payment', element: <StudentOrderDetailPage /> },
               { path: '/student/profile', element: <StudentProfilePage /> }
                 ]
               }
