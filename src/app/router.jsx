@@ -23,6 +23,7 @@ import {
 } from '../pages/PublicCoursePages.jsx';
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
 import { StudentActivityPlayer } from '../components/learning/StudentLessonPlayer.jsx';
+import { StudentGradebook } from '../components/learning/StudentGradebook.jsx';
 import { CancellationPolicyPage, PaymentPolicyPage, PrivacyPolicyPage, RefundPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
 import { AlIctPage, OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
 import {
@@ -114,6 +115,7 @@ export const router = createBrowserRouter([
               { path: '/student/courses', element: <StudentCoursesPage /> },
               { path: '/student/courses/:courseId', element: <ProgressPage /> },
               { path: '/student/courses/:courseId/progress', element: <ProgressPage /> },
+              { path: '/student/courses/:courseTrackId/grades', element: <StudentGradebook /> },
               { path: '/student/lessons/:lessonId', element: <StudentLessonPage /> },
               { path: '/student/orders', element: <OrdersPage /> },
               { path: '/student/orders/new', element: <NewOrderPage /> },

@@ -23,6 +23,7 @@ export const learningApi = {
   continue: (courseSlug, signal) => learningClient.get(`/api/v1/learning/courses/${courseSlug}/continue`, { signal }).then(data),
   playerActivity: (courseSlug, lessonSlug, activityId, signal) => learningClient.get(`/api/v1/learning/courses/${courseSlug}/lessons/${lessonSlug}/activities/${activityId}`, { signal }).then(data),
   setManualCompletion: (courseSlug, lessonSlug, activityId, completed) => learningClient.patch(`/api/v1/learning/courses/${courseSlug}/lessons/${lessonSlug}/activities/${activityId}/completion`, { completed }).then(data),
+  courseGradebook: (trackId, signal) => learningClient.get(`/api/v1/student/courses/${trackId}/gradebook`, { signal }).then(data),
   quiz: (quizId, signal) => learningClient.get(`/api/v1/student/quizzes/${quizId}`, { signal }).then(data),
   startQuizAttempt: (quizId) => learningClient.post(`/api/v1/student/quizzes/${quizId}/attempts`).then(data),
   quizAttempt: (attemptId, signal) => learningClient.get(`/api/v1/student/quiz-attempts/${attemptId}`, { signal }).then(data),
