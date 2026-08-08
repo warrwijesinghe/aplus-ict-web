@@ -10,7 +10,7 @@ const renderCard = (course) => render(
 test('renders the redesigned Sinhala course card without publication status UI', () => {
   renderCard({
     academicLevel: { code: 'GRADE_10' },
-    availabilityStatus: 'coming_soon',
+    availabilityStatus: 'active',
     id: 'grade-10-si',
     medium: { code: 'sinhala', nameSi: 'සිංහල මාධ්‍ය' },
     shortDescriptionSi: 'ඉදිරියේදී ලබා ගත හැකි පාඩම් මාර්ගයකි.',

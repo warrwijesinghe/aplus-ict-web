@@ -14,7 +14,7 @@ import { courseSeo, lessonSeo } from '../seo/public-seo-config.js';
 import { trackPublicEvent } from '../analytics/events.js';
 import { LessonPrice } from '../components/pricing/LessonPrice.jsx';
 import { academicAreaForCourse, lessonPurchaseText } from '../config/lesson-pricing.js';
-import { courseBreadcrumbs, isComingSoon } from '../utils/academic-course.js';
+import { courseBreadcrumbs } from '../utils/academic-course.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
 import { StudentCourseOverview } from '../components/learning/StudentLessonPlayer.jsx';
@@ -237,7 +237,6 @@ const ActivityStudyContent = ({ activity }) => {
 const SyllabusLessonCard = ({ course, courseSlug, isEnrolled, lesson, progress }) => {
   const availability = lessonAvailability(lesson);
   const lessonStats = lessonProgress({ ...lesson, progress });
-  const comingSoon = isComingSoon(course);
 
   return (
     <article className="syllabus-lesson-card">
@@ -267,13 +266,9 @@ const SyllabusLessonCard = ({ course, courseSlug, isEnrolled, lesson, progress }
             <progress max="100" value={lessonStats.progressPercent} />
           </div>
         ) : null}
-        {comingSoon ? (
-          <span className="lesson-card-link" role="status">Lesson preview coming soon</span>
-        ) : (
-          <Link className="lesson-card-link" onClick={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
-            {isEnrolled ? 'Start lesson' : 'Preview lesson'}
-          </Link>
-        )}
+        <Link className="lesson-card-link" onClick={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
+          {isEnrolled ? 'Start lesson' : 'Preview lesson'}
+        </Link>
       </div>
     </article>
   );
@@ -581,7 +576,6 @@ export const PublicCourseDetailPage = () => {
   if (query.isError || curriculum.isError) return <InlineError error={query.error || curriculum.error} onRetry={() => { query.refetch(); curriculum.refetch(); }} />;
   if (!course) return <EmptyState title="This course is not available" />;
   const lessons = curriculum.data?.data?.lessons || [];
-  const comingSoon = isComingSoon(course);
   const progressByLesson = new Map(
     (learningProgress.data?.lessons || []).map((lesson) => [lesson.id, lesson.progress])
   );
@@ -618,7 +612,7 @@ export const PublicCourseDetailPage = () => {
           <p className="course-detail-note">
             Free content may be available first. Full lesson content is available after purchasing the lesson.
           </p>
-          {comingSoon ? <p className="course-detail-note">Coming Soon — this course cannot be enrolled in or purchased yet.</p> : <div className="course-detail-actions"><Link className="button" to={enrollment.data ? `/courses/${course.slug}/learn` : `/enroll/${course.slug}`}>{enrollment.data ? 'Continue Learning' : isAuthenticated ? 'Enroll Free' : 'Login to Enroll'}</Link></div>}
+          <div className="course-detail-actions"><Link className="button" to={enrollment.data ? `/courses/${course.slug}/learn` : `/enroll/${course.slug}`}>{enrollment.data ? 'Continue Learning' : isAuthenticated ? 'Enroll Free' : 'Login to Enroll'}</Link></div>
         </div>
       </section>
       <section className="syllabus-summary">

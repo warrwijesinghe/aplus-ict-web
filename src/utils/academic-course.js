@@ -39,5 +39,3 @@ export const courseBreadcrumbs = (course) => {
   const medium = mediumForCourse(course) === 'si' ? 'Sinhala Medium' : 'English Medium';
   return [{ label: 'Home', path: '/' }, { label, path }, ...(grade ? [{ label: `Grade ${grade} ICT` }] : []), { label: medium }];
 };
-
-export const isComingSoon = (item = {}) => String(item.availabilityStatus || item.status || '').toLowerCase() === 'coming_soon';

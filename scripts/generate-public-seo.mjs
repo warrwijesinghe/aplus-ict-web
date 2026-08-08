@@ -63,14 +63,14 @@ export const fetchDynamicPublicPaths = async (apiUrl) => {
     const courses = payload?.data || [];
     const paths = [];
     for (const course of courses) {
-      if (!course?.slug || course.availabilityStatus === 'coming_soon' || course.isPublic === false) continue;
+      if (!course?.slug || course.availabilityStatus === 'inactive' || course.isPublic === false) continue;
       paths.push(`/courses/${course.slug}`);
       try {
         const curriculumResponse = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/public/courses/${course.slug}/curriculum`, { signal: AbortSignal.timeout(5000) });
         if (!curriculumResponse.ok) continue;
         const curriculum = await curriculumResponse.json();
         for (const lesson of curriculum?.data?.lessons || []) {
-          if (lesson?.slug && lesson.isPublished !== false && lesson.availabilityStatus !== 'coming_soon') paths.push(`/courses/${course.slug}/lessons/${lesson.slug}`);
+          if (lesson?.slug && lesson.isPublished !== false) paths.push(`/courses/${course.slug}/lessons/${lesson.slug}`);
         }
       } catch { /* A course page is still useful when its lesson feed is unavailable. */ }
     }

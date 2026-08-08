@@ -49,7 +49,7 @@ test('groups homepage courses by school stage in database display order', async 
     { id: 'ol-2', courseGroup: 'OL', medium: { code: 'en', nameEn: 'English Medium' }, sortOrder: 20, title: 'O/L ICT - Part 2', slug: 'ol-ict-en-part-2' },
     { id: 'ol-3', courseGroup: 'OL', medium: { code: 'en', nameEn: 'English Medium' }, sortOrder: 30, title: 'O/L ICT - Part 3', slug: 'ol-ict-en-part-3' },
     { id: 'al-1', courseGroup: 'AL', medium: { code: 'en', nameEn: 'English Medium' }, sortOrder: 10, title: 'A/L ICT - Part 1', slug: 'al-ict-en-part-1' },
-    { id: 'school-1', availabilityStatus: 'coming_soon', courseGroup: 'SCHOOL', medium: { code: 'en', nameEn: 'English Medium' }, sortOrder: 10, title: 'Grade 6 ICT', slug: 'grade-6-ict-en' }
+    { id: 'school-1', availabilityStatus: 'active', courseGroup: 'SCHOOL', medium: { code: 'en', nameEn: 'English Medium' }, sortOrder: 10, title: 'Grade 6 ICT', slug: 'grade-6-ict-en' }
   ] });
   renderWithProviders(<PlatformHomePage />);
   await waitFor(() => expect(screen.getByRole('heading', { level: 2, name: 'A/L ICT Courses' })).toBeInTheDocument());
