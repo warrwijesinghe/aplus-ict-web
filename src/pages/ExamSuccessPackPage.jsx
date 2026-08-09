@@ -1,11 +1,33 @@
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { commerceApi } from '../api/commerce.api.js';
 import { contentApi } from '../api/content.api.js';
+import { resourceApi } from '../api/resource.api.js';
 import { InlineError, LoadingSkeleton } from '../components/common/States.jsx';
 
-const price = (value, currency = 'LKR') => new Intl.NumberFormat('en-LK', { style: 'currency', currency }).format(Number(value || 0));
+const price = (value) => `Rs. ${Number(value || 0).toLocaleString('en-LK', { maximumFractionDigits: 0 })}`;
 const date = (value) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—';
+const sampleTutorialCover = (isSinhala) => `${import.meta.env.BASE_URL}images/tutorial-covers/${isSinhala ? 'al-ict-sinhala-tutorial-book.png' : 'ol-ict-english-tutorial-book.png'}`;
+
+const TutorialCover = ({ resourceId, fallbackSrc, alt, placeholder }) => {
+  const [imageSrc, setImageSrc] = useState(fallbackSrc);
+  useEffect(() => {
+    let objectUrl;
+    setImageSrc(fallbackSrc);
+    if (!resourceId) return undefined;
+    resourceApi.content(resourceId)
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob);
+        setImageSrc(objectUrl);
+      })
+      .catch(() => undefined);
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [fallbackSrc, resourceId]);
+  return imageSrc
+    ? <img alt={alt} src={imageSrc} />
+    : <div aria-label={alt} className="exam-pack-tutorial-placeholder"><span>A+</span><strong>{placeholder}</strong></div>;
+};
 
 export const ExamSuccessPackPage = () => {
   const { courseSlug, lessonSlug } = useParams(); const navigate = useNavigate(); const client = useQueryClient();
@@ -15,7 +37,69 @@ export const ExamSuccessPackPage = () => {
   if (lesson.isPending || pack.isPending) return <LoadingSkeleton label="Loading Exam Success Pack" />;
   if (lesson.isError || pack.isError) return <InlineError error={lesson.error || pack.error} onRetry={() => { lesson.refetch(); pack.refetch(); }} />;
   const data = pack.data; const product = data.product;
-  return <section className="exam-success-pack"><nav className="breadcrumbs"><Link to={`/courses/${courseSlug}/learn`}>My course</Link><span>/</span><Link to={`/courses/${courseSlug}/lessons/${lessonSlug}`}>{data.lesson.title}</Link><span>/</span><span>Exam Success Pack</span></nav><p className="eyebrow">Exam Success Pack</p><h1>{product.name}</h1><p>{product.shortDescription || product.description || `Premium practice and revision activities for ${data.lesson.title}.`}</p><div className="exam-pack-summary"><strong>{price(product.price, product.currency)}</strong><span>{data.includedPremiumActivityCount} premium activities included</span><span>{product.entitlementDurationDays ? `${product.entitlementDurationDays} days of access` : 'No automatic expiry'}</span></div>{data.hasActiveEntitlement ? <p className="success-message">Your Exam Success Pack is active. Premium activities in this Lesson are unlocked.</p> : data.pendingOrder ? <section className="payment-pending"><h2>Payment pending</h2><p>Order {data.pendingOrder.orderNumber} is waiting for payment confirmation.</p><Link className="button" to={`/student/orders/${data.pendingOrder.id}`}>View order</Link></section> : <><p>Creating an order reserves the server-calculated price.</p>{create.error ? <InlineError error={create.error} /> : null}<button className="button" disabled={create.isPending} onClick={() => create.mutate()} type="button">{create.isPending ? 'Creating order…' : 'Create order'}</button></>}</section>;
+  const context = lesson.data?.data;
+  const isSinhala = context?.course?.medium?.code === 'sinhala';
+  const lessonNumber = context?.lesson?.lessonNumber ?? data.lesson?.lessonNumber;
+  const tutorialImageResourceId = context?.lesson?.tutorialImageResourceId;
+  const tutorialFallbackSrc = sampleTutorialCover(isSinhala);
+  const freeActivity = context?.lesson?.activities?.find((activity) => activity.accessPolicy === 'free');
+  const freeLearningPath = freeActivity ? `/courses/${courseSlug}/lessons/${lessonSlug}/activities/${freeActivity.id}` : `/courses/${courseSlug}/learn`;
+  const tutorialCopy = isSinhala ? {
+    eyebrow: 'PRINTED TUTORIAL · ගෙදරටම බෙදාහැරීම',
+    title: 'ඔබේ පාඩමට සකස් කළ මුද්‍රිත tutorial එකක් ඇතුළත්',
+    text: 'ගෙවීම තහවුරු වූ පසු, මෙම පාඩමේ tutorial එක ඔබගේ profile එකේ ලියාපදිංචි home address එකට බෙදා හරිනවා.',
+    badge: 'HOME DELIVERY INCLUDED',
+    placeholder: 'ඔබගේ පාඩමේ Tutorial Cover',
+  } : {
+    eyebrow: 'PRINTED TUTORIAL · HOME DELIVERY',
+    title: 'A professionally printed tutorial is included',
+    text: 'After payment is confirmed, the tutorial for this lesson is delivered to the home address saved in your student profile.',
+    badge: 'HOME DELIVERY INCLUDED',
+    placeholder: 'Your lesson tutorial cover',
+  };
+  const copy = isSinhala ? {
+    myCourse: 'මගේ පාඩම්', pack: 'Premium පාඩම් ප්‍රවේශය', eyebrow: 'PREMIUM පාඩම් ප්‍රවේශය',
+    accessTitle: 'සම්පූර්ණ පාඩම් Premium ප්‍රවේශය',
+    intro: 'මෙය එක් activity එකක් සඳහා වන ගාස්තුවක් නොවේ. මෙම පාඩම සඳහා පළ කරන premium learning activities, quizzes සහ revision resources වෙත සම්පූර්ණ ප්‍රවේශය ලබා ගන්න.',
+    priceLabel: 'සම්පූර්ණ පාඩම සඳහා මිල / Full lesson price',
+    benefitsTitle: 'මෙම පාඩම සමඟ ලැබෙන Premium ප්‍රවේශය', benefits: [
+      { icon: '01', title: 'Guided Premium ඉගෙනීම', description: 'මෙම පාඩමේ premium activities සහ ගැඹුරු පුහුණු කොටස් ඔබගේ වේගයට ඉගෙන ගන්න.' },
+      { icon: '02', title: 'Exam-targeted පුහුණුව', description: 'මෙම පාඩම සඳහා පළ කරන premium quizzes සහ exam-style practice වෙත ප්‍රවේශය ලබා ගන්න.' },
+      { icon: '03', title: 'Printed tute home delivery', description: 'මෙම පාඩමේ printed tute එක ඔබගේ student profile එකේ ලියාපදිංචි home address එකට ලබා දේ.', badge: 'ඇතුළත්', featured: true },
+      { icon: '04', title: 'Revision resources', description: 'පසුව මෙම පාඩමට එකතු කරන premium revision resources ඔබගේ ප්‍රවේශයට ඇතුළත් වේ.' },
+    ],
+    activeTitle: 'ඔබගේ premium access සක්‍රීයයි', activeText: 'මෙම පාඩමේ premium activities දැන් විවෘත කර ඇත.',
+    pendingTitle: 'ගෙවීම තහවුරු කිරීමට ඉතිරිව ඇත', pendingText: 'ඔබගේ order එක ගෙවීම තහවුරු වන තෙක් රැඳී ඇත.', viewOrder: 'Order එක බලන්න',
+    notReady: 'දැන්ම unlock කිරීමට අවශ්‍ය නැද්ද?', freeText: 'නොමිලේ activities වලින් ආරම්භ කරන්න. ඔබ සූදානම් වූ විට premium activities සහ ගෙදරට බෙදා හරින printed tutorial එක ලබා ගන්න.',
+    continueFree: 'නොමිලේ ඉගෙනීම ඉදිරියට ගෙනයන්න', checkoutNote: 'ගෙවීම තහවුරු වූ පසු ඔබේ printed tutorial එක home delivery සඳහා සූදානම් කෙරේ.', unlock: 'Premium unlock කරලා tutorial එක ලබාගන්න', creating: 'Order එක සකස් කරමින්…',
+  } : {
+    myCourse: 'My course', pack: 'Premium lesson access', eyebrow: 'PREMIUM LESSON ACCESS',
+    accessTitle: 'Full lesson premium access',
+    intro: 'This is not a charge for one activity. It gives you full access to the premium learning activities, quizzes, and revision resources published for this lesson.',
+    priceLabel: 'Full lesson price',
+    benefitsTitle: 'Your premium lesson experience', benefits: [
+      { icon: '01', title: 'Guided premium learning', description: 'Work through the lesson’s premium activities and deeper practice at your own pace.' },
+      { icon: '02', title: 'Exam-targeted practice', description: 'Access premium quizzes and exam-style practice published for this lesson.' },
+      { icon: '03', title: 'Printed tute delivered home', description: 'A printed tute for this lesson will be delivered to the home address in your student profile.', badge: 'INCLUDED', featured: true },
+      { icon: '04', title: 'Revision resources', description: 'Premium revision resources added to this lesson later are included with your access.' },
+    ],
+    activeTitle: 'Your premium access is active', activeText: 'Premium activities in this lesson are now unlocked.',
+    pendingTitle: 'Payment confirmation pending', pendingText: 'Your order is waiting for payment confirmation.', viewOrder: 'View order',
+    notReady: 'Not ready to unlock yet?', freeText: 'Start with the free activities. When you are ready, unlock the premium activities and receive the printed tutorial at home.',
+    continueFree: 'Continue free learning', checkoutNote: 'After payment is confirmed, your printed tutorial is prepared for home delivery.', unlock: 'Unlock premium + get your tutorial', creating: 'Preparing your order…',
+  };
+  return <section className={`exam-success-pack ${isSinhala ? 'sinhala-medium' : 'english-medium'}`}>
+    <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to={`/courses/${courseSlug}/learn`}>{copy.myCourse}</Link><span>/</span><Link to={`/courses/${courseSlug}/lessons/${lessonSlug}`}>{data.lesson.title}</Link><span>/</span><span>{copy.pack}</span></nav>
+    <div className="exam-pack-layout">
+      <header className="exam-pack-intro"><div className="exam-pack-intro-copy"><p className="eyebrow">{copy.eyebrow}</p>{lessonNumber ? <div className="exam-pack-lesson-number">{isSinhala ? 'පාඩම' : 'Lesson'} {String(lessonNumber).padStart(2, '0')}</div> : null}<h1>{data.lesson.title}</h1><h2>{copy.accessTitle}</h2><p>{copy.intro}</p></div><section className="exam-pack-tutorial-inline"><div className="exam-pack-tutorial-copy"><p className="eyebrow">{tutorialCopy.eyebrow}</p><h3>{tutorialCopy.title}</h3><p>{tutorialCopy.text}</p><strong>{tutorialCopy.badge}</strong></div><figure><TutorialCover alt={`${data.lesson.title} tutorial cover`} fallbackSrc={tutorialFallbackSrc} placeholder={tutorialCopy.placeholder} resourceId={tutorialImageResourceId} /><figcaption>{isSinhala ? 'Printed tutorial' : 'Printed lesson tutorial'}</figcaption></figure></section></header>
+      <aside className="exam-pack-purchase" aria-label={copy.pack}>
+        <div className="exam-pack-price"><span>{copy.priceLabel}</span><strong>{price(product.price)}</strong></div>
+        <div className="exam-pack-benefits"><h2>{copy.benefitsTitle}</h2><div>{copy.benefits.map((benefit) => <article className={benefit.featured ? 'featured' : ''} key={benefit.title}><span>{benefit.icon}</span><div><h3>{benefit.title}{benefit.badge ? <em>{benefit.badge}</em> : null}</h3><p>{benefit.description}</p></div></article>)}</div></div>
+        {data.hasActiveEntitlement ? <div className="exam-pack-active"><strong>{copy.activeTitle}</strong><p>{copy.activeText}</p></div> : data.pendingOrder ? <div className="exam-pack-pending"><strong>{copy.pendingTitle}</strong><p>{copy.pendingText}</p><Link to={`/student/orders/${data.pendingOrder.id}`}>{copy.viewOrder}</Link></div> : <div className="exam-pack-actions"><p>{copy.checkoutNote}</p>{create.error ? <InlineError error={create.error} /> : null}<button className="button" disabled={create.isPending} onClick={() => create.mutate()} type="button">{create.isPending ? copy.creating : copy.unlock}</button></div>}
+      </aside>
+      <section className="exam-pack-free-path"><div><p className="eyebrow">{isSinhala ? 'නොමිලේ පාඩම්' : 'FREE LEARNING'}</p><h2>{copy.notReady}</h2><p>{copy.freeText}</p></div><Link className="button secondary" to={freeLearningPath}>{copy.continueFree}</Link></section>
+    </div>
+  </section>;
 };
 
 export const StudentOrdersPage = () => {

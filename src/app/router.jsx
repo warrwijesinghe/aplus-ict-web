@@ -104,19 +104,19 @@ export const router = createBrowserRouter([
         element: <RoleRoute roles={['student']} />,
         children: [
           { path: '/complete-profile', element: <CompleteProfilePage /> },
-          { path: '/profile', element: <StudentProfilePage /> },
           {
             element: <ProfileCompletionGuard />,
             children: [
+              {
+                element: <StudentLayout />,
+                children: [
+              { path: '/profile', element: <StudentProfilePage /> },
               { path: '/dashboard', element: <StudentDashboard /> },
               { path: '/dashboard/courses', element: <MyCoursesPage /> },
               { path: '/dashboard/profile', element: <StudentProfilePage /> },
               { path: '/my-courses', element: <MyCoursesPage /> },
               { path: '/learning-history', element: <LearningHistoryPage /> },
               { path: '/courses/:courseSlug/lessons/:lessonSlug/exam-success-pack', element: <ExamSuccessPackPage /> },
-              {
-                element: <StudentLayout />,
-                children: [
               { path: '/student', element: <StudentDashboard /> },
               { path: '/student/courses', element: <MyCoursesPage /> },
               { path: '/student/courses/:courseId', element: <ProgressPage /> },

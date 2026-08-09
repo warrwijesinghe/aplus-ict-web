@@ -34,7 +34,7 @@ describe('student lesson activity renderers', () => {
 
   it('never renders protected fields for a locked activity', () => {
     renderActivity({ type: 'rich_text', isLocked: true, content: '<p>private body</p>', youtubeUrl: 'https://youtube.com/watch?v=dQw4w9WgXcQ', externalUrl: 'https://private.example' });
-    expect(screen.getByText('Premium activity')).toBeInTheDocument();
+    expect(screen.getByText('This activity is ready to unlock')).toBeInTheDocument();
     expect(screen.queryByText('private body')).not.toBeInTheDocument();
     expect(screen.queryByText('Open video on YouTube')).not.toBeInTheDocument();
   });

@@ -17,6 +17,7 @@ import {
   StatusBadge
 } from '../components/common/States.jsx';
 import { ResourceImage } from '../components/resources/ResourceImage.jsx';
+import { BrandLogo } from '../components/layout/BrandLogo.jsx';
 import { useOrderSelection } from '../features/store/selection-context.jsx';
 import { formatCurrency } from '../utils/currency.js';
 import { formatDate } from '../utils/date-time.js';
@@ -357,13 +358,24 @@ export const LoginPage = () => {
   const { startGoogleLogin } = useAuth();
 
   return (
-    <section className="form-card">
-      <p className="eyebrow">Student sign in</p>
-      <h1>Continue your learning</h1>
-      <p>Use your Google account to open your saved lessons and progress.</p>
-      <button onClick={startGoogleLogin} type="button">
-        Continue with Google
-      </button>
+    <section className="student-login">
+      <header className="student-login-topbar">
+        <Link aria-label="A Plus ICT home" to="/"><BrandLogo /></Link>
+        <Link className="student-login-back" to="/courses">Explore courses <span aria-hidden="true">→</span></Link>
+      </header>
+      <div className="student-login-shell">
+        <div className="student-login-main">
+          <p className="eyebrow">Student sign in</p>
+          <h1>Continue your learning.</h1>
+          <p className="student-login-lead">Sign in with Google to open your saved lessons, progress, and enrolled courses.</p>
+          <button className="student-login-google" onClick={startGoogleLogin} type="button"><span aria-hidden="true">G</span>Continue with Google</button>
+          <p className="student-login-note">Use the Google account you used for A Plus ICT. Your course choices are always yours.</p>
+        </div>
+        <aside className="student-login-visual">
+          <div className="student-login-visual-copy"><p className="eyebrow">LEARN ON YOUR TERMS</p><h2>Your learning is ready when you are.</h2><ul><li>Return to lessons from any device</li><li>Keep your completed activities and progress</li><li>Explore free learning before unlocking premium lessons</li></ul></div>
+          <p className="student-login-visual-mark" aria-hidden="true">A+</p>
+        </aside>
+      </div>
     </section>
   );
 };
