@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { contentApi } from '../api/content.api.js';
 import { queryKeys } from '../api/query-keys.js';
@@ -16,6 +16,7 @@ export const EnrollmentPage = () => {
   const { isAuthenticated, startGoogleLogin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [search] = useSearchParams();
   const [confirming, setConfirming] = useState(false);
   const courseQuery = useQuery({ queryKey: queryKeys.content.publicCourse(courseSlug), queryFn: ({ signal }) => contentApi.publicCourse(courseSlug, signal) });
   const profile = useStudentProfile(isAuthenticated);
@@ -35,11 +36,14 @@ export const EnrollmentPage = () => {
     <article className="enrollment-login-card"><span className="enrollment-course-icon"><CourseIcon /></span><div><p className="eyebrow">{level} · {medium}</p><h2>{course.title}</h2><p>Free content is available. Some lessons may require purchase to unlock.</p></div><button className="button" onClick={() => { sessionStorage.setItem('aplus-return-to', location.pathname); startGoogleLogin(); }} type="button">Continue with Google</button></article>
   </div></section>;
 
-  if (!isProfileComplete(profile.data)) return <Navigate replace to={`/complete-profile?returnTo=${encodeURIComponent(location.pathname)}`} />;
+  if (!isProfileComplete(profile.data)) return <Navigate replace to={`/complete-profile?returnTo=${encodeURIComponent(location.pathname + location.search)}`} />;
 
   const submit = async () => {
     await enroll.mutateAsync(course);
-    navigate(`/courses/${course.slug}/learn`, { state: { enrolled: true }, replace: true });
+    const requestedReturnTo = search.get('returnTo');
+    const lessonPath = `/courses/${course.slug}/lessons/`;
+    const destination = requestedReturnTo?.startsWith(lessonPath) ? requestedReturnTo : `/courses/${course.slug}/learn`;
+    navigate(destination, { state: { enrolled: true }, replace: true });
   };
 
   return <section className="enrollment-page"><div className="enrollment-shell">

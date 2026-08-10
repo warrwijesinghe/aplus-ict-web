@@ -17,7 +17,7 @@ import { academicAreaForCourse, lessonPurchaseText } from '../config/lesson-pric
 import { courseBreadcrumbs } from '../utils/academic-course.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
-import { StudentCourseOverview } from '../components/learning/StudentLessonPlayer.jsx';
+import { LessonActivityNavigator, StudentCourseOverview } from '../components/learning/StudentLessonPlayer.jsx';
 import {
   BilingualHeading,
   CatalogueCourseCard
@@ -996,24 +996,17 @@ const PublicContentItem = ({ item }) => {
   );
 };
 
-const LessonContents = ({ lesson, onNavigate, open, selectedHash, setOpen }) => (
+const topicPath = (courseSlug, lessonSlug, topicId) => `/courses/${courseSlug}/lessons/${lessonSlug}/topics/${topicId}`;
+
+const LessonContents = ({ courseSlug, lesson, lessonSlug, onNavigate, open, selectedTopicId, setOpen }) => (
   <details className="lesson-content-tree" onToggle={(event) => setOpen(event.currentTarget.open)} open={open}>
     <summary><span>This lesson</span><strong>Lesson contents</strong></summary>
     <nav aria-label="Lesson content navigation">
       <ol>
         {lesson.topics?.map((topic, index) => {
-          const topicHash = `#topic-${topic.id}`;
           return (
             <li key={topic.id}>
-              <a aria-current={selectedHash === topicHash ? 'location' : undefined} href={topicHash} onClick={onNavigate}>{String(index + 1).padStart(2, '0')}. {topic.title}</a>
-              {topic.contentItems?.length ? (
-                <ul>
-                  {topic.contentItems.map((item) => {
-                    const itemHash = `#content-${item.id}`;
-                    return <li key={item.id}><a aria-current={selectedHash === itemHash ? 'location' : undefined} href={itemHash} onClick={onNavigate}>{item.title}</a></li>;
-                  })}
-                </ul>
-              ) : null}
+              <Link aria-current={String(selectedTopicId) === String(topic.id) ? 'page' : undefined} onClick={onNavigate} to={topicPath(courseSlug, lessonSlug, topic.id)}>{String(index + 1).padStart(2, '0')}. {topic.title}</Link>
             </li>
           );
         })}
@@ -1061,8 +1054,8 @@ export const LessonLearningPage = () => {
   if (!enrollment.data) return (
     <section className="login-cta">
       <p className="eyebrow">Free enrollment</p><h1>Enroll Free to Open Available Lesson Content</h1>
-      <p>Free and unlocked content remain together in this lesson after enrollment.</p>
-      <Link className="button" to={`/enroll/${courseSlug}`}>Enroll Free to Start</Link>
+      <p>Enroll once to open the available content and begin this lesson.</p>
+      <Link className="button" to={`/enroll/${courseSlug}?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Enroll Free and Start This Lesson</Link>
     </section>
   );
   return (
@@ -1078,20 +1071,50 @@ export const LessonLearningPage = () => {
         {!lesson.premiumUnlocked && lesson.unlockProduct ? <UnlockLessonButton course={course} lesson={lesson} /> : null}
       </section>
       <div className="public-lesson-layout">
-        <LessonContents lesson={lesson} onNavigate={() => setContentsOpen(false)} open={contentsOpen} selectedHash={location.hash} setOpen={setContentsOpen} />
+        <aside className="lesson-navigation-stack" aria-label="Lesson navigation"><LessonActivityNavigator courseSlug={courseSlug} lessonSlug={lessonSlug} /><LessonContents courseSlug={courseSlug} lesson={lesson} lessonSlug={lessonSlug} onNavigate={() => setContentsOpen(false)} open={contentsOpen} setOpen={setContentsOpen} /></aside>
         <section className="topic-learning-area" aria-label="Lesson topics">
-          {lesson.topics?.length ? lesson.topics.map((topic, index) => (
-            <section className="lesson-topic" id={`topic-${topic.id}`} key={topic.id}>
-              <p className="eyebrow">Topic {String(index + 1).padStart(2, '0')}</p><h2>{topic.title}</h2>
-              {topic.descriptionEn ? <p>{topic.descriptionEn}</p> : null}
-              <div className="public-content-list">{topic.contentItems.map((item) => <PublicContentItem item={item} key={item.id} />)}</div>
-            </section>
-          )) : <EmptyState title="Lesson content is being prepared" />}
+          {lesson.topics?.length ? <><header className="lesson-topic-list-heading"><p className="eyebrow">Lesson topics</p><h2>Choose a topic to begin</h2><p>Select a topic to open its learning content.</p></header><div className="lesson-topic-list">{lesson.topics.map((topic, index) => <Link className="lesson-topic-link" key={topic.id} to={topicPath(courseSlug, lessonSlug, topic.id)}><span className="lesson-topic-link-number">{String(index + 1).padStart(2, '0')}</span><span><strong>{topic.title}</strong>{topic.descriptionEn ? <small>{topic.descriptionEn}</small> : <small>{topic.contentItems?.length || 0} learning item{topic.contentItems?.length === 1 ? '' : 's'}</small>}</span><b aria-hidden="true">→</b></Link>)}</div></> : <EmptyState title="Lesson content is being prepared" />}
         </section>
       </div>
-      <p className="lesson-back-link"><Link to={`/courses/${courseSlug}`}>Back to course details</Link></p>
     </div>
   );
+};
+
+export const TopicLearningPage = () => {
+  const { courseSlug, lessonSlug, topicId } = useParams();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const [contentsOpen, setContentsOpen] = useState(false);
+  const query = useQuery({
+    queryKey: queryKeys.content.publicLesson(courseSlug, lessonSlug),
+    queryFn: ({ signal }) => contentApi.publicLesson(courseSlug, lessonSlug, signal),
+  });
+  const course = query.data?.data?.course;
+  const lesson = query.data?.data?.lesson;
+  const enrollment = useCourseEnrollment(course?.id, isAuthenticated && Boolean(course?.id));
+  const topic = lesson?.topics?.find((item) => String(item.id) === String(topicId));
+
+  usePageSeo({
+    title: topic && lesson ? `${topic.title} | ${lesson.title}` : 'ICT Topic',
+    description: topic?.descriptionEn || lesson?.descriptionEn || 'Explore ICT lesson content at A Plus ICT.',
+    path: topicPath(courseSlug, lessonSlug, topicId),
+    noIndex: true,
+  });
+
+  if (query.isPending) return <LoadingSkeleton label="Loading topic" />;
+  if (query.isError) return <InlineError error={query.error} onRetry={query.refetch} />;
+  if (!lesson || !topic) return <EmptyState title="This topic is not available" />;
+  if (!isAuthenticated) return <section className="login-cta"><p className="eyebrow">Student sign in</p><h1>{topic.title}</h1><p>Sign in to open this topic and save your progress.</p><a className="button" href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Continue with Google to Start This Topic</a></section>;
+  if (enrollment.isPending) return <LoadingSkeleton label="Checking topic access" />;
+  if (!enrollment.data) return <section className="login-cta"><p className="eyebrow">Free enrollment</p><h1>Enroll Free to Open This Topic</h1><p>Enroll once to open the available content and begin learning.</p><Link className="button" to={`/enroll/${courseSlug}?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Enroll Free and Start This Topic</Link></section>;
+
+  return <div className="lesson-workspace public-lesson-workspace">
+    <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to="/">Home</Link><span>/</span><Link to={`/courses/${courseSlug}`}>{course?.title}</Link><span>/</span><Link to={`/courses/${courseSlug}/lessons/${lessonSlug}`}>{lesson.title}</Link><span>/</span><span>{topic.title}</span></nav>
+    <div className="public-lesson-layout">
+      <aside className="lesson-navigation-stack" aria-label="Lesson navigation"><LessonActivityNavigator courseSlug={courseSlug} lessonSlug={lessonSlug} /><LessonContents courseSlug={courseSlug} lesson={lesson} lessonSlug={lessonSlug} onNavigate={() => setContentsOpen(false)} open={contentsOpen} selectedTopicId={topic.id} setOpen={setContentsOpen} /></aside>
+      <section className="topic-learning-area" aria-label={topic.title}><div className="lesson-topic"><Link className="lesson-workspace-link" to={`/courses/${courseSlug}/lessons/${lessonSlug}`}>← Back to lesson topics</Link><p className="eyebrow">Learning content</p><h1>{topic.title}</h1>{topic.descriptionEn ? <p>{topic.descriptionEn}</p> : null}<div className="public-content-list">{topic.contentItems?.length ? topic.contentItems.map((item) => <PublicContentItem item={item} key={item.id} />) : <EmptyState title="Topic content is being prepared" />}</div></div></section>
+    </div>
+  </div>;
 };
 
 export const StudentGuidePage = () => {

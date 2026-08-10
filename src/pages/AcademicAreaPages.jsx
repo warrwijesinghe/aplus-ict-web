@@ -93,6 +93,24 @@ const Hero = ({ area }) => {
   </section>;
 };
 
+const learningPathLabels = {
+  SCHOOL: { title: 'School ICT', detail: 'Grades 6–9' },
+  OL: { title: 'G.C.E. O/L ICT', detail: 'Grades 10–11' },
+  AL: { title: 'G.C.E. A/L ICT', detail: 'Grades 12–13' }
+};
+
+const LearningPathSwitcher = ({ currentArea }) => <section className="home-section academic-path-switcher" aria-labelledby="learning-path-switcher-title">
+  <img alt="Student studying ICT with a laptop and headset" className="academic-path-switcher-image" src="/images/learning-places/academic-path-switcher-student.png" />
+  <div className="academic-path-switcher-copy">
+    <p className="eyebrow">Choose a different level</p>
+    <h2 id="learning-path-switcher-title">Find the right ICT learning path</h2>
+    <p>Choose the level that matches your school grade.</p>
+  </div>
+  <nav aria-label="Choose a different ICT learning path" className="academic-path-switcher-links">
+    {Object.entries(learningPathLabels).filter(([area]) => area !== currentArea).map(([area, label]) => <Link key={area} to={AREAS[area].path}><span><strong>{label.title}</strong><small>{label.detail}</small></span><b aria-hidden="true">→</b></Link>)}
+  </nav>
+</section>;
+
 const CourseCards = ({ area, courses, loading, error }) => {
   if (loading) return <LoadingSkeleton label="Loading published courses" />;
   if (error) return <InlineError error={error} />;
@@ -114,6 +132,7 @@ const AcademicLandingPage = ({ area }) => {
   usePageSeo({ path: info.path, image: info.image, structuredData: { '@context': 'https://schema.org', '@type': 'CollectionPage', name: info.title } });
   return <><Hero area={area} />
     <section className="home-section course-picker" id="course-selection"><p className="eyebrow">Available courses</p><h2>{area === 'SCHOOL' ? 'ICT courses for Grades 6–9' : info.action}</h2><CourseCards area={area} courses={courses} error={catalogue.error} loading={catalogue.isPending} /></section>
+    <LearningPathSwitcher currentArea={area} />
   </>;
 };
 

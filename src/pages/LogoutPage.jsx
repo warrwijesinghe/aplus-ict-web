@@ -17,24 +17,30 @@ export const LogoutPage = () => {
   }, [logout]);
 
   return (
-    <section className="form-card logout-card">
-      <p className="eyebrow">Student session</p>
-      <h1>{isComplete ? 'You are logged out' : 'Logging you out...'}</h1>
-      <p>
-        {isComplete
-          ? 'Your learning session has been safely cleared on this device.'
-          : 'Please wait while we securely close your learning session.'}
-      </p>
-      {isComplete ? (
-        <div className="logout-actions">
-          <Link className="button" to="/">
-            Return home
-          </Link>
-          <Link className="button secondary" to="/login">
-            Continue with Google
-          </Link>
+    <section aria-labelledby="logout-title" className="logout-page">
+      <div className="logout-card" role="status">
+        <div aria-hidden="true" className={`logout-status-icon${isComplete ? ' complete' : ''}`}>
+          {isComplete ? '✓' : <span className="logout-spinner" />}
         </div>
-      ) : null}
+        <p className="eyebrow">Student session</p>
+        <h1 id="logout-title">{isComplete ? 'You’re logged out' : 'Logging you out…'}</h1>
+        <p className="logout-message">
+          {isComplete
+            ? 'Your learning session has been safely cleared from this device.'
+            : 'Please wait while we securely close your learning session.'}
+        </p>
+        {isComplete ? (
+          <div className="logout-actions">
+            <Link className="button" to="/">
+              Return home
+            </Link>
+            <Link className="button secondary" to="/login">
+              Sign in again
+            </Link>
+          </div>
+        ) : null}
+        {isComplete ? <p className="logout-reassurance">You can sign in again whenever you’re ready.</p> : null}
+      </div>
     </section>
   );
 };

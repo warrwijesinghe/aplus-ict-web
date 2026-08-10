@@ -7,6 +7,7 @@ import { AdminLayout } from '../layouts/AdminLayout.jsx';
 import { AuthLayout } from '../layouts/AuthLayout.jsx';
 import { PublicLayout } from '../layouts/PublicLayout.jsx';
 import { StudentLayout } from '../layouts/StudentLayout.jsx';
+import { LessonExperienceLayout } from '../layouts/LessonExperienceLayout.jsx';
 import { TeacherLayout } from '../layouts/TeacherLayout.jsx';
 import { GoogleLoginSuccessPage } from '../pages/GoogleLoginSuccessPage.jsx';
 import { EnrollmentPage } from '../pages/EnrollmentPage.jsx';
@@ -18,6 +19,7 @@ import {
   ContactPage,
   CourseLearningPage,
   LessonLearningPage,
+  TopicLearningPage,
   PublicCourseDetailPage,
   StudentGuidePage
 } from '../pages/PublicCoursePages.jsx';
@@ -62,9 +64,6 @@ export const router = createBrowserRouter([
       { path: '/courses', element: <Navigate replace to="/#pathways" /> },
       { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
       { path: '/enroll/:courseSlug', element: <EnrollmentPage /> },
-      { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
-      { path: '/courses/:courseSlug/lessons/:lessonSlug/activities/:activityId', element: <StudentActivityPlayer /> },
-      { path: '/courses/:courseSlug/lessons/:lessonSlug', element: <LessonLearningPage /> },
       { path: '/resources', element: <PublicResourcesPage /> },
       { path: '/free-lessons', element: <PublicResourcesPage /> },
       { path: '/student-guide', element: <StudentGuidePage /> },
@@ -80,6 +79,15 @@ export const router = createBrowserRouter([
       { path: '/store', element: <StorePage /> },
       { path: '/store/products/:productSlug', element: <ProductDetailPage /> },
       { path: '/logout', element: <LogoutPage /> }
+    ]
+  },
+  {
+    element: <LessonExperienceLayout />,
+    children: [
+      { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
+      { path: '/courses/:courseSlug/lessons/:lessonSlug/activities/:activityId', element: <StudentActivityPlayer /> },
+      { path: '/courses/:courseSlug/lessons/:lessonSlug/topics/:topicId', element: <TopicLearningPage /> },
+      { path: '/courses/:courseSlug/lessons/:lessonSlug', element: <LessonLearningPage /> }
     ]
   },
   {
