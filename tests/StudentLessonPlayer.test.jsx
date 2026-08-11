@@ -14,7 +14,6 @@ describe('student lesson activity renderers', () => {
   it('renders each safe activity shell and a future-safe fallback', () => {
     const cases = [
       [{ type: 'label', content: '<strong>Topic label</strong>' }, 'Topic label'],
-      [{ type: 'video', youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' }, 'Open video on YouTube'],
       [{ type: 'image' }, 'Image unavailable.'],
       [{ type: 'pdf' }, 'Resource unavailable.'],
       [{ type: 'file' }, 'Resource unavailable.'],
@@ -30,6 +29,10 @@ describe('student lesson activity renderers', () => {
       expect(screen.getByText(expected)).toBeInTheDocument();
       view.unmount();
     });
+    const video = renderActivity({ type: 'video', youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' });
+    expect(screen.getByTitle('Activity title')).toBeInTheDocument();
+    expect(screen.queryByText('Open video on YouTube')).not.toBeInTheDocument();
+    video.unmount();
   });
 
   it('never renders protected fields for a locked activity', () => {

@@ -15,7 +15,7 @@ const useCourseLessons = (courseSlug, lessonSlug) =>
     enabled: Boolean(courseSlug && lessonSlug)
   });
 
-const LmsLessonHeader = ({ lesson }) => {
+const LmsLessonHeader = ({ courseSlug, lesson }) => {
   if (!lesson) return null;
 
   const activities = lesson.topics.flatMap((topic) => topic.activities);
@@ -28,7 +28,7 @@ const LmsLessonHeader = ({ lesson }) => {
     <div className="lms-lesson-header">
       <div className="lms-lesson-title">
         <span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span>
-        <strong>{lesson.title}</strong>
+        <Link to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>{lesson.title}</Link>
       </div>
       <div className="lms-lesson-progress">
         <div
@@ -134,7 +134,7 @@ const StudentLessonExperienceLayout = ({ courseSlug, lessonSlug }) => {
           <BrandLogo variant="light" />
         </Link>
         <div className="lms-desktop-lesson-header">
-          <LmsLessonHeader lesson={lesson} />
+          <LmsLessonHeader courseSlug={courseSlug} lesson={lesson} />
         </div>
         <nav aria-label="Learning navigation">
           <LmsLessonSwitcher
@@ -147,7 +147,7 @@ const StudentLessonExperienceLayout = ({ courseSlug, lessonSlug }) => {
         </nav>
       </header>
       <section className="lms-lesson-banner" aria-label="Current lesson">
-        <LmsLessonHeader lesson={lesson} />
+        <LmsLessonHeader courseSlug={courseSlug} lesson={lesson} />
       </section>
       <Outlet />
     </main>

@@ -19,7 +19,6 @@ import {
   ContactPage,
   CourseLearningPage,
   LessonLearningPage,
-  TopicLearningPage,
   PublicCourseDetailPage,
   StudentGuidePage
 } from '../pages/PublicCoursePages.jsx';
@@ -86,7 +85,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug/activities/:activityId', element: <StudentActivityPlayer /> },
-      { path: '/courses/:courseSlug/lessons/:lessonSlug/topics/:topicId', element: <TopicLearningPage /> },
+      { path: '/courses/:courseSlug/lessons/:lessonSlug/topics/:topicId', element: <LessonLearningPage /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug', element: <LessonLearningPage /> }
     ]
   },
@@ -135,6 +134,8 @@ export const router = createBrowserRouter([
               { path: '/student/orders/new', element: <StudentOrdersPage /> },
               { path: '/student/orders/:orderId', element: <StudentOrderDetailPage /> },
               { path: '/student/orders/:orderId/payment', element: <StudentOrderDetailPage /> },
+              { path: '/student/orders/:orderId/payment/:paymentMethod', element: <StudentOrderDetailPage /> },
+              { path: '/student/orders/:orderId/payment/:paymentMethod/:paymentStep', element: <StudentOrderDetailPage /> },
               { path: '/payments/directpay/return', element: <DirectPayReturnPage /> },
               { path: '/payments/directpay/cancel', element: <DirectPayReturnPage cancelled /> },
               { path: '/student/profile', element: <StudentProfilePage /> }

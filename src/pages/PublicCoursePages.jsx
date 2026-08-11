@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { CircleHelp, FileText, Video } from 'lucide-react';
 import { contentApi } from '../api/content.api.js';
 import { learningApi } from '../api/learning.api.js';
 import { resourceApi } from '../api/resource.api.js';
@@ -13,6 +14,7 @@ import { usePageSeo } from '../seo/use-page-seo.js';
 import { courseSeo, lessonSeo } from '../seo/public-seo-config.js';
 import { trackPublicEvent } from '../analytics/events.js';
 import { LessonPrice } from '../components/pricing/LessonPrice.jsx';
+import { StudentQuiz } from '../components/learning/StudentQuiz.jsx';
 import { academicAreaForCourse, lessonPurchaseText } from '../config/lesson-pricing.js';
 import { courseBreadcrumbs } from '../utils/academic-course.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
@@ -987,6 +989,8 @@ const PublicContentItem = ({ item }) => {
       </div>
       {item.isLocked ? (
         <p className="locked-content-message">🔒 Purchase this lesson to unlock this content.</p>
+      ) : item.contentType === 'quiz' && item.quizId ? (
+        <StudentQuiz quizId={item.quizId} />
       ) : isRichContent ? (
         <ActivityStudyContent activity={item} />
       ) : (
@@ -997,6 +1001,42 @@ const PublicContentItem = ({ item }) => {
 };
 
 const topicPath = (courseSlug, lessonSlug, topicId) => `/courses/${courseSlug}/lessons/${lessonSlug}/topics/${topicId}`;
+const activityPath = (courseSlug, lessonSlug, activityId) => `/courses/${courseSlug}/lessons/${lessonSlug}/activities/${activityId}`;
+const TopicActivityIcon = ({ type }) => {
+  const Icon = type === 'video' ? Video : type === 'quiz' ? CircleHelp : FileText;
+  return <Icon aria-hidden="true" size={19} />;
+};
+
+const TopicActivityList = ({ courseSlug, lessonSlug, topic }) => (
+  <div className="lesson-topic-children">
+    {topic.contentItems?.length ? topic.contentItems.map((item) => (
+      <Link className={`lesson-topic-child ${item.isLocked ? 'locked' : ''}`} key={item.id} to={activityPath(courseSlug, lessonSlug, item.id)}>
+        <span aria-label={contentTypeLabel[item.contentType] || item.contentType} className="lesson-topic-child-icon" role="img"><TopicActivityIcon type={item.contentType} /></span>
+        <span><strong>{item.title}</strong>{item.descriptionEn ? <small>{item.descriptionEn}</small> : null}</span>
+        <b aria-hidden="true">→</b>
+      </Link>
+    )) : <p className="lesson-topic-empty">No learning activities are available in this topic yet.</p>}
+  </div>
+);
+
+const LessonTopicList = ({ courseSlug, lesson, lessonSlug }) => {
+  const [selectedTopicId, setSelectedTopicId] = useState(null);
+  const selectedTopic = lesson.topics.find((topic) => String(topic.id) === String(selectedTopicId));
+  if (selectedTopic) return <section className="lesson-topic-selection" id={`topic-${selectedTopic.id}`}>
+    <h2>{selectedTopic.title}</h2>
+    <TopicActivityList courseSlug={courseSlug} lessonSlug={lessonSlug} topic={selectedTopic} />
+    <button className="lesson-workspace-link lesson-topic-back" onClick={() => setSelectedTopicId(null)} type="button">← Back to lesson topics</button>
+  </section>;
+  return <div className="lesson-topic-list">{lesson.topics.map((topic, index) => (
+    <section className="lesson-topic-list-item" id={`topic-${topic.id}`} key={topic.id}>
+      <button className="lesson-topic-link" onClick={() => setSelectedTopicId(topic.id)} type="button">
+        <span className="lesson-topic-link-number">{String(index + 1).padStart(2, '0')}</span>
+        <span><strong>{topic.title}</strong>{topic.descriptionEn ? <small>{topic.descriptionEn}</small> : <small>{topic.contentItems?.length || 0} learning item{topic.contentItems?.length === 1 ? '' : 's'}</small>}</span>
+        <b aria-hidden="true">→</b>
+      </button>
+    </section>
+  ))}</div>;
+};
 
 const LessonContents = ({ courseSlug, lesson, lessonSlug, onNavigate, open, selectedTopicId, setOpen }) => (
   <details className="lesson-content-tree" onToggle={(event) => setOpen(event.currentTarget.open)} open={open}>
@@ -1006,7 +1046,7 @@ const LessonContents = ({ courseSlug, lesson, lessonSlug, onNavigate, open, sele
         {lesson.topics?.map((topic, index) => {
           return (
             <li key={topic.id}>
-              <Link aria-current={String(selectedTopicId) === String(topic.id) ? 'page' : undefined} onClick={onNavigate} to={topicPath(courseSlug, lessonSlug, topic.id)}>{String(index + 1).padStart(2, '0')}. {topic.title}</Link>
+              <Link aria-current={String(selectedTopicId) === String(topic.id) ? 'page' : undefined} onClick={onNavigate} to={`/courses/${courseSlug}/lessons/${lessonSlug}#topic-${topic.id}`}>{String(index + 1).padStart(2, '0')}. {topic.title}</Link>
             </li>
           );
         })}
@@ -1073,7 +1113,7 @@ export const LessonLearningPage = () => {
       <div className="public-lesson-layout">
         <aside className="lesson-navigation-stack" aria-label="Lesson navigation"><LessonActivityNavigator courseSlug={courseSlug} lessonSlug={lessonSlug} /><LessonContents courseSlug={courseSlug} lesson={lesson} lessonSlug={lessonSlug} onNavigate={() => setContentsOpen(false)} open={contentsOpen} setOpen={setContentsOpen} /></aside>
         <section className="topic-learning-area" aria-label="Lesson topics">
-          {lesson.topics?.length ? <><header className="lesson-topic-list-heading"><p className="eyebrow">Lesson topics</p><h2>Choose a topic to begin</h2><p>Select a topic to open its learning content.</p></header><div className="lesson-topic-list">{lesson.topics.map((topic, index) => <Link className="lesson-topic-link" key={topic.id} to={topicPath(courseSlug, lessonSlug, topic.id)}><span className="lesson-topic-link-number">{String(index + 1).padStart(2, '0')}</span><span><strong>{topic.title}</strong>{topic.descriptionEn ? <small>{topic.descriptionEn}</small> : <small>{topic.contentItems?.length || 0} learning item{topic.contentItems?.length === 1 ? '' : 's'}</small>}</span><b aria-hidden="true">→</b></Link>)}</div></> : <EmptyState title="Lesson content is being prepared" />}
+          {lesson.topics?.length ? <LessonTopicList courseSlug={courseSlug} lesson={lesson} lessonSlug={lessonSlug} /> : <EmptyState title="Lesson content is being prepared" />}
         </section>
       </div>
     </div>

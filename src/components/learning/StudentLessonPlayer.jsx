@@ -134,16 +134,18 @@ const LabelActivity = ({ activity }) => (
 const VideoActivity = ({ activity }) => {
   const embed = youtubeEmbedUrl(activity.youtubeUrl);
   return embed ? (
-    <div className="player-video">
-      <iframe
-        allowFullScreen
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        loading="lazy"
-        referrerPolicy="strict-origin-when-cross-origin"
-        src={embed}
-        title={activity.title}
-      />
-    </div>
+    <>
+      <div className="player-video">
+        <iframe
+          allowFullScreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+          src={embed}
+          title={activity.title}
+        />
+      </div>
+    </>
   ) : (
     <p role="status">This video is unavailable right now.</p>
   );
