@@ -34,7 +34,7 @@ const viteAssetTags = (html) => (html.match(/<(?:script|link)\b[^>]+(?:src|href)
 export const generatePublicSeo = ({ mode = 'production', env: suppliedEnv, dynamicPaths = [] } = {}) => {
   const env = suppliedEnv || loadEnv(mode, root, '');
   const indexable = mode === 'production' && env.VITE_SITE_INDEXABLE === 'true';
-  const siteUrl = (env.VITE_PUBLIC_SITE_URL || 'https://www.aplusict.lk').replace(/\/$/, '');
+  const siteUrl = (env.VITE_PUBLIC_SITE_URL || 'https://aplusict.lk').replace(/\/$/, '').replace('://www.aplusict.lk', '://aplusict.lk');
   const dist = resolve(root, 'dist');
   const index = readFileSync(resolve(dist, 'index.html'), 'utf8');
   const assets = viteAssetTags(index);

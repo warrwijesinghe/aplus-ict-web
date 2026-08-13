@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import { DEFAULT_OG_IMAGE, absoluteUrl, getPublicSeo, normalizePath, pageTitle } from './public-seo-config.js';
 
-const configuredSiteUrl = import.meta.env.VITE_PUBLIC_SITE_URL?.replace(/\/$/, '');
+const configuredSiteUrl = (import.meta.env.VITE_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://aplusict.lk').replace(
+  '://www.aplusict.lk',
+  '://aplusict.lk'
+);
 
 const setMetaContent = (selector, content) => {
   let element = document.head.querySelector(selector);
