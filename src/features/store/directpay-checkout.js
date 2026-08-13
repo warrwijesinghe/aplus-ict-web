@@ -72,14 +72,21 @@ const loadSdk = (environment) => new Promise((resolve, reject) => {
   document.head.appendChild(script);
 });
 
-export const launchDirectPayCheckout = async (checkout, { onSuccess = () => undefined, onError = () => undefined } = {}) => {
+export const clearDirectPayCheckout = (container) => {
+  const element = typeof container === 'string' ? document.getElementById(container) : container;
+  if (element) element.replaceChildren();
+};
+
+export const launchDirectPayCheckout = async (checkout, { containerId, onSuccess = () => undefined, onError = () => undefined } = {}) => {
   const apiKey = import.meta.env.VITE_DIRECTPAY_API_KEY;
   const configuredMerchantId = import.meta.env.VITE_DIRECTPAY_MERCHANT_ID;
   if (!apiKey || !configuredMerchantId) throw new Error('DirectPay checkout is not configured');
   if (configuredMerchantId !== checkout.merchantId) throw new Error('DirectPay merchant configuration does not match this order');
-  const container = document.createElement('div'); container.id = `directpay-card-${checkout.reference}`; document.body.appendChild(container);
+  const container = document.getElementById(containerId);
+  if (!container) throw new Error('DirectPay checkout container is unavailable');
+  clearDirectPayCheckout(container);
   const options = {
-    container: container.id, merchantId: checkout.merchantId, amount: checkout.amount, refCode: checkout.reference, currency: checkout.currency,
+    container: containerId, merchantId: checkout.merchantId, amount: checkout.amount, refCode: checkout.reference, currency: checkout.currency,
     type: 'ONE_TIME_PAYMENT', customerEmail: checkout.customerEmail, customerMobile: checkout.customerMobile, description: checkout.description,
     logo: '', debug: import.meta.env.DEV, apiKey, responseCallback: onSuccess, errorCallback: onError,
   };
@@ -88,5 +95,5 @@ export const launchDirectPayCheckout = async (checkout, { onSuccess = () => unde
     validateDirectPayInitOptions(options);
     logDirectPayInitDiagnostics(options);
     sdk.init(options);
-  } catch (error) { container.remove(); throw error; }
+  } catch (error) { clearDirectPayCheckout(container); throw error; }
 };

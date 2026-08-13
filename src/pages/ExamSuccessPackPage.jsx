@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, ChevronRight, CircleAlert, Clock3, CreditCard, Landmark, MessageCircle, ShieldCheck, Upload } from 'lucide-react';
@@ -6,7 +6,7 @@ import { commerceApi } from '../api/commerce.api.js';
 import { contentApi } from '../api/content.api.js';
 import { resourceApi } from '../api/resource.api.js';
 import { InlineError, LoadingSkeleton } from '../components/common/States.jsx';
-import { isDirectPayBrowserSuccess, launchDirectPayCheckout } from '../features/store/directpay-checkout.js';
+import { clearDirectPayCheckout, isDirectPayBrowserSuccess, launchDirectPayCheckout } from '../features/store/directpay-checkout.js';
 
 const price = (value) => `Rs. ${Number(value || 0).toLocaleString('en-LK', { maximumFractionDigits: 0 })}`;
 const date = (value) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—';
@@ -199,6 +199,7 @@ export const StudentOrderDetailPage = () => {
   const [selectedBankAccountIds, setSelectedBankAccountIds] = useState([]);
   const [paymentSlip, setPaymentSlip] = useState(null);
   const [cardPaymentState, setCardPaymentState] = useState('idle');
+  const directPayContainerRef = useRef(null);
   const order = useQuery({ queryKey: ['commerce', 'student-order', orderId], queryFn: ({ signal }) => commerceApi.studentOrder(orderId, signal) });
   const bankDeposit = useMutation({ mutationFn: () => commerceApi.submitStudentBankDeposit(orderId), onSuccess: () => { client.invalidateQueries({ queryKey: ['commerce'] }); navigate('/student/orders', { replace: true, state: { bankDepositSubmitted: true } }); } });
   const sendBankDepositDetails = useMutation({ mutationFn: () => commerceApi.sendStudentBankDepositPaymentDetails(orderId, selectedBankAccountIds), onSuccess: () => { client.invalidateQueries({ queryKey: ['commerce'] }); navigate('/student/orders', { replace: true, state: { bankDepositSubmitted: true } }); } });
@@ -207,11 +208,14 @@ export const StudentOrderDetailPage = () => {
   const directPay = useMutation({
     mutationFn: async () => {
       setCardPaymentState('processing');
+      clearDirectPayCheckout(directPayContainerRef.current);
       const result = await commerceApi.initiateDirectPay(orderId);
       await launchDirectPayCheckout(result.checkout, {
+        containerId: directPayContainerRef.current?.id,
         onSuccess: (response) => setCardPaymentState(isDirectPayBrowserSuccess(response) ? 'confirming' : 'failed'),
         onError: () => setCardPaymentState('failed'),
       });
+      directPayContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       return result;
     },
     onSuccess: () => setCardPaymentState((state) => state === 'processing' ? 'checkout' : state),
@@ -247,6 +251,13 @@ export const StudentOrderDetailPage = () => {
     poll(); const interval = window.setInterval(poll, 3000);
     return () => { stopped = true; window.clearInterval(interval); };
   }, [cardPaymentState, client, order, orderId]);
+  useEffect(() => () => clearDirectPayCheckout(directPayContainerRef.current), []);
+  useEffect(() => {
+    if (routePaymentMethod !== 'card') clearDirectPayCheckout(directPayContainerRef.current);
+  }, [routePaymentMethod]);
+  useEffect(() => {
+    if (cardPaymentState === 'failed' || cardPaymentState === 'success' || cardPaymentState === 'unverified') clearDirectPayCheckout(directPayContainerRef.current);
+  }, [cardPaymentState]);
   if (order.isPending) return <LoadingSkeleton label="Loading order" />;
   if (order.isError) return <InlineError error={order.error} onRetry={order.refetch} />;
 
@@ -285,8 +296,8 @@ export const StudentOrderDetailPage = () => {
           </div>
           <p className="payment-card-guidance">හැකි සෑම විටම කාඩ් පත් ගෙවීම් ක්‍රමය භාවිතා කරන්න.</p>
           <button className="button checkout-selection-continue" onClick={() => navigate(`/student/orders/${orderId}/payment/${paymentMethod}`)} type="button">{paymentActionLabel} <ChevronRight aria-hidden="true" /></button>
-          </> : !isTransferReceiptStep ? <div className="checkout-payment-step"><p className="eyebrow">STEP 2 OF 2</p><h2>{checkoutMethod === 'card' ? 'Card payment' : checkoutMethod === 'bank-deposit' ? 'Bank deposit' : 'Online bank transfer'}</h2><button className="checkout-change-method" onClick={() => navigate(`/student/orders/${orderId}`)} type="button">← Choose a different payment method</button></div> : null}
-          {selectedPaymentMethod === 'card' ? <section className="payment-option-content" aria-live="polite"><div className="payment-option-copy"><ShieldCheck aria-hidden="true" /><div><h3>Pay securely with DirectPay</h3><p>{cardPaymentState === 'confirming' ? 'Payment received. Confirming your payment...' : cardPaymentState === 'success' ? 'Payment successful. Your premium access is active.' : cardPaymentState === 'failed' ? 'Payment failed. You can try again.' : cardPaymentState === 'unverified' ? 'Unable to verify payment. Please check again shortly.' : 'Enter your card details in DirectPay. A Plus ICT never sees or stores your card information.'}</p></div></div>{cardPaymentState !== 'success' ? <button className="button checkout-primary" disabled={directPay.isPending || ['checkout', 'confirming'].includes(cardPaymentState)} onClick={() => directPay.mutate()} type="button">{directPay.isPending || cardPaymentState === 'processing' ? 'Processing...' : cardPaymentState === 'confirming' ? 'Confirming payment...' : cardPaymentState === 'failed' ? 'Try payment again' : 'Pay Now'}</button> : <Link className="button checkout-primary" to="/student/courses">Go to my courses</Link>}</section> : null}
+          </> : !isTransferReceiptStep ? <div className="checkout-payment-step"><p className="eyebrow">STEP 2 OF 2</p><h2>{checkoutMethod === 'card' ? 'Card payment' : checkoutMethod === 'bank-deposit' ? 'Bank deposit' : 'Online bank transfer'}</h2><button className="checkout-change-method" onClick={() => { clearDirectPayCheckout(directPayContainerRef.current); setCardPaymentState('idle'); navigate(`/student/orders/${orderId}`); }} type="button">← Choose a different payment method</button></div> : null}
+          {selectedPaymentMethod === 'card' ? <section className="payment-option-content" aria-live="polite"><div className="payment-option-copy"><ShieldCheck aria-hidden="true" /><div><h3>Pay securely with DirectPay</h3><p>{cardPaymentState === 'confirming' ? 'Payment received. Confirming your payment...' : cardPaymentState === 'success' ? 'Payment successful. Your premium access is active.' : cardPaymentState === 'failed' ? 'Payment failed. You can try again.' : cardPaymentState === 'unverified' ? 'Unable to verify payment. Please check again shortly.' : 'Enter your card details in DirectPay. A Plus ICT never sees or stores your card information.'}</p></div></div>{!['checkout', 'confirming'].includes(cardPaymentState) && cardPaymentState !== 'success' ? <button className="button checkout-primary" disabled={directPay.isPending} onClick={() => directPay.mutate()} type="button">{directPay.isPending || cardPaymentState === 'processing' ? 'Processing...' : cardPaymentState === 'failed' ? 'Try payment again' : 'Pay Now'}</button> : null}<div className="directpay-checkout-container" id="directpay-card-container" ref={directPayContainerRef} />{cardPaymentState === 'success' ? <Link className="button checkout-primary" to="/student/courses">Go to my courses</Link> : null}</section> : null}
           {selectedPaymentMethod && isBankPayment && !isTransferReceiptStep ? <section className="bank-payment-content" aria-live="polite">
             <div className="bank-payment-simple-intro"><Landmark aria-hidden="true" /><div><h3>{checkoutMethod === 'bank-deposit' ? 'Make a bank deposit' : 'Transfer through your banking app or internet banking'}</h3><p>{checkoutMethod === 'bank-deposit' ? 'Deposit the exact amount to any account below. Keep your receipt until payment is confirmed.' : `Use your order number ${item.orderNumber} as the transfer reference.`}</p></div></div>
             {checkoutMethod === 'bank-deposit' ? <p className="bank-account-choice">Select one or more bank accounts for your deposit. We will send each selected account's payment details to your phone.</p> : null}
