@@ -10728,7 +10728,15 @@ body.navigation-open {
 .bank-payment-simple-intro h3 { color: var(--color-navy); font-size: 0.98rem; margin: 0; }
 .bank-payment-simple-intro p { color: var(--color-text-muted); font-size: 0.82rem; line-height: 1.45; margin: 0.25rem 0 0; }
 .bank-account-list { display: grid; gap: 0.65rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0.85rem; }
-.bank-account-card { align-items: start; background: #fff; border: 1px solid #dce4e9; border-radius: 0.7rem; display: grid; gap: 0.65rem; grid-template-columns: 3rem minmax(0, 1fr); padding: 0.75rem; }
+.bank-account-choice { color: var(--color-navy); font-size: 0.88rem; font-weight: 800; line-height: 1.45; margin: 1rem 0 -0.25rem; }
+.bank-account-card { align-items: start; background: #fff; border: 1px solid #dce4e9; border-radius: 0.7rem; cursor: pointer; display: grid; font: inherit; gap: 0.65rem; grid-template-columns: 1.35rem 3rem minmax(0, 1fr); padding: 0.75rem; text-align: left; width: 100%; }
+.bank-account-card:hover { background: #f8fbfd; border-color: #83a7c0; }
+.bank-account-card-static { cursor: default; grid-template-columns: 3rem minmax(0, 1fr); }
+.bank-account-card-static:hover { background: #fff; border-color: #dce4e9; }
+.bank-account-card.is-selected { background: #eaf6ee; border-color: #228147; box-shadow: 0 0 0 3px rgba(34, 129, 71, 0.14); }
+.bank-account-check { align-items: center; align-self: center; background: #fff; border: 2px solid #8da4b3; border-radius: 0.28rem; color: #fff !important; display: inline-flex !important; font-size: 0.86rem !important; font-weight: 900 !important; height: 1.2rem; justify-content: center; margin: 0 !important; width: 1.2rem; }
+.bank-account-card.is-selected .bank-account-check { background: #228147; border-color: #228147; }
+.bank-payment-content:has(.bank-account-choice) > .bank-deposit-actions:not(.bank-deposit-sms-actions) { display: none; }
 .bank-account-card img { background: #fff; border: 1px solid #edf0f3; border-radius: 0.4rem; height: 3rem; object-fit: contain; padding: 0.2rem; width: 3rem; }
 .bank-account-card strong,
 .bank-account-card span { display: block; }

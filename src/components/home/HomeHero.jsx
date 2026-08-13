@@ -42,14 +42,14 @@ export const HomeHero = () => {
         role="group"
       >
         <img
-          alt="Student learning ICT online using a laptop"
+          alt="Student learning ICT with a headset at a desktop computer"
           className="hero-grid-main"
           fetchPriority="high"
-          height="810"
+          height="1260"
           loading="eager"
           sizes="(min-width: 1024px) 24vw, 58vw"
-          src="/images/learning-places/home-hero-student.webp"
-          width="1440"
+          src="/images/learning-places/home-hero-student-focus.jpg"
+          width="900"
         />
         <img
           alt="Student studying ICT in a quiet learning space"

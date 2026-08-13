@@ -10,7 +10,7 @@ const sections = [
     description: 'Your ICT classroom is wherever you are. Learn from home, school, the library or anywhere with internet access—without travelling to a fixed classroom or following a fixed timetable.',
     points: ['Learn from home or anywhere', 'No travelling to attend lessons', 'Continue whenever you have time'],
     images: [
-      { src: '/images/learning-places/home-student.webp', alt: 'School student learning ICT from a home study space' },
+      { src: '/images/learning-places/study-anywhere-student.jpg', alt: 'Student learning ICT with a headset at a desktop computer' },
       { src: '/images/learning-places/quiet-study.webp', alt: 'Student studying ICT in a quiet learning space' },
       { src: '/images/learning-places/outdoor-study.webp', alt: 'Student studying ICT outdoors with a device' }
     ],
