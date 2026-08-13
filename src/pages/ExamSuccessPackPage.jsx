@@ -6,6 +6,7 @@ import { commerceApi } from '../api/commerce.api.js';
 import { contentApi } from '../api/content.api.js';
 import { resourceApi } from '../api/resource.api.js';
 import { InlineError, LoadingSkeleton } from '../components/common/States.jsx';
+import { isDirectPayBrowserSuccess, launchDirectPayCheckout } from '../features/store/directpay-checkout.js';
 
 const price = (value) => `Rs. ${Number(value || 0).toLocaleString('en-LK', { maximumFractionDigits: 0 })}`;
 const date = (value) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—';
@@ -121,7 +122,7 @@ export const StudentOrdersPage = () => {
   return <section className="student-orders-page"><div className="student-orders-heading"><div><p className="eyebrow">Purchases</p><h1>My orders</h1><p>View your lesson purchases, payment status and access.</p></div>{orders.data.items.length ? <span>{orders.data.items.length} {orders.data.items.length === 1 ? 'order' : 'orders'}</span> : null}</div>{location.state?.receiptSubmitted ? <div className="order-pending-notice" role="status"><CheckCircle2 aria-hidden="true" /><div><strong>Payment receipt sent</strong><p>Your receipt is under review. We will activate your lesson access after the payment is verified.</p></div></div> : (location.state?.bankDepositSubmitted || location.state?.bankTransferSubmitted) ? <div className="order-pending-notice" role="status"><CheckCircle2 aria-hidden="true" /><div><strong>Your order is saved</strong><p>Complete your payment using the account details provided. Then open this order to send your receipt on WhatsApp or attach it.</p></div></div> : null}{orders.data.items.length ? <div className="student-order-cards">{orders.data.items.map((order) => { const payment = paymentCopy(order); const product = order.items.map((item) => item.name).join(', '); const StatusIcon = payment.tone === 'paid' ? CheckCircle2 : payment.tone === 'failed' ? CircleAlert : Clock3; return <article className="student-order-card" key={order.id}><header className="student-order-card-top"><span className="student-order-mark">A+</span><div className="student-order-product"><p>Lesson purchase</p><h2>{product}</h2><span>Order #{order.orderNumber}</span></div></header><section className={`student-order-status-panel ${payment.tone}`}><StatusIcon aria-hidden="true" /><div><strong>{payment.label}</strong><p>{payment.note}</p></div></section><dl className="student-order-meta"><div><dt>Order date</dt><dd>{date(order.createdAt)}</dd></div><div><dt>Payment method</dt><dd>{paymentMethod(order)}</dd></div></dl><footer className="student-order-card-footer"><div className="student-order-total"><span>Total</span><strong>{price(order.total, order.currency)}</strong></div><Link className="student-order-open" to={`/student/orders/${order.id}`}>{payment.action} <ChevronRight aria-hidden="true" /></Link></footer></article>; })}</div> : <div className="student-orders-empty"><h2>No orders yet</h2><p>Lesson purchases you make will appear here.</p></div>}</section>;
 };
 
-const submitCheckout = (checkout) => { const form = document.createElement('form'); form.method = checkout.method; form.action = checkout.action; Object.entries(checkout.fields).forEach(([name, value]) => { const field = document.createElement('input'); field.type = 'hidden'; field.name = name; field.value = value; form.appendChild(field); }); document.body.appendChild(form); form.submit(); };
+const submitCheckout = (checkout) => launchDirectPayCheckout(checkout);
 
 const paymentSupportInternationalPhone = '94717105837';
 const bankAccounts = [
@@ -196,11 +197,24 @@ export const StudentOrderDetailPage = () => {
   const client = useQueryClient();
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [paymentSlip, setPaymentSlip] = useState(null);
+  const [cardPaymentState, setCardPaymentState] = useState('idle');
   const order = useQuery({ queryKey: ['commerce', 'student-order', orderId], queryFn: ({ signal }) => commerceApi.studentOrder(orderId, signal) });
   const bankDeposit = useMutation({ mutationFn: () => commerceApi.submitStudentBankDeposit(orderId), onSuccess: () => { client.invalidateQueries({ queryKey: ['commerce'] }); navigate('/student/orders', { replace: true, state: { bankDepositSubmitted: true } }); } });
   const bankTransferPending = useMutation({ mutationFn: () => commerceApi.submitStudentBankTransfer(orderId), onSuccess: () => { client.invalidateQueries({ queryKey: ['commerce'] }); navigate('/student/orders', { replace: true, state: { bankTransferSubmitted: true } }); } });
   const cancel = useMutation({ mutationFn: () => commerceApi.cancelStudentOrder(orderId), onSuccess: () => { client.invalidateQueries({ queryKey: ['commerce'] }); order.refetch(); } });
-  const directPay = useMutation({ mutationFn: () => commerceApi.initiateDirectPay(orderId), onSuccess: (result) => submitCheckout(result.checkout) });
+  const directPay = useMutation({
+    mutationFn: async () => {
+      setCardPaymentState('processing');
+      const result = await commerceApi.initiateDirectPay(orderId);
+      await launchDirectPayCheckout(result.checkout, {
+        onSuccess: (response) => setCardPaymentState(isDirectPayBrowserSuccess(response) ? 'confirming' : 'failed'),
+        onError: () => setCardPaymentState('failed'),
+      });
+      return result;
+    },
+    onSuccess: () => setCardPaymentState((state) => state === 'processing' ? 'checkout' : state),
+    onError: () => setCardPaymentState('failed'),
+  });
   const bankTransfer = useMutation({
     mutationFn: () => {
       const body = new FormData();
@@ -217,6 +231,20 @@ export const StudentOrderDetailPage = () => {
       window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     }
   });
+  useEffect(() => {
+    if (cardPaymentState !== 'confirming') return undefined;
+    let stopped = false;
+    const poll = async () => {
+      try {
+        const result = await commerceApi.paymentStatus(orderId);
+        if (stopped) return;
+        if (result.status === 'completed') { setCardPaymentState('success'); client.invalidateQueries({ queryKey: ['commerce'] }); order.refetch(); }
+        else if (['failed', 'cancelled', 'amount_mismatch'].includes(result.status)) setCardPaymentState('failed');
+      } catch { if (!stopped) setCardPaymentState('unverified'); }
+    };
+    poll(); const interval = window.setInterval(poll, 3000);
+    return () => { stopped = true; window.clearInterval(interval); };
+  }, [cardPaymentState, client, order, orderId]);
   if (order.isPending) return <LoadingSkeleton label="Loading order" />;
   if (order.isError) return <InlineError error={order.error} onRetry={order.refetch} />;
 
@@ -256,7 +284,7 @@ export const StudentOrderDetailPage = () => {
           <p className="payment-card-guidance">හැකි සෑම විටම කාඩ් පත් ගෙවීම් ක්‍රමය භාවිතා කරන්න.</p>
           <button className="button checkout-selection-continue" onClick={() => navigate(`/student/orders/${orderId}/payment/${paymentMethod}`)} type="button">{paymentActionLabel} <ChevronRight aria-hidden="true" /></button>
           </> : !isTransferReceiptStep ? <div className="checkout-payment-step"><p className="eyebrow">STEP 2 OF 2</p><h2>{checkoutMethod === 'card' ? 'Card payment' : checkoutMethod === 'bank-deposit' ? 'Bank deposit' : 'Online bank transfer'}</h2><button className="checkout-change-method" onClick={() => navigate(`/student/orders/${orderId}`)} type="button">← Choose a different payment method</button></div> : null}
-          {selectedPaymentMethod === 'card' ? <section className="payment-option-content" aria-live="polite"><div className="payment-option-copy"><ShieldCheck aria-hidden="true" /><div><h3>Pay securely with DirectPay</h3><p>You will be redirected to DirectPay to enter your card details. A Plus ICT never sees or stores your card information.</p></div></div><button className="button checkout-primary" disabled={directPay.isPending} onClick={() => directPay.mutate()} type="button">{directPay.isPending ? 'Opening secure payment…' : <>Continue to DirectPay <ChevronRight aria-hidden="true" /></>}</button></section> : null}
+          {selectedPaymentMethod === 'card' ? <section className="payment-option-content" aria-live="polite"><div className="payment-option-copy"><ShieldCheck aria-hidden="true" /><div><h3>Pay securely with DirectPay</h3><p>{cardPaymentState === 'confirming' ? 'Payment received. Confirming your payment...' : cardPaymentState === 'success' ? 'Payment successful. Your premium access is active.' : cardPaymentState === 'failed' ? 'Payment failed. You can try again.' : cardPaymentState === 'unverified' ? 'Unable to verify payment. Please check again shortly.' : 'Enter your card details in DirectPay. A Plus ICT never sees or stores your card information.'}</p></div></div>{cardPaymentState !== 'success' ? <button className="button checkout-primary" disabled={directPay.isPending || ['checkout', 'confirming'].includes(cardPaymentState)} onClick={() => directPay.mutate()} type="button">{directPay.isPending || cardPaymentState === 'processing' ? 'Processing...' : cardPaymentState === 'confirming' ? 'Confirming payment...' : cardPaymentState === 'failed' ? 'Try payment again' : 'Pay Now'}</button> : <Link className="button checkout-primary" to="/student/courses">Go to my courses</Link>}</section> : null}
           {selectedPaymentMethod && isBankPayment && !isTransferReceiptStep ? <section className="bank-payment-content" aria-live="polite">
             <div className="bank-payment-simple-intro"><Landmark aria-hidden="true" /><div><h3>{checkoutMethod === 'bank-deposit' ? 'Make a bank deposit' : 'Transfer through your banking app or internet banking'}</h3><p>{checkoutMethod === 'bank-deposit' ? 'Deposit the exact amount to any account below. Keep your receipt until payment is confirmed.' : `Use your order number ${item.orderNumber} as the transfer reference.`}</p></div></div>
             <div className="bank-account-list" aria-label="Bank account details">{bankAccounts.map((account) => <article className="bank-account-card" key={`${account.bank}-${account.number}`}><img alt="" src={account.logo} /><div><strong>{account.bank}</strong><span>{account.branch}</span><p>{account.name}</p><code>{account.number}</code></div></article>)}</div>
