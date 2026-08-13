@@ -10,14 +10,12 @@ export const PUBLIC_ROUTE_SEO = {
   '/student-guide': { title: 'Student Guide', description: 'Learn how to choose a course, sign in, access available content and save your learning progress with A Plus ICT.' },
   '/about': { title: 'About A Plus ICT | Flexible Online School ICT Learning', description: 'Learn how A Plus ICT provides structured and flexible online ICT education for Sri Lankan school students in Grades 6–13.' },
   '/contact': { title: 'Contact A Plus ICT', description: 'Contact A Plus ICT with questions about school ICT learning, courses and resources.' },
-  '/privacy-policy': { title: 'Privacy Policy', description: 'Privacy Policy for A Plus ICT students and visitors.', noIndex: true },
-  '/terms': { title: 'Terms and Conditions', description: 'Terms and Conditions for A Plus ICT students and visitors.', noIndex: true },
-  '/refund-policy': { title: 'Refund Policy', description: 'Refund Policy for A Plus ICT customers.', noIndex: true },
-  '/cancellation-policy': { title: 'Cancellation Policy', description: 'Cancellation Policy for A Plus ICT customers.', noIndex: true },
-  '/payment-policy': { title: 'Payment Policy', description: 'Payment Policy for A Plus ICT customers.', noIndex: true }
+  '/privacy-policy': { title: 'Privacy Policy', description: 'How A Plus ICT collects, uses and protects student and customer information.' },
+  '/terms-and-conditions': { title: 'Terms & Conditions', description: 'Terms and Conditions for A Plus ICT educational services and purchases.' },
+  '/refund-policy': { title: 'Refund Policy', description: 'Refund Policy for A Plus ICT courses, lessons and educational products.' }
 };
 
-export const PUBLIC_SITEMAP_PATHS = ['/', '/school-ict', '/ol-ict', '/al-ict', '/resources', '/student-guide', '/about', '/contact'];
+export const PUBLIC_SITEMAP_PATHS = ['/', '/school-ict', '/ol-ict', '/al-ict', '/resources', '/student-guide', '/about', '/contact', '/privacy-policy', '/terms-and-conditions', '/refund-policy'];
 export const normalizePath = (path = '/') => { const pathname = path.startsWith('/') ? path : `/${path}`; return pathname === '/' ? '/' : pathname.replace(/\/+$/, ''); };
 export const absoluteUrl = (path, siteUrl) => new URL(normalizePath(path), `${siteUrl.replace(/\/$/, '')}/`).toString();
 export const pageTitle = (title) => `${title} | ${SITE_NAME}`;

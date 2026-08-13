@@ -1,65 +1,40 @@
-import { useQuery } from '@tanstack/react-query';
-import { contentApi } from '../api/content.api.js';
-import { queryKeys } from '../api/query-keys.js';
+import { Link } from 'react-router-dom';
 import { usePageSeo } from '../seo/use-page-seo.js';
 
+const lastUpdated = '13 August 2026';
+const contact = <Link to="/contact">Contact page</Link>;
+
 const policies = {
-  privacy: {
-    title: 'Privacy Policy', path: '/privacy-policy', sections: [
-      ['Information we collect', 'When you use Google sign-in, we receive the account information needed to identify your account. We may also collect student profile details, parent or guardian contact details where provided, learning progress, quiz and assignment information, order and payment information, and uploaded payment evidence where applicable.'],
-      ['Why we use it', 'We use this information to provide learning access, support students and parents, maintain progress records, process and investigate orders, prevent misuse, and improve the service. Cookies or analytics may be used to understand site operation and improve the experience.'],
-      ['Protection and payment processing', 'We apply reasonable technical and organisational safeguards and limit access to authorised personnel and service providers. A Plus ICT does not store card details. When online payment is enabled, card or bank payment processing may be handled by an approved third-party payment provider.'],
-      ['Your choices', 'You may ask us to correct or delete information where applicable, subject to legal, security, and record-keeping requirements. Contact us through the published A Plus ICT support channel for privacy questions or requests.']
-    ]
-  },
-  terms: {
-    title: 'Terms and Conditions', path: '/terms', sections: [
-      ['Eligibility and accounts', 'Students and parents must provide accurate information and protect access to their Google account. Accounts may be suspended where there is misuse, unauthorised sharing, or a breach of these terms.'],
-      ['Learning access and content', 'A Plus ICT provides free and premium ICT learning content for Sri Lankan school students. Access duration, included content, and any delivery details are stated with the relevant offer. Content is licensed for personal learning only and may not be copied, shared, resold, or used to create competing materials.'],
-      ['Payments and services', 'Premium access requires payment confirmation. Internet connectivity, devices, Google services, and other third-party services are outside our direct control. We may change, suspend, or discontinue content where reasonably necessary.'],
-      ['Law and disputes', 'These terms are governed by the laws of Sri Lanka. Please contact A Plus ICT first with any concern so that we can try to resolve it fairly.']
-    ]
-  },
-  refund: {
-    title: 'Refund Policy', path: '/refund-policy', sections: [
-      ['When a refund may be considered', 'We review duplicate payments, a confirmed payment where the purchased access was not granted, an incorrect package purchase reported promptly before use, and verified technical faults. Please provide the order number, transaction reference, payment evidence, and a clear description of the issue.'],
-      ['Digital access', 'Digital premium access that has already been activated or materially accessed is normally not refundable, except where required by law or where a verified technical fault prevents delivery.'],
-      ['Printed or delivered materials', 'Printed tutes or other delivered materials may be considered for cancellation or refund before dispatch. Once dispatched, refunds are not normally available unless the material is faulty or the order was fulfilled incorrectly.'],
-      ['Review and payment', 'We assess eligible requests within a reasonable time and aim to process approved refunds within 7–14 business days. Refunds are normally returned to the original payment method or another appropriate method agreed with the customer; they are not instant or guaranteed before review.']
-    ]
-  },
-  cancellation: {
-    title: 'Cancellation Policy', path: '/cancellation-policy', sections: [
-      ['Digital orders', 'A digital order may be cancelled before premium access is activated. After activation, cancellation is normally unavailable because the digital content has been supplied.'],
-      ['Printed orders', 'An order for printed or delivered materials may be cancelled before dispatch. After dispatch, cancellation is normally unavailable except where the Refund Policy applies.'],
-      ['How to request cancellation', 'Contact A Plus ICT promptly with the order number and transaction reference. A cancellation is not confirmed until we acknowledge it.']
-    ]
-  },
-  payment: {
-    title: 'Payment Policy', path: '/payment-policy', sections: [
-      ['Pricing and methods', 'Prices are shown in LKR unless otherwise stated. Available payment methods are presented at checkout or in the order instructions. Payment confirmation is required before premium access is activated.'],
-      ['Payment security', 'A Plus ICT does not store full card credentials. Online payments may be securely processed through an approved third-party payment provider when that option is enabled.'],
-      ['Payment issues', 'Keep your transaction reference and order number. If a payment succeeds but access is not granted, contact A Plus ICT with those details and payment evidence so that we can investigate. Transaction references are used to match and review payments.']
-    ]
-  }
+  privacy: { title: 'Privacy Policy', path: '/privacy-policy', description: 'How A Plus ICT collects, uses and protects student and customer information.', sections: [
+    ['About this policy', <>A Plus ICT is an online educational service operated by Miracle Network &amp; Solutions (Pvt) Ltd. This policy applies when you visit, create an account, learn, purchase, or contact us.</>],
+    ['Information we collect', <><p>We collect information needed to operate the platform, which may include:</p><ul><li>name, email address, telephone number, account and profile information;</li><li>parent or guardian contact information where provided;</li><li>course enrolment, access, learning progress, quiz and assignment information;</li><li>order, transaction, payment-reference and submitted payment-evidence information; and</li><li>support communications, device/browser, IP address and security records.</li></ul></>],
+    ['Payments', <>Online payments may be processed through PayHere or another authorised payment provider. Sensitive payment credentials, including full card numbers and CVV details, are handled through the payment provider’s systems; A Plus ICT does not store them.</>],
+    ['How we use information', <>We use information to manage accounts, provide course and lesson access, process and investigate orders, maintain learning records, provide support, prevent fraud and misuse, administer and improve the platform, send important service communications, and meet applicable legal, accounting or regulatory obligations.</>],
+    ['Sharing information', <>We do not sell personal information. We share it only where necessary with providers for payment processing, hosting and infrastructure, email or SMS delivery where used, technical support, or with authorities where legally required.</>],
+    ['Cookies, security and retention', <>We use essential cookies and similar session technologies for sign-in, authentication, security and website operation. We use reasonable technical and organisational safeguards, although no internet system is completely secure. Information is retained only as long as reasonably necessary for services, records, security and legal or accounting requirements.</>],
+    ['Your requests', <>You may contact A Plus ICT through the official details on our {contact} to correct account information, ask privacy questions, or make a reasonable request about your personal information. As the platform supports school students, students and parents or guardians are encouraged to contact us when they need help.</>]
+  ] },
+  terms: { title: 'Terms & Conditions', path: '/terms-and-conditions', description: 'Terms and Conditions for A Plus ICT educational services and purchases.', sections: [
+    ['About A Plus ICT', <>A Plus ICT is an online educational service operated by Miracle Network &amp; Solutions (Pvt) Ltd. It provides ICT education, including free and paid lessons, LMS/course access, recorded lessons, digital resources, PDFs/tutorials, and printed materials where offered.</>],
+    ['Acceptance and accounts', <>By using the website, an A Plus ICT account or purchasing services, you agree to these Terms and our <Link to="/privacy-policy">Privacy Policy</Link>. Users must provide accurate information, protect login credentials and not share accounts with unauthorised persons. Users are responsible for activity through their accounts, subject to applicable law and relevant security circumstances.</>],
+    ['Educational use and access', <>The platform supports learning and does not guarantee examination results, grades, admission or academic outcomes. Free and paid content may be offered; paid access requires successful purchase/enrolment. Access periods, included content and delivery details follow the information shown at purchase. Course structures and content may be reasonably updated as educational requirements evolve.</>],
+    ['Pricing and payments', <>Prices are shown in the applicable currency, typically LKR where shown. The displayed checkout price governs a completed transaction, subject to correction of obvious system errors. Promotions may have separate conditions and prices may change for future purchases, not completed valid purchases. Payments may be processed by PayHere or other authorised providers, and an order is paid only once the application confirms payment. Suspected fraud may be investigated and access suspended where reasonably necessary.</>],
+    ['Refunds and printed materials', <>Refunds are handled under our <Link to="/refund-policy">Refund Policy</Link>. Where printed materials are offered, availability, delivery and damaged or incorrect-item review follow the relevant product information and that policy.</>],
+    ['Intellectual property and acceptable use', <>Videos, recorded lessons, PDFs, tutorials, questions, explanations, graphics, website content, course materials and A Plus ICT branding are protected. Purchase provides a personal educational right to use content, not ownership. Except where applicable law permits, you must not copy, record, redistribute, resell, publicly upload, republish, scrape protected content, share paid materials/accounts, gain unauthorised access, attack the platform or make fraudulent payments.</>],
+    ['Availability, third parties and liability', <>We make reasonable efforts to keep the service available, but maintenance, network or hosting failures, security work, third-party services and circumstances outside our reasonable control may interrupt it. Parts of the service depend on payment, content-hosting and infrastructure providers. To the extent permitted by law, we are not responsible for indirect or consequential loss; nothing excludes rights or liabilities that cannot lawfully be excluded.</>],
+    ['Suspension, changes and law', <>We may reasonably suspend or terminate access for fraud, significant breach, unauthorised sharing, security threats or abuse. Terms may change and this page will show the revised date. These Terms are governed by the applicable laws of Sri Lanka. Questions can be sent through the official details on our {contact}.</>]
+  ] },
+  refund: { title: 'Refund Policy', path: '/refund-policy', description: 'Refund Policy for A Plus ICT courses, lessons and educational products.', sections: [
+    ['Scope', <>A Plus ICT is an online educational service operated by Miracle Network &amp; Solutions (Pvt) Ltd. This policy covers paid online lessons, course/LMS access, digital materials, other educational services, and printed materials where offered.</>],
+    ['Digital access', <>Digital content may become available immediately after payment. Once access is activated and content accessed, refunds are generally not provided merely because a customer changes their mind, no longer wishes to study, does not complete a course, or does not use access. This does not limit rights available under applicable law.</>],
+    ['Eligible situations', <><p>After review, refunds may be considered for:</p><ul><li>duplicate payments;</li><li>an incorrect amount caused by a system or payment error;</li><li>successful payment where access cannot be provided;</li><li>a significant A Plus ICT technical failure that prevents delivery and cannot reasonably be resolved; or</li><li>another valid case determined after review.</li></ul></>],
+    ['Failed or pending payments', <>A failed payment does not create course access. If a payment appears deducted but is not confirmed, request verification first and do not repeatedly pay while status is uncertain. We may verify the transaction with PayHere or the relevant provider.</>],
+    ['Printed materials', <>Cancellation before dispatch may be possible where reasonably practical. Damaged or incorrect items should be reported promptly for replacement or refund review. Delivery or shipping charges, where applicable, are reviewed according to the order and applicable law.</>],
+    ['Requesting and processing a refund', <>Contact A Plus ICT through the official details on our {contact}, normally within 7 days of the transaction. Include your name, registered email or telephone number, order/reference number, payment reference, course or lesson, and reason. We investigate duplicate, incorrect-charge and failed-delivery issues even if identified later. Approved refunds are normally returned via the appropriate or original payment method where supported; banking/provider processing times may apply.</>]
+  ] }
 };
 
-const LegalIdentity = () => {
-  const profile = useQuery({ queryKey: queryKeys.content.siteProfile, queryFn: ({ signal }) => contentApi.siteProfile(signal), retry: false });
-  const identity = profile.data?.data;
-  if (!identity) return null;
-  const address = identity.registeredAddress;
-  return <section><h2>Service provider</h2><p><strong>{identity.legalBusinessName}</strong>, operating the {identity.brandName} educational project.</p><p>{identity.relationshipStatement}<br />Company Registration No: {identity.companyRegistrationNumber}<br />{address.line1}, {address.line2}, {address.city}, {address.country}</p></section>;
-};
-
-const LegalPage = ({ kind }) => {
-  const policy = policies[kind];
-  usePageSeo({ title: policy.title, description: `${policy.title} for A Plus ICT students and visitors.`, path: policy.path });
-  return <section className="prose-page"><h1>{policy.title}</h1><p>Effective date: 4 August 2026</p><LegalIdentity />{policy.sections.map(([heading, content]) => <section key={heading}><h2>{heading}</h2><p>{content}</p></section>)}</section>;
-};
-
+const LegalPage = ({ kind }) => { const policy = policies[kind]; usePageSeo({ title: policy.title, description: policy.description, path: policy.path }); return <article className="prose-page legal-policy-page"><h1>{policy.title}</h1><p className="legal-last-updated">Last updated: {lastUpdated}</p>{policy.sections.map(([heading, content]) => <section key={heading}><h2>{heading}</h2><div>{content}</div></section>)}</article>; };
 export const PrivacyPolicyPage = () => <LegalPage kind="privacy" />;
 export const TermsPage = () => <LegalPage kind="terms" />;
 export const RefundPolicyPage = () => <LegalPage kind="refund" />;
-export const CancellationPolicyPage = () => <LegalPage kind="cancellation" />;
-export const PaymentPolicyPage = () => <LegalPage kind="payment" />;

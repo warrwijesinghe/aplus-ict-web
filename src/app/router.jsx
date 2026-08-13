@@ -26,7 +26,7 @@ import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
 import { StudentActivityPlayer } from '../components/learning/StudentLessonPlayer.jsx';
 import { DirectPayReturnPage, ExamSuccessPackPage, StudentOrderDetailPage, StudentOrdersPage } from '../pages/ExamSuccessPackPage.jsx';
 import { StudentGradebook } from '../components/learning/StudentGradebook.jsx';
-import { CancellationPolicyPage, PaymentPolicyPage, PrivacyPolicyPage, RefundPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
+import { PrivacyPolicyPage, RefundPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
 import { AlIctPage, OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
 import {
   AdminDashboard,
@@ -69,10 +69,11 @@ export const router = createBrowserRouter([
       { path: '/about', element: <AboutPage /> },
       { path: '/contact', element: <ContactPage /> },
       { path: '/privacy-policy', element: <PrivacyPolicyPage /> },
-      { path: '/terms', element: <TermsPage /> },
+      { path: '/terms', element: <Navigate replace to="/terms-and-conditions" /> },
+      { path: '/terms-and-conditions', element: <TermsPage /> },
       { path: '/refund-policy', element: <RefundPolicyPage /> },
-      { path: '/cancellation-policy', element: <CancellationPolicyPage /> },
-      { path: '/payment-policy', element: <PaymentPolicyPage /> },
+      { path: '/cancellation-policy', element: <Navigate replace to="/refund-policy" /> },
+      { path: '/payment-policy', element: <Navigate replace to="/terms-and-conditions" /> },
       { path: '/courses/:courseId/curriculum', element: <CurriculumPage /> },
       { path: '/lessons/:lessonId/preview', element: <LessonPreviewPage /> },
       { path: '/store', element: <StorePage /> },
