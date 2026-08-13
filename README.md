@@ -14,10 +14,10 @@ npm ci
 npm run dev
 ```
 
-Set `VITE_API_URL=http://localhost:4000` for backend access. DirectPay's browser SDK also needs `VITE_DIRECTPAY_MERCHANT_ID`, `VITE_DIRECTPAY_API_KEY`, and `VITE_DIRECTPAY_ENV=development`. These are browser-visible checkout settings, not a Merchant Secret or private key. In the Docker stack, Nginx supplies `/api` as the same-origin API base.
+Set `VITE_API_URL=http://localhost:4000` for backend access. PayHere checkout details are returned by the authenticated API after it creates a server-side payment attempt; no PayHere credentials are configured in this application. In the Docker stack, Nginx supplies `/api` as the same-origin API base.
 
 ## Legal identity and policies
 
 The public footer, About page, Contact page, and policy pages read non-sensitive legal identity from the API site profile. A Plus ICT remains the public brand and is identified as an educational project of Miracle Network and Solutions (Pvt) Ltd. The public policy routes are `/privacy-policy`, `/terms`, `/refund-policy`, `/cancellation-policy`, and `/payment-policy`.
 
-Never put a DirectPay Merchant Secret or private-key material in this application or any `VITE_` environment variable. The DirectPay browser API key is required by the documented JavaScript SDK and should be restricted in the DirectPay merchant portal.
+Never put a PayHere Merchant Secret in this application or any `VITE_` environment variable.

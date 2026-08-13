@@ -10721,9 +10721,6 @@ body.navigation-open {
 .bank-transfer-instructions p { color: var(--color-text-muted); font-size: 0.84rem; line-height: 1.55; margin: 0.3rem 0 0; }
 .checkout-primary { align-items: center; display: inline-flex; gap: 0.35rem; justify-content: center; margin-top: 1rem; min-height: 2.85rem; width: 100%; }
 .checkout-primary svg { height: 1rem; width: 1rem; }
-.directpay-checkout-container { margin-top: 1rem; max-width: 100%; min-height: 0; overflow-x: auto; }
-.directpay-checkout-container:has(#dpMainContainer) { border-top: 1px solid #eee6e7; padding-top: 1rem; }
-.directpay-checkout-container #dpMainContainer { max-width: 100%; }
 .bank-transfer-instructions { background: #f8fbfd; border: 1px solid #dcecf5; border-radius: 0.7rem; padding: 0.85rem; }
 .bank-transfer-instructions > svg { color: #2373a7; }
 .bank-transfer-instructions ol { color: #3c5261; font-size: 0.83rem; line-height: 1.5; margin: 0.55rem 0 0; padding-left: 1.15rem; }

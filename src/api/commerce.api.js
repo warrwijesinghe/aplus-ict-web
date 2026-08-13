@@ -35,6 +35,6 @@ export const commerceApi = {
   sendStudentBankDepositPaymentDetails: (id, bankAccountIds) => commerceClient.post(`/api/v1/student/orders/${id}/bank-deposit/payment-details`, { bankAccountIds }).then((response) => response.data.data),
   submitStudentBankTransfer: (id) => commerceClient.post(`/api/v1/student/orders/${id}/bank-transfer`).then((response) => response.data.data),
   cancelStudentOrder: (id) => commerceClient.post(`/api/v1/student/orders/${id}/cancel`).then((response) => response.data.data),
-  initiateDirectPay: (id) => commerceClient.post(`/api/v1/student/orders/${id}/payments/directpay`, {}, { headers: headers() }).then((response) => response.data.data),
+  initiatePayHere: (id) => commerceClient.post(`/api/v1/student/orders/${id}/payments/payhere`, {}, { headers: headers() }).then((response) => response.data.data),
   paymentStatus: (id, refresh = false) => commerceClient.get(`/api/v1/student/orders/${id}/payment-status`, { params: refresh ? { refresh: 'true' } : {} }).then((response) => response.data.data)
 };
