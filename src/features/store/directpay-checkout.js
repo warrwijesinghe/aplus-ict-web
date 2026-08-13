@@ -81,7 +81,7 @@ export const launchDirectPayCheckout = async (checkout, { onSuccess = () => unde
   const options = {
     container: container.id, merchantId: checkout.merchantId, amount: checkout.amount, refCode: checkout.reference, currency: checkout.currency,
     type: 'ONE_TIME_PAYMENT', customerEmail: checkout.customerEmail, customerMobile: checkout.customerMobile, description: checkout.description,
-    debug: import.meta.env.DEV, apiKey, responseCallback: onSuccess, errorCallback: onError,
+    logo: '', debug: import.meta.env.DEV, apiKey, responseCallback: onSuccess, errorCallback: onError,
   };
   try {
     const sdk = await loadSdk(import.meta.env.VITE_DIRECTPAY_ENV || 'development');
