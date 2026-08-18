@@ -96,6 +96,7 @@ export const AuthProvider = ({ children }) => {
       permissions: user?.permissions || [],
       login: (input) => establish(authApi.login, input),
       register: (input) => establish(authApi.register, input),
+      reviewerLogin: (input) => establish(authApi.reviewerLogin, input),
       startGoogleLogin: authApi.login,
       completeGoogleLogin,
       refreshSession,

@@ -10,6 +10,7 @@ import { StudentLayout } from '../layouts/StudentLayout.jsx';
 import { LessonExperienceLayout } from '../layouts/LessonExperienceLayout.jsx';
 import { TeacherLayout } from '../layouts/TeacherLayout.jsx';
 import { GoogleLoginSuccessPage } from '../pages/GoogleLoginSuccessPage.jsx';
+import { ReviewAccessPage } from '../pages/ReviewAccessPage.jsx';
 import { EnrollmentPage } from '../pages/EnrollmentPage.jsx';
 import { CompleteProfilePage, LearningHistoryPage, MyCoursesPage, ProfileCompletionGuard, StudentDashboard, StudentProfilePage } from '../pages/StudentExperiencePages.jsx';
 import { AdminContentPage } from '../pages/AdminContentPage.jsx';
@@ -95,7 +96,7 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <AuthLayout />,
-        children: [{ path: '/login', element: <LoginPage /> }]
+        children: [{ path: '/login', element: <LoginPage /> }, { path: '/review-access', element: <ReviewAccessPage /> }]
       }
     ]
   },

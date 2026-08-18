@@ -21,3 +21,7 @@ Set `VITE_API_URL=http://localhost:4000` for backend access. PayHere checkout de
 The public footer, About page, Contact page, and policy pages read non-sensitive legal identity from the API site profile. A Plus ICT remains the public brand and is identified as an educational project of Miracle Network and Solutions (Pvt) Ltd. The public policy routes are `/privacy-policy`, `/terms`, `/refund-policy`, `/cancellation-policy`, and `/payment-policy`.
 
 Never put a PayHere Merchant Secret in this application or any `VITE_` environment variable.
+
+## Payment Provider Review Access
+
+The non-indexed `/review-access` route is a restricted form for the server-configured reviewer account. It sends credentials only to the API and does not use a Vite environment variable for passwords or hashes. The API operator enables, configures, and disables it as documented in the API README; normal `/login` remains Google-only.

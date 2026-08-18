@@ -9,6 +9,8 @@ export const authApi = {
     window.location.assign(`${authClient.defaults.baseURL}/api/v1/auth/google`);
     return new Promise(() => {});
   },
+  reviewerLogin: (input) =>
+    authClient.post('/api/v1/auth/reviewer-login', input, { skipRefresh: true }).then(unwrap),
   refresh: () => authClient.post('/api/v1/auth/refresh', null, { skipRefresh: true }).then(unwrap),
   logout: () => authClient.post('/api/v1/auth/logout', null, { skipRefresh: true }).then(unwrap),
   logoutAll: () =>
