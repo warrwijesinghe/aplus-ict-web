@@ -14,7 +14,6 @@ const normalizeUser = (user) => ({
   roles: user?.roles || (user?.role ? [user.role] : [])
 });
 
-const isGoogleCallbackRoute = () => window.location.pathname === '/login/success';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -25,9 +24,7 @@ export const AuthProvider = ({ children }) => {
   const clearSession = useCallback(() => {
     authMemory.clear();
     setUser(null);
-    queryClient.removeQueries({ queryKey: ['auth'] });
-    queryClient.removeQueries({ queryKey: ['learning'] });
-    queryClient.removeQueries({ queryKey: ['commerce', 'orders'] });
+    queryClient.clear();
   }, []);
   const refreshSession = useCallback(async () => {
     const result = await authApi.refresh();
@@ -40,14 +37,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     configureRefreshQueue({ refresh: refreshSession, onSessionFailure: clearSession });
 
-    // The callback page validates the one-time fragment token itself. Skipping
-    // the automatic refresh here avoids a stale refresh failure clearing that
-    // newly received access token during the callback.
-    if (isGoogleCallbackRoute()) {
-      setIsRestoringSession(false);
-      return;
-    }
-
     if (hasStartedSessionRestore.current) return;
     hasStartedSessionRestore.current = true;
 
@@ -57,35 +46,12 @@ export const AuthProvider = ({ children }) => {
   }, [clearSession, refreshSession]);
   const establish = useCallback(async (action, input) => {
     const result = await action(input);
+    queryClient.clear();
     authMemory.set(result.accessToken);
-    const current = await authApi.me();
-    const user = normalizeUser(current.user || current);
+    const user = normalizeUser(result.user);
     setUser(user);
     return user;
   }, []);
-  const completeGoogleLogin = useCallback(
-    async (accessToken) => {
-      setIsRestoringSession(true);
-      // Activity detail responses may contain authorized learning content. A
-      // Google account switch must never reuse that cache for the next user.
-      queryClient.removeQueries({ queryKey: ['learning'] });
-      queryClient.removeQueries({ queryKey: ['student'] });
-      authMemory.set(accessToken);
-
-      try {
-        const current = await authApi.me();
-        const user = normalizeUser(current.user || current);
-        setUser(user);
-        return user;
-      } catch (error) {
-        clearSession();
-        throw error;
-      } finally {
-        setIsRestoringSession(false);
-      }
-    },
-    [clearSession]
-  );
   const value = useMemo(
     () => ({
       user,
@@ -97,8 +63,6 @@ export const AuthProvider = ({ children }) => {
       login: (input) => establish(authApi.login, input),
       register: (input) => establish(authApi.register, input),
       reviewerLogin: (input) => establish(authApi.reviewerLogin, input),
-      startGoogleLogin: authApi.login,
-      completeGoogleLogin,
       refreshSession,
       logout: async () => {
         try {
@@ -118,7 +82,7 @@ export const AuthProvider = ({ children }) => {
       hasPermission: (permission) => hasPermission(user, permission),
       hasAnyPermission: (permissions) => hasAnyPermission(user, permissions)
     }),
-    [clearSession, completeGoogleLogin, establish, isRestoringSession, refreshSession, user]
+    [clearSession, establish, isRestoringSession, refreshSession, user]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

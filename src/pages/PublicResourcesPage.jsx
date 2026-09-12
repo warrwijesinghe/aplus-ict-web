@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { queryKeys } from '../api/query-keys.js';
 import { resourceApi } from '../api/resource.api.js';
-import { serviceUrls } from '../api/service-urls.js';
 import { useAuth } from '../auth/auth-context.jsx';
 import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/States.jsx';
 import { usePageSeo } from '../seo/use-page-seo.js';
@@ -85,7 +84,7 @@ const DownloadAction = ({ item }) => {
     return (
       <a
         className="button secondary"
-        href={serviceUrls.auth + '/api/v1/auth/google?returnTo=/resources'}
+        href={'/login?returnTo=/resources'}
       >
         Sign in to access
       </a>

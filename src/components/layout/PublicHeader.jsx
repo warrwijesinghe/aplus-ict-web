@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { contentApi } from '../../api/content.api.js';
 import { queryKeys } from '../../api/query-keys.js';
-import { serviceUrls } from '../../api/service-urls.js';
 import { useAuth } from '../../auth/auth-context.jsx';
 import { destinationForUser } from '../../utils/route-destination.js';
 import { BrandLogo } from './BrandLogo.jsx';
@@ -125,7 +124,7 @@ export const PublicHeader = () => {
         ) : (
           <a
             className="header-login"
-            href={serviceUrls.auth + '/api/v1/auth/google?returnTo=' + loginReturnTo}
+            href={'/login?returnTo=' + loginReturnTo}
             onClick={() => { trackPublicEvent('student_login_started'); closeMenu(); }}
           >
             Student Login

@@ -5,7 +5,6 @@ import { CircleHelp, FileText, Video } from 'lucide-react';
 import { contentApi } from '../api/content.api.js';
 import { learningApi } from '../api/learning.api.js';
 import { resourceApi } from '../api/resource.api.js';
-import { serviceUrls } from '../api/service-urls.js';
 import { queryKeys } from '../api/query-keys.js';
 import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/States.jsx';
 import { ResourceImage } from '../components/resources/ResourceImage.jsx';
@@ -421,8 +420,8 @@ export const PublicHomePage = () => {
           </article>
           <article>
             <span>02</span>
-            <h3>Sign in securely with Google</h3>
-            <p lang="si">Google සමඟ ආරක්ෂිතව පිවිසෙන්න.</p>
+            <h3>Sign in securely with your phone</h3>
+            <p lang="si">දුරකථන අංකය භාවිතයෙන් ආරක්ෂිතව පිවිසෙන්න.</p>
           </article>
           <article>
             <span>03</span>
@@ -460,9 +459,9 @@ export const PublicHomePage = () => {
         </div>
       </section>
       <section className="home-section access-comparison"><p className="eyebrow">One learning path</p><h2>Start free. Unlock more when you need it.</h2><p className="section-intro">Free and unlocked content stay together in the same lesson path.</p><div className="comparison-grid"><article><h3>Free access</h3><ul><li>Selected video chapters</li><li>Selected notes and activities</li><li>Progress tracking</li></ul></article><article><h3>Unlocked lesson access</h3><ul><li>Complete lesson content</li><li>Additional notes and activities</li><li>Complete lesson progress</li></ul></article></div></section>
-      <section className="home-section guide-preview"><img alt="Student taking notes while learning online" className="guide-image" loading="lazy" src="/images/learning-places/student-guide-learning.webp" /><div><p className="eyebrow">Student guide</p><h2>New to the learning flow?</h2><p>Learn how Google sign-in, free activities, and learning progress work before you begin.</p></div><Link className="text-link" to="/student-guide">Read the student guide <span aria-hidden="true">→</span></Link></section>
+      <section className="home-section guide-preview"><img alt="Student taking notes while learning online" className="guide-image" loading="lazy" src="/images/learning-places/student-guide-learning.webp" /><div><p className="eyebrow">Student guide</p><h2>New to the learning flow?</h2><p>Learn how Phone sign-in, free activities, and learning progress work before you begin.</p></div><Link className="text-link" to="/student-guide">Read the student guide <span aria-hidden="true">→</span></Link></section>
       <section className="home-section coming-soon-section"><p className="eyebrow">Coming next</p><h2>O/L ICT is coming next</h2><p>Future learning paths for Grade 10 and Grade 11 are being prepared. Questions? <Link to="/contact">Contact A Plus ICT</Link>.</p></section>
-      <section className="home-section faq-section"><p className="eyebrow">FAQ</p><h2>Questions before you begin?</h2><div className="faq-list">{[['Can I start with free lessons?', 'Yes. Selected chapters and activities are available in the same course path.'], ['Are Sinhala and English Medium separate?', 'Yes. Choose the A/L ICT course that matches your medium.'], ['Do I need a Google account?', 'Yes. Google sign-in is used to open learning content and save progress.'], ['How is progress calculated?', 'Progress is based on the learning activities available to your account.'], ['Can I unlock lessons individually?', 'Where an unlock option is available, it is shown on the relevant lesson.'], ['What content is included in a lesson?', 'Lessons can include videos, notes, activities and quizzes.']].map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>
+      <section className="home-section faq-section"><p className="eyebrow">FAQ</p><h2>Questions before you begin?</h2><div className="faq-list">{[['Can I start with free lessons?', 'Yes. Selected chapters and activities are available in the same course path.'], ['Are Sinhala and English Medium separate?', 'Yes. Choose the A/L ICT course that matches your medium.'], ['How do I create an account?', 'Verify your mobile number by SMS and set a password to open learning content and save progress.'], ['How is progress calculated?', 'Progress is based on the learning activities available to your account.'], ['Can I unlock lessons individually?', 'Where an unlock option is available, it is shown on the relevant lesson.'], ['What content is included in a lesson?', 'Lessons can include videos, notes, activities and quizzes.']].map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>
       <section className="final-home-cta"><div><p className="eyebrow">A Plus ICT</p><h2>Start learning A/L ICT today</h2><p lang="si">අදම ඔබගේ A/L ICT ඉගෙනීම ආරම්භ කරන්න.</p></div><div className="hero-actions"><Link className="button" to={courseLink(sinhalaCourse)}>Start Sinhala Medium</Link><Link className="button secondary" to={courseLink(englishCourse)}>Start English Medium</Link></div></section>
     </>
   );
@@ -804,13 +803,13 @@ export const CourseLearningPage = () => {
     return (
       <section className="login-cta">
         <p className="eyebrow">Student sign in</p>
-        <h1>Continue with Google to start learning.</h1>
+        <h1>Sign in with your phone to start learning.</h1>
         <p>Sign in is required before opening activities or saving progress.</p>
         <a
           className="button"
-          href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=${encodeURIComponent(location.pathname)}`}
+          href={`/login?returnTo=${encodeURIComponent(location.pathname)}`}
         >
-          Continue with Google
+          Sign in with your phone
         </a>
       </section>
     );
@@ -877,13 +876,13 @@ export const LegacyLessonLearningPage = () => {
         <p className="eyebrow">Student sign in</p>
         <h1>Sign in to open this lesson.</h1>
         <p>
-          Available free activities are ready for you after Google sign-in. Your progress will save automatically.
+          Available free activities are ready for you after Phone sign-in. Your progress will save automatically.
         </p>
         <a
           className="button"
-          href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=${encodeURIComponent(location.pathname)}`}
+          href={`/login?returnTo=${encodeURIComponent(location.pathname)}`}
         >
-          Continue with Google
+          Sign in with your phone
         </a>
       </section>
     );
@@ -1087,7 +1086,7 @@ export const LessonLearningPage = () => {
       <p>{lesson.descriptionEn || lesson.shortDescription || 'Sign in to open this lesson and save your progress.'}</p>
       <p>{topicCount} topics · {lesson.freeContentCount || 0} free items · {lesson.paidContentCount || 0} locked items</p>
       {lesson.topics?.length ? <ul className="lesson-topic-preview">{lesson.topics.map((topic) => <li key={topic.id}>{topic.title}</li>)}</ul> : null}
-      <a className="button" href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Continue with Google to Start This Lesson</a>
+      <a className="button" href={`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Sign in with your phone to Start This Lesson</a>
     </section>
   );
   if (enrollment.isPending) return <LoadingSkeleton label="Checking lesson access" />;
@@ -1144,7 +1143,7 @@ export const TopicLearningPage = () => {
   if (query.isPending) return <LoadingSkeleton label="Loading topic" />;
   if (query.isError) return <InlineError error={query.error} onRetry={query.refetch} />;
   if (!lesson || !topic) return <EmptyState title="This topic is not available" />;
-  if (!isAuthenticated) return <section className="login-cta"><p className="eyebrow">Student sign in</p><h1>{topic.title}</h1><p>Sign in to open this topic and save your progress.</p><a className="button" href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Continue with Google to Start This Topic</a></section>;
+  if (!isAuthenticated) return <section className="login-cta"><p className="eyebrow">Student sign in</p><h1>{topic.title}</h1><p>Sign in to open this topic and save your progress.</p><a className="button" href={`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Sign in with your phone to Start This Topic</a></section>;
   if (enrollment.isPending) return <LoadingSkeleton label="Checking topic access" />;
   if (!enrollment.data) return <section className="login-cta"><p className="eyebrow">Free enrollment</p><h1>Enroll Free to Open This Topic</h1><p>Enroll once to open the available content and begin learning.</p><Link className="button" to={`/enroll/${courseSlug}?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Enroll Free and Start This Topic</Link></section>;
 
@@ -1181,7 +1180,7 @@ export const StudentGuidePage = () => {
           <div>
             <h2>Sign in when you are ready</h2>
             <p>
-              Continue with Google to open lessons, save completed activities, and return easily.
+              Sign in with your phone to open lessons, save completed activities, and return easily.
             </p>
           </div>
         </li>

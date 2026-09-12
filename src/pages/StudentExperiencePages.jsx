@@ -4,6 +4,7 @@ import { Link, Navigate, Outlet, useLocation, useNavigate, useSearchParams } fro
 import { useAuth } from '../auth/auth-context.jsx';
 import { EmptyState, InlineError, LoadingSkeleton, StatusBadge } from '../components/common/States.jsx';
 import { isProfileComplete } from '../features/student/student-learning.js';
+import { safeDestination } from '../utils/route-destination.js';
 import { useLearningHistory, useStudentDashboard, useStudentProfile, useUnenrollFromCourse, useUpdateStudentProfile } from '../features/student/hooks.js';
 
 const validPhone = /^(?:\+94|0)?7\d{8}$/;
@@ -124,7 +125,7 @@ export const StudentProfilePage = ({ completion = false }) => {
   const submit = async (values) => {
     const saved = await update.mutateAsync(values);
     const requested = search.get('returnTo');
-    if (completion && saved.isComplete) navigate(requested?.startsWith('/') ? requested : '/dashboard', { replace: true });
+    if (completion && saved.isComplete) navigate(safeDestination(requested, '/dashboard'), { replace: true });
   };
 
   return <section className="student-profile-page">
@@ -133,7 +134,7 @@ export const StudentProfilePage = ({ completion = false }) => {
         <p className="eyebrow">{completion ? 'Almost there' : 'My profile'}</p>
         <h1>{completion ? 'Complete your student profile' : 'Student information'}</h1>
         <p>Keep your details up to date so we can support your learning and make enrollment quick.</p>
-        <div className="profile-account" aria-label="Signed-in account"><span aria-hidden="true">G</span><div><small>Signed in with Google</small><strong>{user?.email || 'Your Google account'}</strong></div></div>
+        <div className="profile-account" aria-label="Signed-in account"><span aria-hidden="true">✓</span><div><small>Sign-in phone number</small><strong>{user?.phoneNumber || user?.email}</strong></div></div>
       </header>
       <div className="student-profile-card">
         <div className="profile-card-heading"><div><h2>Your details</h2><p>Fields marked with <span aria-hidden="true">*</span><span className="sr-only">an asterisk</span> are required.</p></div>{completion ? <span className="profile-step">Step 1 of 1</span> : null}</div>
@@ -144,6 +145,7 @@ export const StudentProfilePage = ({ completion = false }) => {
             <label className="profile-field" htmlFor="gender">Gender <span aria-hidden="true">*</span><select aria-describedby={errors.gender ? 'gender-error' : undefined} aria-invalid={Boolean(errors.gender)} autoComplete="sex" id="gender" {...form.register('gender', { required: 'Select your gender' })}><option value="">Select an option</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option></select><FieldError error={errors.gender} id="gender-error" /></label>
           </div></fieldset>
           <fieldset><legend>Contact and school</legend><div className="profile-form-grid">
+            <label className="profile-field" htmlFor="email">Contact email<input id="email" type="email" autoComplete="email" maxLength={254} {...form.register('email')} /><span className="field-hint">Required for card checkout and receipts. Your sign-in phone number is shown above.</span></label>
             <label className="profile-field profile-field-wide" htmlFor="address">Address <span aria-hidden="true">*</span><input aria-describedby={errors.address ? 'address-error' : undefined} aria-invalid={Boolean(errors.address)} autoComplete="street-address" id="address" {...form.register('address', { required: 'Enter your address' })} /><FieldError error={errors.address} id="address-error" /></label>
             <label className="profile-field" htmlFor="city">City <span aria-hidden="true">*</span><input aria-describedby={errors.city ? 'city-error' : undefined} aria-invalid={Boolean(errors.city)} autoComplete="address-level2" id="city" {...form.register('city', { required: 'Enter your city' })} /><FieldError error={errors.city} id="city-error" /></label>
             <label className="profile-field" htmlFor="district">District <span aria-hidden="true">*</span><select aria-describedby={errors.district ? 'district-error' : undefined} aria-invalid={Boolean(errors.district)} autoComplete="address-level1" id="district" {...form.register('district', { required: 'Select your district' })}><option value="">Select your district</option>{sriLankanDistricts.map((district) => <option key={district} value={district}>{district}</option>)}</select><FieldError error={errors.district} id="district-error" /></label>

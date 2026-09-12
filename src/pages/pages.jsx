@@ -17,7 +17,6 @@ import {
   StatusBadge
 } from '../components/common/States.jsx';
 import { ResourceImage } from '../components/resources/ResourceImage.jsx';
-import { BrandLogo } from '../components/layout/BrandLogo.jsx';
 import { useOrderSelection } from '../features/store/selection-context.jsx';
 import { formatCurrency } from '../utils/currency.js';
 import { formatDate } from '../utils/date-time.js';
@@ -68,7 +67,7 @@ export const HomePage = () => {
               Student Login
             </Link>
           </p>
-          <p className="google-note">Google student sign-in is planned for a future phase.</p>
+          <p>Sign in with your mobile number and password.</p>
         </div>
         <div className="hero-stat-grid" aria-label="A/L ICT catalogue highlights">
           <p>
@@ -347,104 +346,6 @@ export const LessonPreviewPage = () => {
         <Section key={section.id} section={section} />
       ))}
     </>
-  );
-};
-
-const credentialsSchema = z.object({
-  email: z.string().email('Enter a valid email address.'),
-  password: z.string().min(1, 'Password is required.')
-});
-export const LoginPage = () => {
-  const { startGoogleLogin } = useAuth();
-
-  return (
-    <section className="student-login">
-      <header className="student-login-topbar">
-        <Link aria-label="A Plus ICT home" to="/"><BrandLogo /></Link>
-        <Link className="student-login-back" to="/courses">Explore courses <span aria-hidden="true">→</span></Link>
-      </header>
-      <div className="student-login-shell">
-        <div className="student-login-main">
-          <p className="eyebrow">Student sign in</p>
-          <h1>Continue your learning.</h1>
-          <p className="student-login-lead">Sign in with Google to open your saved lessons, progress, and enrolled courses.</p>
-          <button className="student-login-google" onClick={startGoogleLogin} type="button"><span aria-hidden="true">G</span>Continue with Google</button>
-          <p className="student-login-note">Use the Google account you used for A Plus ICT. Your course choices are always yours.</p>
-        </div>
-        <aside className="student-login-visual">
-          <div className="student-login-visual-copy"><p className="eyebrow">LEARN ON YOUR TERMS</p><h2>Your learning is ready when you are.</h2><ul><li>Return to lessons from any device</li><li>Keep your completed activities and progress</li><li>Explore free learning before unlocking premium lessons</li></ul></div>
-          <p className="student-login-visual-mark" aria-hidden="true">A+</p>
-        </aside>
-      </div>
-    </section>
-  );
-};
-const registrationSchema = credentialsSchema
-  .extend({
-    firstName: z.string().trim().min(1, 'First name is required.').max(120),
-    lastName: z.string().trim().max(120).optional(),
-    password: z
-      .string()
-      .min(8, 'Use at least 8 characters.')
-      .regex(/[A-Za-z]/, 'Include a letter.')
-      .regex(/\d/, 'Include a number.'),
-    confirmPassword: z.string()
-  })
-  .refine((values) => values.password === values.confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'Passwords do not match.'
-  });
-export const RegisterPage = () => {
-  const { register: registerAccount } = useAuth();
-  const navigate = useNavigate();
-  const form = useForm({ resolver: zodResolver(registrationSchema) });
-  const mutation = useMutation({
-    mutationFn: ({ confirmPassword: _confirmPassword, ...values }) => registerAccount(values),
-    onSuccess: () => navigate('/student', { replace: true })
-  });
-  return (
-    <section className="form-card">
-      <h1>Create your student account</h1>
-      <form onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
-        <Field
-          error={form.formState.errors.firstName}
-          label="First name"
-          name="firstName"
-          register={form.register}
-        />
-        <Field
-          error={form.formState.errors.lastName}
-          label="Last name"
-          name="lastName"
-          register={form.register}
-        />
-        <Field
-          error={form.formState.errors.email}
-          label="Email"
-          name="email"
-          register={form.register}
-          type="email"
-        />
-        <Field
-          error={form.formState.errors.password}
-          label="Password"
-          name="password"
-          register={form.register}
-          type="password"
-        />
-        <Field
-          error={form.formState.errors.confirmPassword}
-          label="Confirm password"
-          name="confirmPassword"
-          register={form.register}
-          type="password"
-        />
-        {mutation.error && <InlineError error={mutation.error} />}
-        <button disabled={mutation.isPending} type="submit">
-          {mutation.isPending ? 'Creating account…' : 'Create account'}
-        </button>
-      </form>
-    </section>
   );
 };
 
@@ -833,7 +734,7 @@ export const ProfilePage = StudentProfilePage;
       <article>
         <h2>{user?.name || 'A Plus ICT student'}</h2>
         <p>{user?.email}</p>
-        <p>Your student account uses Google sign-in. No password is stored in this Web app.</p>
+        <p>Your student account uses your verified mobile number and password.</p>
       </article>
       <div className="member-profile-actions">
         <Link className="button" to="/logout">

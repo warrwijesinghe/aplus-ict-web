@@ -12,6 +12,9 @@ describe('utilities', () => {
   test('allows only local destinations', () => {
     expect(safeDestination('/student')).toBe('/student');
     expect(safeDestination('//bad.example')).toBe('/');
+    expect(safeDestination('/\\bad.example')).toBe('/');
+    expect(safeDestination('/\n/bad.example')).toBe('/');
+    expect(safeDestination(null, '/student')).toBe('/student');
   });
   test('accepts HTTPS external URLs only', () => {
     expect(safeExternalUrl('https://example.com/path')).toBe('https://example.com/path');

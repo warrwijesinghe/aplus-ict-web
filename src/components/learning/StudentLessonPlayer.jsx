@@ -8,7 +8,6 @@ import { queryKeys } from '../../api/query-keys.js';
 import { resourceApi } from '../../api/resource.api.js';
 import { safeExternalUrl } from '../../utils/safe-url.js';
 import { useAuth } from '../../auth/auth-context.jsx';
-import { serviceUrls } from '../../api/service-urls.js';
 import { EmptyState, InlineError, LoadingSkeleton } from '../common/States.jsx';
 import { StudentQuiz } from './StudentQuiz.jsx';
 import { LessonPrice } from '../pricing/LessonPrice.jsx';
@@ -802,12 +801,12 @@ export const StudentActivityPlayer = () => {
       <section className="login-cta">
         <p className="eyebrow">Student sign in</p>
         <h1>Sign in to continue learning.</h1>
-        <p>Google sign-in keeps your activity progress and next lesson safe.</p>
+        <p>Phone sign-in keeps your activity progress and next lesson safe.</p>
         <a
           className="button"
-          href={`${serviceUrls.auth}/api/v1/auth/google?returnTo=${encodeURIComponent(location.pathname)}`}
+          href={`/login?returnTo=${encodeURIComponent(location.pathname)}`}
         >
-          Continue with Google
+          Sign in with your phone
         </a>
       </section>
     );

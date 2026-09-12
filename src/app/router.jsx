@@ -9,7 +9,7 @@ import { PublicLayout } from '../layouts/PublicLayout.jsx';
 import { StudentLayout } from '../layouts/StudentLayout.jsx';
 import { LessonExperienceLayout } from '../layouts/LessonExperienceLayout.jsx';
 import { TeacherLayout } from '../layouts/TeacherLayout.jsx';
-import { GoogleLoginSuccessPage } from '../pages/GoogleLoginSuccessPage.jsx';
+import { PhoneAuthPage } from '../pages/PhoneAuthPage.jsx';
 import { ReviewAccessPage } from '../pages/ReviewAccessPage.jsx';
 import { EnrollmentPage } from '../pages/EnrollmentPage.jsx';
 import { CompleteProfilePage, LearningHistoryPage, MyCoursesPage, ProfileCompletionGuard, StudentDashboard, StudentProfilePage } from '../pages/StudentExperiencePages.jsx';
@@ -34,7 +34,6 @@ import {
   AdminListPage,
   CurriculumPage,
   LessonPreviewPage,
-  LoginPage,
   NewOrderPage,
   NotFoundPage,
   OrderDetailPage,
@@ -96,13 +95,13 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <AuthLayout />,
-        children: [{ path: '/login', element: <LoginPage /> }, { path: '/review-access', element: <ReviewAccessPage /> }]
+        children: [{ path: '/login', element: <PhoneAuthPage key="login" /> }, { path: '/register', element: <PhoneAuthPage key="register" mode="register" /> }, { path: '/forgot-password', element: <PhoneAuthPage key="reset" mode="reset" /> }, { path: '/review-access', element: <ReviewAccessPage /> }]
       }
     ]
   },
   {
     element: <AuthLayout />,
-    children: [{ path: '/login/success', element: <GoogleLoginSuccessPage /> }]
+    children: [{ path: '/login/success', element: <Navigate replace to="/login" /> }]
   },
   { path: '/unauthorized', element: <UnauthorizedPage /> },
   { path: '/service-unavailable', element: <ServiceUnavailablePage /> },
