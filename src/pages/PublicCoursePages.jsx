@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { CircleHelp, FileText, Video } from 'lucide-react';
+import { BarChart3, CircleHelp, Clock3, FileText, Globe2, Infinity as InfinityIcon, Monitor, Play, ShieldCheck, Truck, Video } from 'lucide-react';
 import { contentApi } from '../api/content.api.js';
 import { learningApi } from '../api/learning.api.js';
 import { resourceApi } from '../api/resource.api.js';
@@ -15,7 +15,7 @@ import { trackPublicEvent } from '../analytics/events.js';
 import { LessonPrice } from '../components/pricing/LessonPrice.jsx';
 import { StudentQuiz } from '../components/learning/StudentQuiz.jsx';
 import { academicAreaForCourse, lessonPurchaseText } from '../config/lesson-pricing.js';
-import { courseBreadcrumbs } from '../utils/academic-course.js';
+import { courseImageFor } from '../utils/course-image.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
 import { LessonActivityNavigator, StudentCourseOverview } from '../components/learning/StudentLessonPlayer.jsx';
@@ -48,21 +48,6 @@ const counts = (course) => {
       )}
     </p>
   );
-};
-
-// Course cards use local imagery while the catalogue is being populated. The default
-// keeps future courses presentable until an admin assigns API-managed resource metadata.
-const courseCardImages = [
-  '/images/learning-places/al-online-learning.webp',
-  '/images/learning-places/lesson-focused-study.webp',
-  '/images/learning-places/lesson-cafe-learning.webp',
-  '/images/learning-places/lesson-campus-call.webp'
-];
-
-const courseCardImage = (course) => {
-  const imageSeed = String(course.slug || course.id || course.title || 'course');
-  const imageIndex = [...imageSeed].reduce((total, character) => total + character.charCodeAt(0), 0) % courseCardImages.length;
-  return courseCardImages[imageIndex];
 };
 
 // Course descriptions can be filled in from the admin catalogue later. This
@@ -236,42 +221,84 @@ const ActivityStudyContent = ({ activity }) => {
 };
 
 const SyllabusLessonCard = ({ course, courseSlug, isEnrolled, lesson, progress }) => {
-  const availability = lessonAvailability(lesson);
   const lessonStats = lessonProgress({ ...lesson, progress });
+  const isSinhala = ['sinhala', 'si'].includes(String(course.medium?.code || '').toLowerCase());
+  const lessonNumber = String(lesson.lessonNumber).padStart(2, '0');
+  const mediumLabel = isSinhala
+    ? course.medium?.nameSi || 'සිංහල මාධ්‍ය'
+    : course.medium?.nameEn || course.medium?.name || 'English Medium';
+  const actionLabel = lessonStats.progressPercent > 0
+    ? (isSinhala ? 'පාඩම දිගටම කරගෙන යන්න' : 'Continue Lesson')
+    : (isSinhala ? 'දැන් පාඩම ආරම්භ කරන්න' : 'Start Lesson Now');
+  const lessonPath = `/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`;
+  const destination = isEnrolled
+    ? lessonPath
+    : `/enroll/${courseSlug}?returnTo=${encodeURIComponent(lessonPath)}`;
 
   return (
     <article className="syllabus-lesson-card">
       <div className="lesson-card-image-frame">
         <LessonImage lesson={lesson} />
+        <div className="lesson-card-image-labels">
+          <span className="lesson-card-image-number">{isSinhala ? `පාඩම ${lessonNumber}` : `Lesson ${lessonNumber}`}</span>
+          <span className="lesson-card-image-medium" lang={isSinhala ? 'si' : undefined}><Globe2 aria-hidden="true" />{mediumLabel}</span>
+        </div>
       </div>
       <div className="lesson-card-content">
-        <div className="lesson-card-meta">
-          <span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span>
-          {lesson.estimatedPeriods ? <span>{lesson.estimatedPeriods} periods</span> : null}
-        </div>
-        <LessonAvailabilityBadge lesson={lesson} />
-        <h3>{lesson.title}</h3>
-        {lesson.shortDescription ? <p>{lesson.shortDescription}</p> : null}
-        <div className="lesson-content-counts">
-          {lesson.freeContentCount ? <span>{lesson.freeContentCount} free</span> : null}
-          {lesson.paidContentCount ? <span>{lesson.paidContentCount} full lesson items</span> : null}
-        </div>
-        <span className={'lesson-access ' + availability.className}>{availability.label}</span>
+        <h3 lang={isSinhala ? 'si' : undefined}>{lesson.title}</h3>
+        {lesson.shortDescription ? <p lang={isSinhala ? 'si' : undefined}>{lesson.shortDescription}</p> : null}
         <LessonPrice area={academicAreaForCourse(course)} course={course} product={lesson.unlockProduct} />
         {isEnrolled ? (
           <div className="card-progress">
             <div>
-              <span>Your progress</span>
+              <span>{isSinhala ? 'ඔබගේ ප්‍රගතිය' : 'Your progress'}</span>
               <strong>{lessonStats.progressPercent}%</strong>
             </div>
             <progress max="100" value={lessonStats.progressPercent} />
           </div>
         ) : null}
-        <Link className="lesson-card-link" onClick={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
-          {isEnrolled ? 'Start lesson' : 'Preview lesson'}
+        <Link className="button lesson-card-link" onClick={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} to={destination}>
+          {actionLabel}
         </Link>
       </div>
     </article>
+  );
+};
+
+const CourseLearningBenefits = ({ isSinhala }) => {
+  const benefits = isSinhala
+    ? [
+        { icon: <Play aria-hidden="true" />, title: 'පටිගත කළ පාඩම්', caption: 'ඔබේ වේලාවට නැවත ඉගෙනගන්න' },
+        { icon: <FileText aria-hidden="true" />, title: 'පුහුණු ප්‍රශ්න', caption: 'විභාග විශ්වාසය ගොඩනඟන්න' },
+        { icon: <Truck aria-hidden="true" />, title: 'නිවසට Tute බෙදාහැරීම', caption: 'මුද්‍රිත tute නිවසටම ගෙන්වා ගන්න' },
+        { icon: <InfinityIcon aria-hidden="true" />, title: 'LMS ප්‍රවේශය', caption: 'ඔබට අවශ්‍ය විට ඉගෙනගන්න' },
+        { icon: <Monitor aria-hidden="true" />, title: 'ඕනෑම device එකකින්', caption: 'දුරකථනයෙන් හෝ පරිගණකයෙන්' },
+        { icon: <Clock3 aria-hidden="true" />, title: 'ඔබේ වේලාවට', caption: 'ඔබට ගැළපෙන වේලාවක ඉගෙනගන්න' },
+        { icon: <BarChart3 aria-hidden="true" />, title: 'ප්‍රගතිය නිරීක්ෂණය', caption: 'ඔබේ ඉගෙනීම මැන බලන්න' },
+        { icon: <ShieldCheck aria-hidden="true" />, title: 'ආරක්ෂිත ප්‍රවේශය', caption: 'ඔබේ LMS ඉගෙනීම සුරක්ෂිතයි' }
+      ]
+    : [
+        { icon: <Play aria-hidden="true" />, title: 'Recorded Lessons', caption: 'Learn at your own pace' },
+        { icon: <FileText aria-hidden="true" />, title: 'Practice Questions', caption: 'Build exam confidence' },
+        { icon: <Truck aria-hidden="true" />, title: 'Home Delivery Tutes', caption: 'Printed tutes delivered to your home' },
+        { icon: <InfinityIcon aria-hidden="true" />, title: 'LMS Access', caption: 'Learn whenever you need' },
+        { icon: <Monitor aria-hidden="true" />, title: 'Any Device', caption: 'Phone, tablet or computer' },
+        { icon: <Clock3 aria-hidden="true" />, title: 'Flexible Study Time', caption: 'Fit learning around your day' },
+        { icon: <BarChart3 aria-hidden="true" />, title: 'Progress Tracking', caption: 'See how far you have come' },
+        { icon: <ShieldCheck aria-hidden="true" />, title: 'Secure Access', caption: 'Your LMS learning stays protected' }
+      ];
+
+  return (
+    <section className="course-learning-benefits" aria-label={isSinhala ? 'පාඩම් ප්‍රතිලාභ' : 'Learning benefits'}>
+      <div className="course-benefit-grid">
+        {benefits.map(({ icon, title, caption }) => (
+          <article className="course-benefit" key={title}>
+            <span className="course-benefit-icon">{icon}</span>
+            <div><h3 lang={isSinhala ? 'si' : undefined}>{title}</h3><p>{caption}</p></div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 };
 
@@ -294,7 +321,7 @@ const CourseCard = ({ course }) => {
           height="360"
           loading="lazy"
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          src={courseCardImage(course)}
+          src={courseImageFor(course)}
           width="600"
         />
       </div>
@@ -576,47 +603,34 @@ export const PublicCourseDetailPage = () => {
     return <LoadingSkeleton label="Loading course" />;
   if (query.isError || curriculum.isError) return <InlineError error={query.error || curriculum.error} onRetry={() => { query.refetch(); curriculum.refetch(); }} />;
   if (!course) return <EmptyState title="This course is not available" />;
+  const isSinhala = ['sinhala', 'si'].includes(String(course.medium?.code || '').toLowerCase());
   const lessons = curriculum.data?.data?.lessons || [];
   const progressByLesson = new Map(
     (learningProgress.data?.lessons || []).map((lesson) => [lesson.id, lesson.progress])
   );
   return (
     <>
-      <nav aria-label="Breadcrumb" className="breadcrumbs">{courseBreadcrumbs(course).map((item, index) => <span key={`${item.label}-${index}`}>{index ? <span aria-hidden="true">/</span> : null}{item.path ? <Link to={item.path}>{item.label}</Link> : <span>{item.label}</span>}</span>)}</nav>
       <section className="course-detail-hero">
-        <div className="course-hero-image-frame">
-          {course.heroResourceId ? (
-            <ResourceImage
-              alt={`${course.title} course hero`}
-              className="course-hero-image"
-              resourceId={course.heroResourceId}
-            />
-          ) : (
-            <img
-              alt={`${course.title} course cover`}
-              className="course-hero-image"
-              height="675"
-              loading="eager"
-              sizes="(min-width: 768px) 50vw, 100vw"
-              src={courseCardImage(course)}
-              width="1200"
-            />
-          )}
+        <div className="course-detail-hero-copy">
+          <p className="course-hero-kicker">{course.academicLevel?.nameEn || 'ICT'} · {isSinhala ? course.medium?.nameSi || 'සිංහල මාධ්‍ය' : course.medium?.nameEn || course.medium?.name || course.medium?.code}</p>
+          <h1 lang={isSinhala ? 'si' : undefined}>{courseHeading(course)}</h1>
+          <p className="course-detail-description" lang={isSinhala ? 'si' : undefined}>{courseDescription(course)}</p>
+          <div className="course-detail-actions"><Link className="button course-hero-action" to={enrollment.data ? `/courses/${course.slug}/learn` : `/enroll/${course.slug}`}>{isSinhala ? 'දැන් ඉගෙනීම ආරම්භ කරන්න' : 'Start Learning Now'}</Link></div>
         </div>
-        <div>
-          <p className="eyebrow">{course.academicLevel?.nameEn || 'ICT'} · {course.medium?.nameEn || course.medium?.name || course.medium?.code}</p>
-          <h1 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{courseHeading(course)}</h1>
-          <p className="course-detail-description">{courseDescription(course)}</p>
-          <p className="course-online-value">Online school ICT learning—study this course anytime, from anywhere.</p>
-          {counts(course)}
-          <LessonPrice area={academicAreaForCourse(course)} course={course} />
-          <p className="course-detail-note">
-            Free content may be available first. Full lesson content is available after purchasing the lesson.
-          </p>
-          <div className="course-detail-actions"><Link className="button" to={enrollment.data ? `/courses/${course.slug}/learn` : `/enroll/${course.slug}`}>{enrollment.data ? 'Continue Learning' : isAuthenticated ? 'Enroll Free' : 'Login to Enroll'}</Link></div>
+        <div className="course-hero-image-frame">
+          <img
+            alt={`${course.title} course cover`}
+            className="course-hero-image"
+            height="675"
+            loading="eager"
+            sizes="(min-width: 768px) 50vw, 100vw"
+            src={courseImageFor(course)}
+            width="1200"
+          />
         </div>
       </section>
       <section className="syllabus-summary">
+        <CourseLearningBenefits isSinhala={isSinhala} />
         <p className="eyebrow">Syllabus overview</p>
         <h2>Complete syllabus and lessons</h2>
         <p className="syllabus-intro">

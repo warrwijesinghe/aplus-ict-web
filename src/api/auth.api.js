@@ -1,6 +1,8 @@
 import { authClient } from './clients/auth.client.js';
 const unwrap = (response) => response.data.data;
 export const authApi = {
+  requestLoginOtp: (input) => authClient.post('/api/v1/auth/otp/request', input, { skipRefresh: true }).then((response) => response.data),
+  verifyLoginOtp: (input) => authClient.post('/api/v1/auth/otp/verify', input, { skipRefresh: true }).then(unwrap),
   login: (input) => authClient.post('/api/v1/auth/phone/login', input, { skipRefresh: true }).then(unwrap),
   register: (input) => authClient.post('/api/v1/auth/phone/register', input, { skipRefresh: true }).then(unwrap),
   requestOtp: (input) => authClient.post('/api/v1/auth/phone/otp', input, { skipRefresh: true }).then(unwrap),

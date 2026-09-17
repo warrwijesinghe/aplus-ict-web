@@ -61,6 +61,7 @@ export const AuthProvider = ({ children }) => {
       roles: user?.roles || [],
       permissions: user?.permissions || [],
       login: (input) => establish(authApi.login, input),
+      setSession: (result) => establish(async () => result),
       register: (input) => establish(authApi.register, input),
       reviewerLogin: (input) => establish(authApi.reviewerLogin, input),
       refreshSession,

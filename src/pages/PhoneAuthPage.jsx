@@ -38,6 +38,11 @@ export const PhoneAuthPage = ({ mode = 'login' }) => {
     finally { setBusy(false); }
   };
   const sendCode = () => perform(async () => {
+    if (isLogin) {
+      const result = await authApi.requestLoginOtp({ phone: phoneNumber });
+      setCode(''); setStep('otp'); setRemaining(result.resendAfter); setNotice(result.message);
+      return;
+    }
     const result = await authApi.requestOtp({ phoneNumber, purpose: isReset ? 'reset' : 'register' });
     setChallenge(result); setVerificationToken(''); setCode(''); setStep('otp');
     setRemaining(result.resendAfter); setNotice(result.message);
@@ -50,7 +55,8 @@ export const PhoneAuthPage = ({ mode = 'login' }) => {
   const submit = (event) => {
     event.preventDefault();
     if (busy) return;
-    if (isLogin) return perform(async () => finishLogin(await auth.login({ phoneNumber, password })));
+    if (isLogin && step === 'phone') return sendCode();
+    if (isLogin && step === 'otp') return perform(async () => finishLogin(await authApi.verifyLoginOtp({ phone: phoneNumber, otp: code }).then((result) => auth.setSession(result))));
     if (step === 'phone') return sendCode();
     if (step === 'otp') return perform(async () => {
       const result = await authApi.verifyOtp({ challengeId: challenge.challengeId, code });
@@ -72,22 +78,21 @@ export const PhoneAuthPage = ({ mode = 'login' }) => {
     <header className="student-login-topbar"><Link aria-label="A Plus ICT home" to="/"><BrandLogo /></Link><Link to="/courses">Explore courses →</Link></header>
     <div className="student-login-shell"><div className="student-login-main">
       <p className="eyebrow">{isLogin ? 'Student sign in' : isReset ? 'Account recovery' : 'Create your account'}</p>
-      <h1>{isLogin ? 'Continue your learning.' : step === 'done' ? 'Your password is reset.' : step === 'otp' ? 'Verify your phone.' : step === 'password' ? 'Set your password.' : isReset ? 'Forgot your password?' : 'Start with your phone.'}</h1>
-      <p className="student-login-lead">{isLogin ? 'Sign in with your mobile number and password.' : step === 'done' ? 'Sign in with your new password. Your previous sessions have been signed out.' : step === 'otp' ? `Enter the 6-digit code sent to ${phoneNumber}. The code expires in 5 minutes.` : step === 'password' ? 'Your phone is verified. Choose a password for your account.' : isReset ? 'We’ll send a verification code to your registered mobile number.' : 'Verify your mobile number by SMS, then choose a password.'}</p>
+      <h1>{isLogin ? (step === 'otp' ? 'Verify your phone.' : 'Continue your learning.') : step === 'done' ? 'Your password is reset.' : step === 'otp' ? 'Verify your phone.' : step === 'password' ? 'Set your password.' : isReset ? 'Forgot your password?' : 'Start with your phone.'}</h1>
+      <p className="student-login-lead">{isLogin ? (step === 'otp' ? `Verification code sent to ${phoneNumber}. Enter the 6-digit code to sign in.` : 'Sign in securely with your mobile number.') : step === 'done' ? 'Sign in with your new password. Your previous sessions have been signed out.' : step === 'otp' ? `Enter the 6-digit code sent to ${phoneNumber}. The code expires in 5 minutes.` : step === 'password' ? 'Your phone is verified. Choose a password for your account.' : isReset ? 'We’ll send a verification code to your registered mobile number.' : 'Verify your mobile number by SMS, then choose a password.'}</p>
       {step === 'done' ? <Link className="button" to={`/login${query}`}>Back to sign in</Link> : <form className="phone-auth-form" onSubmit={submit}>
-        {(isLogin || step === 'phone') && <label>Mobile number<input autoComplete="tel" type="tel" inputMode="tel" maxLength={30} placeholder="0771234567" required value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} /></label>}
-        {!isLogin && step === 'otp' && <label>Verification code<input autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} /></label>}
+        {(!isLogin || step === 'phone') && <label>Mobile number<input autoFocus autoComplete="tel" type="tel" inputMode="tel" maxLength={30} placeholder="0771234567" required value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} /></label>}
+        {(isLogin || !isLogin) && step === 'otp' && <label>Verification code<input autoFocus autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} /></label>}
         {!isLogin && step === 'password' && !isReset && <label>Full name<input autoComplete="name" maxLength={120} required value={name} onChange={(e) => setName(e.target.value)} /></label>}
-        {(isLogin || step === 'password') && <label>{isLogin ? 'Password' : 'New password'}<input type="password" autoComplete={isLogin ? 'current-password' : 'new-password'} minLength={isLogin ? undefined : 8} maxLength={72} required value={password} onChange={(e) => setPassword(e.target.value)} /></label>}
+        {(!isLogin && step === 'password') && <label>New password<input type="password" autoComplete="new-password" minLength={8} maxLength={72} required value={password} onChange={(e) => setPassword(e.target.value)} /></label>}
         {!isLogin && step === 'password' && <><label>Confirm password<input type="password" autoComplete="new-password" minLength={8} maxLength={72} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /></label><p className="field-hint">Use at least 8 characters, including a letter and a number.</p></>}
         {error && <p role="alert" className="field-error">{error}</p>}
         {notice && <p role="status">{notice}</p>}
-        <button className="button" disabled={busy} type="submit">{busy ? 'Please wait…' : isLogin ? 'Sign in' : step === 'phone' ? 'Send verification code' : step === 'otp' ? 'Verify phone' : isReset ? 'Reset password' : 'Create account'}</button>
-        {!isLogin && step === 'otp' && <button type="button" disabled={busy || remaining > 0} onClick={sendCode}>{remaining > 0 ? `Resend code in ${remaining}s` : 'Resend code'}</button>}
-        {!isLogin && step !== 'phone' && <button type="button" disabled={busy} onClick={() => { setStep('phone'); setChallenge(null); setVerificationToken(''); setError(''); setNotice(''); setPassword(''); setConfirmPassword(''); }}>Start again</button>}
+        <button className="button" disabled={busy} type="submit">{busy ? 'Please wait…' : isLogin ? (step === 'phone' ? 'Send OTP' : 'Verify & Login') : step === 'phone' ? 'Send verification code' : step === 'otp' ? 'Verify phone' : isReset ? 'Reset password' : 'Create account'}</button>
+        {(isLogin || !isLogin) && step === 'otp' && <button type="button" disabled={busy || remaining > 0} onClick={sendCode}>{remaining > 0 ? `Resend code in ${remaining}s` : 'Resend OTP'}</button>}
+        {(isLogin || !isLogin) && step !== 'phone' && <button type="button" disabled={busy} onClick={() => { setStep('phone'); setChallenge(null); setVerificationToken(''); setError(''); setNotice(''); setPassword(''); setConfirmPassword(''); }}>Change phone number</button>}
       </form>}
       <nav className="phone-auth-links" aria-label="Account options">{isLogin ? <><Link to={`/register${query}`}>Create an account</Link><Link to={`/forgot-password${query}`}>Forgot password?</Link></> : <Link to={`/login${query}`}>Back to sign in</Link>}</nav>
-      {!isLogin && <p className="student-login-note">Previously signed in with Google? Contact support to connect your existing account to a mobile number, then use password reset.</p>}
     </div><aside className="student-login-visual"><div className="student-login-visual-copy"><p className="eyebrow">LEARN ON YOUR TERMS</p><h2>Your learning is ready when you are.</h2><ul><li>Return to lessons from any device</li><li>Keep your completed activities and progress</li><li>Explore free learning before unlocking premium lessons</li></ul></div><p className="student-login-visual-mark" aria-hidden="true">A+</p></aside></div>
   </section>;
 };

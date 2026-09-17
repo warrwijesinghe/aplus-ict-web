@@ -9,7 +9,7 @@ Student profiles, enrolments and learning progress are persisted through the API
 The A Plus ICT Web application is the public website and Student LMS. It displays the dynamic A/L ICT catalogue, supports phone verification and password sign-in, presents free and paid lessons in one flow, records progress and supports individual lesson ordering.
 
 ```powershell
-copy .env.example .env
+# Configure the existing local .env only with public VITE_* settings.
 npm ci
 npm run dev
 ```
@@ -32,6 +32,6 @@ The non-indexed `/review-access` route is a restricted form for the server-confi
 - `/register`: phone → SMS code → name and password.
 - `/forgot-password`: phone → SMS code → new password → sign in.
 
-All authentication screens are non-indexed. Intended course/enrolment destinations are retained through these flows. The API sends OTPs using server-side Mobitel credentials; no SMS secret belongs in this application.
+The API sends OTPs through its server-side Text.lk integration; no SMS secret belongs in this application.
 
-Deploy with the API phone-authentication migration. Existing Google students must have a login number assigned to their existing account by an operator before they use OTP password reset; see the API's `docs/PHONE_AUTHENTICATION.md`.
+Deploy with the API phone-authentication migration.
