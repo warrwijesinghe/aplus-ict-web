@@ -1,19 +1,15 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { GuestOnlyRoute } from '../auth/guest-only-route.jsx';
-import { PermissionRoute } from '../auth/permission-route.jsx';
 import { ProtectedRoute } from '../auth/protected-route.jsx';
 import { RoleRoute } from '../auth/role-route.jsx';
-import { AdminLayout } from '../layouts/AdminLayout.jsx';
 import { AuthLayout } from '../layouts/AuthLayout.jsx';
 import { PublicLayout } from '../layouts/PublicLayout.jsx';
 import { StudentLayout } from '../layouts/StudentLayout.jsx';
 import { LessonExperienceLayout } from '../layouts/LessonExperienceLayout.jsx';
-import { TeacherLayout } from '../layouts/TeacherLayout.jsx';
 import { PhoneAuthPage } from '../pages/PhoneAuthPage.jsx';
 import { ReviewAccessPage } from '../pages/ReviewAccessPage.jsx';
 import { EnrollmentPage } from '../pages/EnrollmentPage.jsx';
 import { CompleteProfilePage, LearningHistoryPage, MyCoursesPage, ProfileCompletionGuard, StudentDashboard, StudentProfilePage } from '../pages/StudentExperiencePages.jsx';
-import { AdminContentPage } from '../pages/AdminContentPage.jsx';
 import { LogoutPage } from '../pages/LogoutPage.jsx';
 import {
   AboutPage,
@@ -26,12 +22,11 @@ import {
 import { PublicResourcesPage } from '../pages/PublicResourcesPage.jsx';
 import { StudentActivityPlayer } from '../components/learning/StudentLessonPlayer.jsx';
 import { ExamSuccessPackPage, StudentOrderDetailPage, StudentOrdersPage } from '../pages/ExamSuccessPackPage.jsx';
+import { CourseSelectionPage } from '../pages/CourseSelectionPage.jsx';
 import { StudentGradebook } from '../components/learning/StudentGradebook.jsx';
 import { PrivacyPolicyPage, RefundPolicyPage, TermsPage } from '../pages/LegalPages.jsx';
-import { AlIctPage, OlIctPage, PlatformHomePage, SchoolIctPage } from '../pages/AcademicAreaPages.jsx';
+import { AlIctPage, DegreePage, OlIctPage, PlatformHomePage, ProfessionalCertificationsPage, SchoolIctPage, ShortCoursesPage } from '../pages/AcademicAreaPages.jsx';
 import {
-  AdminDashboard,
-  AdminListPage,
   CurriculumPage,
   LessonPreviewPage,
   NewOrderPage,
@@ -44,14 +39,9 @@ import {
   ServiceUnavailablePage,
   StorePage,
   StudentLessonPage,
-  TeacherContentPage,
-  TeacherCoursePage,
-  TeacherCoursesPage,
-  TeacherDashboard,
   UnauthorizedPage
 } from '../pages/pages.jsx';
 
-const plannedAdmin = <AdminListPage />;
 export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
@@ -60,7 +50,10 @@ export const router = createBrowserRouter([
       { path: '/al-ict', element: <AlIctPage /> },
       { path: '/ol-ict', element: <OlIctPage /> },
       { path: '/school-ict', element: <SchoolIctPage /> },
-      { path: '/courses', element: <Navigate replace to="/#pathways" /> },
+      { path: '/degree', element: <DegreePage /> },
+      { path: '/professional-certifications', element: <ProfessionalCertificationsPage /> },
+      { path: '/short-courses', element: <ShortCoursesPage /> },
+      { path: '/courses', element: <CourseSelectionPage /> },
       { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
       { path: '/enroll/:courseSlug', element: <EnrollmentPage /> },
       { path: '/resources', element: <PublicResourcesPage /> },
@@ -126,6 +119,7 @@ export const router = createBrowserRouter([
               { path: '/learning-history', element: <LearningHistoryPage /> },
               { path: '/courses/:courseSlug/lessons/:lessonSlug/exam-success-pack', element: <ExamSuccessPackPage /> },
               { path: '/student', element: <StudentDashboard /> },
+              { path: '/student/explore', element: <CourseSelectionPage student /> },
               { path: '/student/courses', element: <MyCoursesPage /> },
               { path: '/student/courses/:courseId', element: <ProgressPage /> },
               { path: '/student/courses/:courseId/progress', element: <ProgressPage /> },
@@ -138,67 +132,6 @@ export const router = createBrowserRouter([
               { path: '/student/orders/:orderId/payment/:paymentMethod', element: <StudentOrderDetailPage /> },
               { path: '/student/orders/:orderId/payment/:paymentMethod/:paymentStep', element: <StudentOrderDetailPage /> },
               { path: '/student/profile', element: <StudentProfilePage /> }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        element: <RoleRoute roles={['teacher', 'content_editor', 'admin', 'super_admin']} />,
-        children: [
-          {
-            element: <TeacherLayout />,
-            children: [
-              { path: '/teacher', element: <TeacherDashboard /> },
-              { path: '/teacher/courses', element: <TeacherCoursesPage /> },
-              { path: '/teacher/courses/:trackId', element: <TeacherCoursePage /> },
-              { path: '/teacher/content', element: <TeacherContentPage /> },
-              { path: '/teacher/content/subjects', element: <TeacherContentPage /> },
-              { path: '/teacher/content/courses', element: <TeacherContentPage /> }
-            ]
-          }
-        ]
-      },
-      {
-        element: <RoleRoute roles={['admin', 'super_admin']} />,
-        children: [
-          {
-            element: <AdminLayout />,
-            children: [
-              { path: '/admin', element: <AdminDashboard /> },
-              { path: '/admin/content/subjects', element: plannedAdmin },
-              { path: '/admin/content/courses', element: <AdminContentPage /> },
-              { path: '/admin/content/modules', element: plannedAdmin },
-              { path: '/admin/content/lessons', element: plannedAdmin },
-              {
-                element: <PermissionRoute permissions={['learning.enrolments.read']} />,
-                children: [
-                  { path: '/admin/learning/enrolments', element: plannedAdmin },
-                  { path: '/admin/learning/progress', element: plannedAdmin }
-                ]
-              },
-              {
-                element: (
-                  <PermissionRoute
-                    permissions={['resources.read', 'resources.read_all', 'resources.manage']}
-                  />
-                ),
-                children: [{ path: '/admin/resources', element: plannedAdmin }]
-              },
-              {
-                element: <PermissionRoute permissions={['commerce.products.read']} />,
-                children: [{ path: '/admin/commerce/products', element: plannedAdmin }]
-              },
-              {
-                element: <PermissionRoute permissions={['commerce.orders.read_all']} />,
-                children: [{ path: '/admin/commerce/orders', element: plannedAdmin }]
-              },
-              {
-                element: <PermissionRoute permissions={['commerce.payments.read']} />,
-                children: [
-                  { path: '/admin/commerce/payments', element: plannedAdmin },
-                  { path: '/admin/commerce/fulfilments', element: plannedAdmin }
                 ]
               }
             ]

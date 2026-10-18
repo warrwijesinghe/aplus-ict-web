@@ -4,7 +4,7 @@ export const BrandLogo = ({ brandName = 'A Plus ICT', className = '', variant = 
     <img
       alt="A Plus ICT"
       className="brand-logo-image"
-      src={variant === 'light' ? '/images/aplus-ict-logo-light.png' : '/images/aplus-ict-logo.png'}
+      src={variant === 'light' ? '/images/aplus-brand-on-dark.png' : '/images/aplus-brand-on-light.png'}
     />
     <span className="sr-only">{brandName}</span>
   </span>

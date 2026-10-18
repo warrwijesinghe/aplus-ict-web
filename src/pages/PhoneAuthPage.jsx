@@ -22,7 +22,7 @@ export const PhoneAuthPage = ({ mode = 'login' }) => {
   const [notice, setNotice] = useState('');
   const [remaining, setRemaining] = useState(0);
   const isLogin = mode === 'login', isReset = mode === 'reset';
-  const returnTo = safeDestination(search.get('returnTo') || location.state?.from || sessionStorage.getItem('aplus-return-to'), '/student');
+  const returnTo = safeDestination(search.get('returnTo') || location.state?.from || sessionStorage.getItem('aplus-return-to'), '/student/explore');
   const query = `?returnTo=${encodeURIComponent(returnTo)}`;
   usePageSeo({ path: location.pathname, title: isLogin ? 'Student sign in' : isReset ? 'Reset password' : 'Create account', description: 'Secure student account access.', noIndex: true });
 

@@ -2,10 +2,14 @@ export const SITE_NAME = 'A Plus ICT';
 export const DEFAULT_OG_IMAGE = '/images/platform-learning-journey.webp';
 
 export const PUBLIC_ROUTE_SEO = {
+  '/courses': { title: 'Explore ICT Courses', description: 'Explore ICT courses and learning paths at A Plus ICT.' },
   '/': { title: 'Online ICT Classes for Grades 6–13', description: 'Study School, O/L and A/L ICT online with structured video lessons, learning materials and progress tracking. Learn anytime, anywhere with A Plus ICT.' },
   '/school-ict': { title: 'Online ICT Courses for Grades 6–9', description: 'Learn Grade 6, 7, 8 and 9 ICT online through syllabus-aligned lessons and learning resources. Study at your own pace with A Plus ICT.' },
   '/ol-ict': { title: 'Online O/L ICT Classes in Sri Lanka', description: 'Learn Grade 10 and Grade 11 ICT online in Sinhala or English Medium with structured lessons, materials and examination-focused support.' },
   '/al-ict': { title: 'Online A/L ICT Classes in Sri Lanka', description: 'Learn all 13 G.C.E. A/L ICT competencies online with structured video lessons, notes, activities and progress tracking.' },
+  '/degree': { title: 'Degree Courses', description: 'Explore degree-level ICT courses at A Plus ICT.' },
+  '/professional-certifications': { title: 'Professional Certifications', description: 'Explore professional ICT certification courses at A Plus ICT.' },
+  '/short-courses': { title: 'Short Courses', description: 'Explore short ICT courses at A Plus ICT.' },
   '/resources': { title: 'Free School ICT Resources and Notes', description: 'Access free ICT notes, lesson materials and revision resources for Sri Lankan students from Grade 6 to Grade 13.' },
   '/student-guide': { title: 'Student Guide', description: 'Learn how to choose a course, sign in, access available content and save your learning progress with A Plus ICT.' },
   '/about': { title: 'About A Plus ICT | Flexible Online School ICT Learning', description: 'Learn how A Plus ICT provides structured and flexible online ICT education for Sri Lankan school students in Grades 6–13.' },
@@ -15,7 +19,7 @@ export const PUBLIC_ROUTE_SEO = {
   '/refund-policy': { title: 'Refund Policy', description: 'Refund Policy for A Plus ICT courses, lessons and educational products.' }
 };
 
-export const PUBLIC_SITEMAP_PATHS = ['/', '/school-ict', '/ol-ict', '/al-ict', '/resources', '/student-guide', '/about', '/contact', '/privacy-policy', '/terms-and-conditions', '/refund-policy'];
+export const PUBLIC_SITEMAP_PATHS = ['/', '/courses', '/school-ict', '/ol-ict', '/al-ict', '/degree', '/professional-certifications', '/short-courses', '/resources', '/student-guide', '/about', '/contact', '/privacy-policy', '/terms-and-conditions', '/refund-policy'];
 export const normalizePath = (path = '/') => { const pathname = path.startsWith('/') ? path : `/${path}`; return pathname === '/' ? '/' : pathname.replace(/\/+$/, ''); };
 export const absoluteUrl = (path, siteUrl) => new URL(normalizePath(path), `${siteUrl.replace(/\/$/, '')}/`).toString();
 export const pageTitle = (title) => `${title} | ${SITE_NAME}`;

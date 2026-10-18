@@ -148,13 +148,13 @@ export const CourseHighlights = ({ course }) => {
   </ul>;
 };
 
-export const CatalogueCourseCard = ({ area, course }) => {
+export const CatalogueCourseCard = ({ area, course, compact = false }) => {
   const title = primaryCourseTitle(course) || 'ICT course';
   const route = course.slug ? `/courses/${course.slug}` : '/courses';
   const sinhala = isSinhalaMedium(course);
 
   return (
-    <article className={`catalogue-course-card ${sinhala ? 'is-sinhala' : 'is-english'}`}>
+    <article className={`catalogue-course-card ${sinhala ? 'is-sinhala' : 'is-english'}${compact ? ' catalogue-course-card-compact' : ''}`}>
       <img
         alt={`${title} course cover`}
         className="catalogue-course-image"
@@ -169,11 +169,10 @@ export const CatalogueCourseCard = ({ area, course }) => {
       />
       <div className="catalogue-course-content">
         <MediumBadge medium={course.medium} />
-        <p className="course-grade">{gradeLabel(course)}</p>
+        {!compact && <p className="course-grade">{gradeLabel(course)}</p>}
         <h3 lang={sinhala ? 'si' : undefined}>{title}</h3>
-        <p className="course-description" lang={sinhala ? 'si' : undefined}>{descriptionForCourse(course)}</p>
-        <CourseHighlights course={course} />
-        <Link className="button secondary catalogue-course-cta" onClick={() => trackPublicEvent('course_card_opened', { course_slug: course.slug })} to={route}>
+        {!compact && <><p className="course-description" lang={sinhala ? 'si' : undefined}>{descriptionForCourse(course)}</p><CourseHighlights course={course} /></>}
+        <Link aria-label={compact ? `View ${title}, ${sinhala ? 'Sinhala' : 'English'} medium` : undefined} className="button secondary catalogue-course-cta" onClick={() => trackPublicEvent('course_card_opened', { course_slug: course.slug })} to={route}>
           <span>View Course</span><ArrowRightIcon />
         </Link>
       </div>

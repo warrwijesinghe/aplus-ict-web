@@ -70,7 +70,7 @@ const courseCardImage = (course) => {
 const courseDescription = (course) =>
   course.shortDescription ||
   course.description ||
-  'Follow a structured lesson path, begin with free content, and build your A/L ICT confidence.';
+  'Explore the lessons and learning content available in this course.';
 
 const courseHeading = (course) => course?.medium?.code === 'sinhala'
   ? course.titleSi || course.title
@@ -607,7 +607,7 @@ export const PublicCourseDetailPage = () => {
           <p className="eyebrow">{course.academicLevel?.nameEn || 'ICT'} · {course.medium?.nameEn || course.medium?.name || course.medium?.code}</p>
           <h1 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{courseHeading(course)}</h1>
           <p className="course-detail-description">{courseDescription(course)}</p>
-          <p className="course-online-value">Online school ICT learning—study this course anytime, from anywhere.</p>
+          <p className="course-online-value">Online learning—study this course anytime, from anywhere.</p>
           {counts(course)}
           <LessonPrice area={academicAreaForCourse(course)} course={course} />
           <p className="course-detail-note">

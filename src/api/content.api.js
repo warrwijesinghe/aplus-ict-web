@@ -32,6 +32,7 @@ const publicCatalogue = (response) => ({
   data: (response.data.data || []).map(normalizeCatalogueCourse),
 });
 export const contentApi = {
+  courseSelection: (signal) => contentClient.get('/api/v1/public/course-selection', { signal }).then(unwrap),
   subjects: (params, signal) =>
     contentClient.get('/api/v1/categories', { params, signal }).then(itemList),
   courses: (params, signal) =>
@@ -67,12 +68,5 @@ export const contentApi = {
       return { data: { course, lesson: { ...source, topics: [{ id: `${source.id}-content`, title: source.title, contentItems }] } } };
     }
   },
-  siteProfile: (signal) => contentClient.get('/api/v1/site-profile', { signal }).then(unwrap),
-  adminList: (type, params, signal) =>
-    contentClient.get(`/api/v1/admin/${type}`, { params, signal }).then(unwrap),
-  // The admin editor deliberately uses the same small CRUD contract for
-  // lessons, content sections, and their lesson-level unlock products.
-  adminCreate: (type, body) => contentClient.post(`/api/v1/admin/${type}`, body).then(unwrap),
-  adminUpdate: (type, id, body) =>
-    contentClient.patch(`/api/v1/admin/${type}/${id}`, body).then(unwrap)
+  siteProfile: (signal) => contentClient.get('/api/v1/site-profile', { signal }).then(unwrap)
 };

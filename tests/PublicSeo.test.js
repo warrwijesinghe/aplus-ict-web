@@ -6,9 +6,9 @@ test('normalizes canonical paths and strips filter query parameters', () => {
   expect(absoluteUrl('/ol-ict', 'https://example.test/')).toBe('https://example.test/ol-ict');
 });
 
-test('the static sitemap covers all academic pathways and excludes the legacy catalogue route', () => {
+test('the static sitemap covers the catalogue and academic pathways', () => {
   expect(PUBLIC_SITEMAP_PATHS).toEqual(expect.arrayContaining(['/school-ict', '/ol-ict', '/al-ict']));
-  expect(PUBLIC_SITEMAP_PATHS).not.toContain('/courses');
+  expect(PUBLIC_SITEMAP_PATHS).toContain('/courses');
 });
 
 test('course metadata selects the matching medium title without inventing statistics', () => {

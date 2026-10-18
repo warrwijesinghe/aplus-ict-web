@@ -11,6 +11,7 @@ import { PlatformExperience } from '../components/home/PlatformExperience.jsx';
 import { EducatorSection } from '../components/home/EducatorSection.jsx';
 import { HomeFaq as RefinedHomeFaq } from '../components/home/HomeFaq.jsx';
 import { HomeCourseCollections } from '../components/home/HomeCourseCollections.jsx';
+import { CourseSummaryCards } from './CourseSelectionPage.jsx';
 
 const AREAS = {
   SCHOOL: {
@@ -60,6 +61,39 @@ const AREAS = {
       ['/images/learning-places/lesson-headset-laptop.webp', 'Student learning with a laptop and headset'],
       ['/images/learning-places/lesson-focused-study.webp', 'Student focused on A/L ICT study']
     ]
+  },
+  DEGREE: {
+    path: '/degree', image: '/images/learning-places/campus-steps.webp', label: 'Degree',
+    title: 'Explore Degree Courses', description: 'Discover degree-level ICT courses and find a learning path that suits your goals.', action: 'Explore Degree Courses',
+    gallery: [
+      ['/images/learning-places/campus-steps.webp', 'Student on a university campus'],
+      ['/images/learning-places/lesson-campus-call.webp', 'Student learning on campus'],
+      ['/images/learning-places/outdoor-laptop.webp', 'Student working on a laptop'],
+      ['/images/learning-places/lesson-study.webp', 'Student studying course material'],
+      ['/images/learning-places/focused-student.webp', 'Student studying']
+    ]
+  },
+  PROFESSIONAL: {
+    path: '/professional-certifications', image: '/images/learning-places/lesson-laptop-focus.webp', label: 'Professional Certifications',
+    title: 'Explore Professional Certifications', description: 'Discover professional ICT courses and explore available certification pathways.', action: 'Explore Certifications',
+    gallery: [
+      ['/images/learning-places/lesson-laptop-focus.webp', 'Learner working on a laptop'],
+      ['/images/learning-places/lesson-webinar-notes.webp', 'Learner taking notes'],
+      ['/images/learning-places/cafe-laptop.webp', 'Learner working on a laptop'],
+      ['/images/learning-places/lesson-headset-laptop.webp', 'Learner following an online lesson'],
+      ['/images/learning-places/quiet-study.webp', 'Learner studying']
+    ]
+  },
+  SHORT_COURSES: {
+    path: '/short-courses', image: '/images/learning-places/practical-learning.webp', label: 'Short Courses',
+    title: 'Explore Short Courses', description: 'Find short ICT courses for focused learning and practical skills.', action: 'Explore Short Courses',
+    gallery: [
+      ['/images/learning-places/practical-learning.webp', 'Learner practising ICT skills'],
+      ['/images/learning-places/lesson-tablet-headphones.webp', 'Learner following an online lesson'],
+      ['/images/learning-places/study-desk.webp', 'Learner studying at a desk'],
+      ['/images/learning-places/lesson-study-notes.webp', 'Learner reviewing notes'],
+      ['/images/learning-places/online-session.webp', 'Learner attending an online session']
+    ]
   }
 };
 
@@ -82,7 +116,7 @@ const Hero = ({ area }) => {
       <div className="public-hero-copy">
         <p className="eyebrow">{info.label}</p>
         <h1 id={`${area.toLowerCase()}-hero-title`}>{info.title}</h1>
-        <p className="hero-language-note" lang="si">{info.support}</p>
+        {info.support && <p className="hero-language-note" lang="si">{info.support}</p>}
         <p>{info.description}</p>
         <div className="hero-actions"><a className="button" href="#course-selection">{info.action}</a><Link className="button secondary" to="/free-lessons">Start Learning Free</Link></div>
       </div>
@@ -115,7 +149,7 @@ const CourseCards = ({ area, courses, loading, error }) => {
   if (loading) return <LoadingSkeleton label="Loading published courses" />;
   if (error) return <InlineError error={error} />;
   const gridColumns = courses.length > 2 ? 3 : 2;
-  return courses.length ? <div className={`catalogue-course-grid catalogue-course-grid-${gridColumns} landing-course-grid`}>{courses.map((course) => <CatalogueCourseCard area={area} course={course} key={course.id} />)}</div> : <EmptyState title="Courses will appear here as they are published"><p>Check back soon for the latest lessons.</p></EmptyState>;
+  return courses.length ? <div className={`catalogue-course-grid catalogue-course-grid-${gridColumns} landing-course-grid${area === 'SCHOOL' ? ' school-course-grid' : ''}`}>{courses.map((course) => <CatalogueCourseCard area={area} compact={area === 'SCHOOL'} course={course} key={course.id} />)}</div> : <EmptyState title="Courses will appear here as they are published"><p>Check back soon for the latest lessons.</p></EmptyState>;
 };
 
 
@@ -127,15 +161,24 @@ const AreaSupport = ({ area }) => {
 
 const AcademicLandingPage = ({ area }) => {
   const info = AREAS[area];
-  const catalogue = useQuery({ queryKey: queryKeys.content.publicCourses(), queryFn: ({ signal }) => contentApi.publicCourses({}, signal), staleTime: 60_000, retry: 1 });
+  const schoolArea = ['SCHOOL', 'OL', 'AL'].includes(area);
+  const catalogue = useQuery({ queryKey: queryKeys.content.publicCourses(), queryFn: ({ signal }) => contentApi.publicCourses({}, signal), staleTime: 60_000, retry: 1, enabled: schoolArea });
+  const selection = useQuery({ queryKey: ['course-selection'], queryFn: ({ signal }) => contentApi.courseSelection(signal), staleTime: 60_000, retry: 1 });
   const courses = (catalogue.data?.data || []).filter((course) => academicAreaForCourse(course) === area);
+  const summaries = (selection.data?.data || []).filter((course) => course.courseGroup === area && (!schoolArea || course.availabilityStatus === 'inactive'));
   usePageSeo({ path: info.path, image: info.image, structuredData: { '@context': 'https://schema.org', '@type': 'CollectionPage', name: info.title } });
   return <><Hero area={area} />
-    <section className="home-section course-picker" id="course-selection"><p className="eyebrow">Available courses</p><h2>{area === 'SCHOOL' ? 'ICT courses for Grades 6–9' : info.action}</h2><CourseCards area={area} courses={courses} error={catalogue.error} loading={catalogue.isPending} /></section>
-    <LearningPathSwitcher currentArea={area} />
+    <section className="home-section course-picker" id="course-selection"><p className="eyebrow">Courses</p><h2>{area === 'SCHOOL' ? 'ICT courses for Grades 6–9' : info.action}</h2>
+      {schoolArea && (courses.length > 0 || catalogue.isPending || catalogue.error) && <CourseCards area={area} courses={courses} error={catalogue.error} loading={catalogue.isPending} />}
+      {selection.isPending ? <LoadingSkeleton label="Loading courses" /> : selection.error ? <InlineError error={selection.error} /> : summaries.length ? <CourseSummaryCards courses={summaries} /> : !courses.length && !catalogue.error && (!schoolArea || !catalogue.isPending) ? <EmptyState title="Courses in this category are coming soon"><p>Check back for updates.</p></EmptyState> : null}
+    </section>
+    {schoolArea ? <LearningPathSwitcher currentArea={area} /> : <section className="home-section"><Link className="button secondary" to="/courses">Explore all categories</Link></section>}
   </>;
 };
 
 export const AlIctPage = () => <AcademicLandingPage area="AL" />;
 export const OlIctPage = () => <AcademicLandingPage area="OL" />;
 export const SchoolIctPage = () => <AcademicLandingPage area="SCHOOL" />;
+export const DegreePage = () => <AcademicLandingPage area="DEGREE" />;
+export const ProfessionalCertificationsPage = () => <AcademicLandingPage area="PROFESSIONAL" />;
+export const ShortCoursesPage = () => <AcademicLandingPage area="SHORT_COURSES" />;

@@ -29,7 +29,5 @@ export const learningApi = {
   quizAttempt: (attemptId, signal) => learningClient.get(`/api/v1/student/quiz-attempts/${attemptId}`, { signal }).then(data),
   saveQuizAnswer: (attemptId, questionId, answer) => learningClient.put(`/api/v1/student/quiz-attempts/${attemptId}/answers/${questionId}`, answer).then(data),
   submitQuizAttempt: (attemptId) => learningClient.post(`/api/v1/student/quiz-attempts/${attemptId}/submit`).then(data),
-  quizResult: (attemptId, signal) => learningClient.get(`/api/v1/student/quiz-attempts/${attemptId}/result`, { signal }).then(data),
-  adminEnrolments: (params, signal) =>
-    learningClient.get('/api/v1/admin/learning/enrolments', { params, signal }).then(data)
+  quizResult: (attemptId, signal) => learningClient.get(`/api/v1/student/quiz-attempts/${attemptId}/result`, { signal }).then(data)
 };

@@ -4,8 +4,8 @@
  * Use these semantic tokens instead of introducing standalone UI colours.
  */
 :root {
-  --aplus-red: #ff0000;
-  --aplus-red-dark: #c90000;
+  --aplus-red: #bb0000;
+  --aplus-red-dark: #900000;
   --aplus-red-soft: #fff0f0;
   --aplus-black: #000000;
   --aplus-ink: #1a1a1a;
@@ -45,7 +45,7 @@ a { color: var(--aplus-red-dark); }
 
 .public-hero { background: var(--aplus-black); }
 .public-hero-copy h1 { color: var(--aplus-white); }
-.public-hero-copy .eyebrow, .hero-language-note { color: var(--aplus-red); }
+.public-hero-copy .eyebrow, .hero-language-note { color: #ffb3b3; }
 .public-hero-copy > p:not(.eyebrow):not(.hero-language-note) { color: var(--aplus-white); opacity: .82; }
 .public-hero .quiet-link { color: var(--aplus-white); }
 .public-hero-media { background: var(--aplus-black); }
@@ -70,7 +70,7 @@ a { color: var(--aplus-red-dark); }
 
 .tutor-panel { background: var(--aplus-black); }
 .tutor-panel h2, .tutor-panel .quiet-link { color: var(--aplus-white); }
-.tutor-panel .eyebrow, .tutor-panel .tutor-role { color: var(--aplus-red); }
+.tutor-panel .eyebrow, .tutor-panel .tutor-role { color: #ffb3b3; }
 .tutor-panel p:not(.eyebrow) { color: var(--aplus-white); opacity: .82; }
 .course-picker, .landing-info-grid article { border-color: var(--aplus-line); }
 .course-online-value { color: var(--aplus-red-dark); font-weight: 800; line-height: 1.55; }

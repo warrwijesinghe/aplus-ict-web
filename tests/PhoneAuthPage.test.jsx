@@ -36,12 +36,18 @@ describe('phone authentication screens', () => {
     await waitFor(() => expect(navigate).toHaveBeenCalledWith('/enroll/al-ict', { replace: true }));
     expect(login).toHaveBeenCalledWith({ phoneNumber: '0771234567', password: 'Learning123!' });
   });
+  test('opens course selection after a regular sign in', async () => {
+    show();
+    type('Mobile number', '0771234567'); type('Password', 'Learning123!');
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/student/explore', { replace: true }));
+  });
   test('verifies before password setup and creates an account with proof', async () => {
     show('register', '/register'); await verify();
     type('Full name', 'Student One'); type('New password', 'Learning123!'); type('Confirm password', 'Learning123!');
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
     await waitFor(() => expect(register).toHaveBeenCalledWith({ challengeId: 'challenge', verificationToken: 'proof', name: 'Student One', password: 'Learning123!' }));
-    expect(navigate).toHaveBeenCalledWith('/complete-profile?returnTo=%2Fstudent', { replace: true });
+    expect(navigate).toHaveBeenCalledWith('/complete-profile?returnTo=%2Fstudent%2Fexplore', { replace: true });
   });
   test('rejects mismatched passwords without calling the API', async () => {
     show('register', '/register'); await verify();
@@ -72,7 +78,7 @@ describe('phone authentication screens', () => {
     show('login', '/login?returnTo=https%3A%2F%2Fevil.example');
     type('Mobile number', '0771234567'); type('Password', 'Learning123!');
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
-    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/student', { replace: true }));
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/student/explore', { replace: true }));
     expect(document.querySelector('meta[name="robots"]').content).toBe('noindex, nofollow');
   });
 });

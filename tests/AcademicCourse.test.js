@@ -7,6 +7,16 @@ test('normalizes API medium aliases consistently', () => {
   expect(mediumForCourse({ medium: { code: 'english' } })).toBe('en');
 });
 
+test('keeps short courses out of school grade breadcrumbs', () => {
+  const course = { courseGroup: 'SHORT_COURSES', title: 'ICT 10 Essentials', slug: 'ict-10-essentials', medium: 'English' };
+  expect(academicAreaForCourse(course)).toBeNull();
+  expect(courseBreadcrumbs(course)).toEqual([
+    { label: 'Home', path: '/' },
+    { label: 'Short Courses', path: '/short-courses' },
+    { label: 'English Medium' }
+  ]);
+});
+
 test('creates breadcrumbs from the actual academic area and grade', () => {
   const course = { slug: 'grade-7-ict-si', grade: 7, medium: { code: 'si' } };
   expect(academicAreaForCourse(course)).toBe('SCHOOL');

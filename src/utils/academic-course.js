@@ -18,6 +18,7 @@ export const gradeForCourse = (course = {}) => {
 
 export const academicAreaForCourse = (course = {}) => {
   const level = String(course.courseGroup || course.academicLevel?.code || course.academicLevel || '').toUpperCase();
+  if (['DEGREE', 'PROFESSIONAL', 'SHORT_COURSES'].includes(level)) return null;
   const grade = gradeForCourse(course);
   const slug = String(course.slug || '').toLowerCase();
   if (level === 'AL' || slug.startsWith('al-') || ['12', '13'].includes(grade)) return 'AL';
@@ -28,6 +29,9 @@ export const academicAreaForCourse = (course = {}) => {
 
 export const academicAreaDetails = (course) => {
   const area = academicAreaForCourse(course);
+  if (course?.courseGroup === 'DEGREE') return { area: 'DEGREE', label: 'Degree', path: '/degree' };
+  if (course?.courseGroup === 'PROFESSIONAL') return { area: 'PROFESSIONAL', label: 'Professional Certifications', path: '/professional-certifications' };
+  if (course?.courseGroup === 'SHORT_COURSES') return { area: 'SHORT_COURSES', label: 'Short Courses', path: '/short-courses' };
   if (area === 'SCHOOL') return { area, label: 'Grades 6–9', path: '/school-ict' };
   if (area === 'OL') return { area, label: 'O/L ICT', path: '/ol-ict' };
   return { area: 'AL', label: 'A/L ICT', path: '/al-ict' };
@@ -35,7 +39,7 @@ export const academicAreaDetails = (course) => {
 
 export const courseBreadcrumbs = (course) => {
   const { label, path } = academicAreaDetails(course);
-  const grade = gradeForCourse(course);
+  const grade = ['DEGREE', 'PROFESSIONAL', 'SHORT_COURSES'].includes(course?.courseGroup) ? '' : gradeForCourse(course);
   const medium = mediumForCourse(course) === 'si' ? 'Sinhala Medium' : 'English Medium';
   return [{ label: 'Home', path: '/' }, { label, path }, ...(grade ? [{ label: `Grade ${grade} ICT` }] : []), { label: medium }];
 };

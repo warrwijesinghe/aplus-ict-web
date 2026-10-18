@@ -6,11 +6,12 @@ import { EmptyState, InlineError, LoadingSkeleton, StatusBadge } from '../compon
 import { isProfileComplete } from '../features/student/student-learning.js';
 import { safeDestination } from '../utils/route-destination.js';
 import { useLearningHistory, useStudentDashboard, useStudentProfile, useUnenrollFromCourse, useUpdateStudentProfile } from '../features/student/hooks.js';
+import { usePageSeo } from '../seo/use-page-seo.js';
 
 const validPhone = /^(?:\+94|0)?7\d{8}$/;
 const sriLankanDistricts = ['Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle', 'Gampaha', 'Hambantota', 'Jaffna', 'Kalutara', 'Kandy', 'Kegalle', 'Kilinochchi', 'Kurunegala', 'Mannar', 'Matale', 'Matara', 'Monaragala', 'Mullaitivu', 'Nuwara Eliya', 'Polonnaruwa', 'Puttalam', 'Ratnapura', 'Trincomalee', 'Vavuniya'];
 const formatDate = (value) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'Not started';
-const targetPath = (course) => course?.continueLearning ? `/courses/${course.slug}/lessons/${course.continueLearning.lessonSlug}/activities/${course.continueLearning.activityId}` : `/courses/${course?.slug}/learn`;
+const targetPath = (course) => course?.continueLearning?.lessonSlug && course.continueLearning.activityId ? `/courses/${course.slug}/lessons/${course.continueLearning.lessonSlug}/activities/${course.continueLearning.activityId}` : `/courses/${course?.slug}/learn`;
 const courseLessonsPath = (course) => `/courses/${course?.slug}/learn`;
 
 const CourseBookIcon = () => <svg aria-hidden="true" fill="none" focusable="false" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h4.5v16H7a2.5 2.5 0 0 0-2.5 2.5v-16ZM19.5 5.5A2.5 2.5 0 0 0 17 3h-4.5v16H17a2.5 2.5 0 0 0-2.5 2.5v-16Z" /></svg>;
@@ -45,24 +46,26 @@ const LearningCourseCard = ({ course, isUnenrolling = false, onUnenroll }) => {
   const required = progress.requiredCount || 0;
   const percentage = progress.percentage || 0;
   const level = course.academicLevel || 'ICT';
-  const medium = course.medium ? `${course.medium} medium` : 'Selected medium';
+  const medium = course.medium ? /\bmedium\b/i.test(course.medium) ? course.medium : `${course.medium} medium` : 'Selected medium';
   const remaining = Math.max(required - completed, 0);
+  const unavailable = course.availabilityStatus === 'unavailable' || course.availabilityStatus === 'inactive';
 
   return <article className="learning-course-card">
     <header className="learning-course-card-header">
       <span aria-hidden="true" className="learning-course-icon"><CourseBookIcon /></span>
       <div><p>{level}</p><span>{medium}</span></div>
-      <StatusBadge status={course.status} />
+      <StatusBadge status={unavailable ? 'Unavailable' : course.status} />
     </header>
     <h3>{course.title}</h3>
-    <div className="learning-course-progress">
+    {unavailable ? <p className="learning-course-unavailable">This course is currently unavailable. Your enrollment and progress are saved.</p> : <><div className="learning-course-progress">
       <div><span>Course progress</span><strong>{percentage}%</strong></div>
       <progress aria-label={`${course.title} progress`} max="100" value={percentage} />
       <p>{completed} of {required} required activities complete</p>
     </div>
     <p className="learning-course-mission"><span>Your next mission</span><strong>{required ? remaining ? `${remaining} activit${remaining === 1 ? 'y' : 'ies'} left in this course journey` : 'Course goal complete — revisit any lesson anytime' : 'Choose any available lesson to begin'}</strong></p>
     <div className="learning-course-last"><span>Last learning</span><strong>{formatDate(course.lastLearningAt)}</strong></div>
-    <div className="learning-course-actions"><Link className="button" to={courseLessonsPath(course)}>View lessons</Link>{onUnenroll ? <button disabled={isUnenrolling} onClick={() => onUnenroll(course)} type="button">{isUnenrolling ? 'Unenrolling…' : 'Unenroll'}</button> : null}</div>
+    </>}
+    <div className="learning-course-actions">{!unavailable && course.slug && <><Link className="button" to={course.continueLearning ? targetPath(course) : courseLessonsPath(course)}>{course.continueLearning ? 'Continue learning' : 'View lessons'}</Link>{course.continueLearning && <Link to={courseLessonsPath(course)}>View lessons</Link>}</>}{onUnenroll ? <button disabled={isUnenrolling} onClick={() => onUnenroll(course)} type="button">{isUnenrolling ? 'Unenrolling…' : 'Unenroll'}</button> : null}</div>
   </article>;
 };
 
@@ -72,13 +75,14 @@ export const StudentDashboard = () => {
   if (data.error) return <InlineError error={data.error} />;
   const dashboard = data.data; const continuation = dashboard.continueLearning;
   const hasCourses = dashboard.courses.length > 0;
+  const hasAvailableCourses = dashboard.courses.some((course) => !['unavailable', 'inactive'].includes(course.availabilityStatus));
   const activeCourse = dashboard.courses.find((course) => course.courseTrackId === continuation?.courseTrackId || course.slug === continuation?.slug);
   const progress = activeCourse?.progress || continuation?.progress || {};
   const completed = progress.completedCount || 0;
   const required = progress.requiredCount || 0;
   const percentage = progress.percentage || 0;
   return <section className="member-dashboard"><header className="student-dashboard-heading"><p className="eyebrow">My ICT learning</p><h1>Hi, {user?.name || 'student'}!</h1><p>{hasCourses ? 'Here is what is waiting for you today.' : 'Your lessons, progress and results — all in one place.'}</p></header>
-    {continuation ? <article className="student-dashboard-feature"><div className="student-dashboard-feature-copy"><p className="eyebrow">Continue learning</p><h2>{continuation.title}</h2><p>{continuation.continueLearning?.title || 'Choose your next activity and keep your learning journey moving.'}</p></div>{required ? <div className="student-dashboard-mission"><div><span>Course journey</span><strong>{percentage}%</strong></div><progress aria-label={`${continuation.title} progress`} max="100" value={percentage} /><p>{completed} of {required} activities complete · choose any available activity next</p></div> : null}<Link className="button" to={targetPath(continuation)}>Continue learning <span aria-hidden="true">→</span></Link></article> : hasCourses ? <article className="student-dashboard-ready"><p><strong>Ready to begin?</strong> Open a course below to view its lessons.</p></article> : <NewLearnerWelcome />}
+    {continuation ? <article className="student-dashboard-feature"><div className="student-dashboard-feature-copy"><p className="eyebrow">Continue learning</p><h2>{continuation.title}</h2><p>{continuation.continueLearning?.title || 'Choose your next activity and keep your learning journey moving.'}</p></div>{required ? <div className="student-dashboard-mission"><div><span>Course journey</span><strong>{percentage}%</strong></div><progress aria-label={`${continuation.title} progress`} max="100" value={percentage} /><p>{completed} of {required} activities complete · choose any available activity next</p></div> : null}<Link className="button" to={targetPath(continuation)}>Continue learning <span aria-hidden="true">→</span></Link></article> : hasAvailableCourses ? <article className="student-dashboard-ready"><p><strong>Ready to begin?</strong> Open a course below to view its lessons.</p></article> : hasCourses ? <article className="student-dashboard-ready"><p>Your enrolled courses are currently unavailable. <Link to="/student/explore">Explore other courses</Link>.</p></article> : <NewLearnerWelcome />}
     {hasCourses ? <section><div className="member-section-heading"><div><p className="eyebrow">Your courses</p><h2>Pick up where you left off</h2></div><Link to="/my-courses">View all courses <span aria-hidden="true">→</span></Link></div><div className="student-course-grid">{dashboard.courses.slice(0, 3).map((course) => <LearningCourseCard course={course} key={course.enrolmentId} />)}</div></section> : null}
     {hasCourses ? <section className="dashboard-activity-section" aria-labelledby="learning-activity-title"><div className="member-section-heading"><h2 id="learning-activity-title">Your activity</h2></div><div className="student-dashboard-grid">
       <DashboardActivityCard title="Quiz results">{dashboard.recentQuizResults.length ? dashboard.recentQuizResults.map((item) => <p key={`${item.courseTrackId}-${item.quizId}`}><strong>{item.courseTitle}</strong><br />{item.title} · {item.percentage}%</p>) : <p>Your quiz results will appear here.</p>}</DashboardActivityCard>
@@ -90,9 +94,10 @@ export const StudentDashboard = () => {
 
 export const MyCoursesPage = () => {
   const courses = useStudentDashboard(); const unenroll = useUnenrollFromCourse();
-  if (courses.isLoading) return <LoadingSkeleton />; if (courses.error) return <InlineError error={courses.error} />;
+  usePageSeo({ path: '/my-courses', title: 'My courses', noIndex: true });
+  if (courses.isLoading) return <LoadingSkeleton label="Loading your courses" />; if (courses.error) return <InlineError error={courses.error} onRetry={courses.refetch} />;
   const remove = (course) => { if (window.confirm(`Unenroll from ${course.title}? Your progress will be kept if you enroll again later.`)) unenroll.mutate(course.courseTrackId); };
-  return <section className="my-courses-page"><header className="my-courses-heading"><p className="eyebrow">My courses</p><h1>Continue your learning</h1><p>Pick up where you left off, see your progress, and keep every course within reach.</p></header>{unenroll.error && <InlineError error={unenroll.error} />}{courses.data.courses.length ? <div className="student-course-grid">{courses.data.courses.map((course) => <LearningCourseCard course={course} isUnenrolling={unenroll.isPending} key={course.enrolmentId} onUnenroll={remove} />)}</div> : <EmptyState title="You have no courses yet"><Link className="button" to="/al-ict">Explore courses</Link></EmptyState>}</section>;
+  return <section className="my-courses-page"><header className="my-courses-heading"><p className="eyebrow">My courses</p><h1>Continue your learning</h1><p>Pick up where you left off, see your progress, and keep every course within reach.</p></header>{unenroll.error && <InlineError error={unenroll.error} />}{unenroll.isSuccess && <p role="status">You have unenrolled from the course. Your progress is saved if you enroll again.</p>}{courses.data.courses.length ? <><div className="student-course-grid">{courses.data.courses.map((course) => <LearningCourseCard course={course} isUnenrolling={unenroll.isPending && unenroll.variables === course.courseTrackId} key={course.enrolmentId} onUnenroll={remove} />)}</div><p className="my-courses-explore"><Link className="button secondary" to="/student/explore">Explore more courses</Link></p></> : <EmptyState title="You have no courses yet"><p>Choose a category and enroll in a course to see it here.</p><Link className="button" to="/student/explore">Explore courses</Link></EmptyState>}</section>;
 };
 
 export const LearningHistoryPage = () => {

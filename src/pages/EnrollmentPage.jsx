@@ -33,13 +33,13 @@ export const EnrollmentPage = () => {
 
   if (!isAuthenticated) return <section className="enrollment-page"><div className="enrollment-shell enrollment-login-shell">
     <header className="enrollment-intro"><p className="eyebrow">Course enrollment</p><h1>{heading}</h1><p>Sign in with your phone first. You’ll complete your profile once, then confirm your place in the course.</p></header>
-    <article className="enrollment-login-card"><span className="enrollment-course-icon"><CourseIcon /></span><div><p className="eyebrow">{level} · {medium}</p><h2>{course.title}</h2><p>Free content is available. Some lessons may require purchase to unlock.</p></div><button className="button" onClick={() => navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)} type="button">Sign in with your phone</button></article>
+    <article className="enrollment-login-card"><span className="enrollment-course-icon"><CourseIcon /></span><div><p className="eyebrow">{level} · {medium}</p><h2>{course.title}</h2><p>Free content is available. Some lessons may require purchase to unlock.</p></div><button className="button" onClick={() => navigate(`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`)} type="button">Sign in with your phone</button></article>
   </div></section>;
 
   if (!isProfileComplete(profile.data)) return <Navigate replace to={`/complete-profile?returnTo=${encodeURIComponent(location.pathname + location.search)}`} />;
 
   const submit = async () => {
-    await enroll.mutateAsync(course);
+    try { await enroll.mutateAsync(course); } catch { return; }
     const requestedReturnTo = search.get('returnTo');
     const lessonPath = `/courses/${course.slug}/lessons/`;
     const destination = requestedReturnTo?.startsWith(lessonPath) ? requestedReturnTo : `/courses/${course.slug}/learn`;

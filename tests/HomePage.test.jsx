@@ -238,7 +238,7 @@ test('mobile navigation retains accessible attributes and closes with Escape', a
   expect(trigger).toHaveAttribute('aria-controls', 'public-navigation');
   expect(trigger).toHaveAttribute('aria-expanded', 'true');
   expect(document.body).toHaveClass('navigation-open');
-  await waitFor(() => expect(screen.getByRole('link', { name: /grades 6/i })).toHaveFocus());
+  await waitFor(() => expect(screen.getByRole('link', { name: 'Courses' })).toHaveFocus());
   fireEvent.keyDown(document, { key: 'Escape' });
   await waitFor(() => expect(trigger).toHaveFocus());
   expect(trigger).toHaveAttribute('aria-expanded', 'false');

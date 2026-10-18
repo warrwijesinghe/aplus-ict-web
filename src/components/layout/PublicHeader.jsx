@@ -48,7 +48,6 @@ export const PublicHeader = () => {
     closeMenu();
   }, [location.pathname, location.search]);
   const roles = user?.roles?.map((role) => (typeof role === 'string' ? role : role.code)) || [];
-  const loginReturnTo = encodeURIComponent(location.pathname + location.search);
   const memberDestination = destinationForUser(user);
   const initials = (user?.name || user?.email || 'Student')
     .split(/\s+/)
@@ -77,6 +76,7 @@ export const PublicHeader = () => {
         <span aria-hidden="true">☰</span>
       </button>
       <nav aria-label="Main navigation" className={isOpen ? 'open' : ''} id="public-navigation" ref={navigationRef}>
+        <NavLink onClick={closeMenu} to="/courses">Courses</NavLink>
         <NavLink onClick={closeMenu} to="/school-ict">Grades 6–9</NavLink>
         <NavLink onClick={closeMenu} to="/ol-ict">O/L ICT</NavLink>
         <NavLink onClick={closeMenu} to="/al-ict">A/L ICT</NavLink>
@@ -107,9 +107,7 @@ export const PublicHeader = () => {
                   <strong>{user?.name || 'A Plus ICT member'}</strong>
                   <span>{user?.email}</span>
                 </p>
-                <Link onClick={closeMenu} to={memberDestination}>
-                  My Learning
-                </Link>
+                {roles.includes('student') ? <Link onClick={closeMenu} to={memberDestination}>My Learning</Link> : null}
                 {roles.includes('student') ? (
                   <Link onClick={closeMenu} to="/student/profile">
                     Profile
@@ -124,7 +122,7 @@ export const PublicHeader = () => {
         ) : (
           <a
             className="header-login"
-            href={'/login?returnTo=' + loginReturnTo}
+            href="/login"
             onClick={() => { trackPublicEvent('student_login_started'); closeMenu(); }}
           >
             Student Login
