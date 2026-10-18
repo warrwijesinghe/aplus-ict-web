@@ -1,3 +1,4 @@
+import { PageHero } from '../common/PageHero.jsx';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/auth-context.jsx';
 
@@ -5,8 +6,7 @@ export const HomeHero = () => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section aria-labelledby="home-hero-title" className="public-hero platform-home-hero">
-      <div className="public-hero-copy">
+    <PageHero titleId="home-hero-title" images={[{"src":"/images/learning-places/home-hero-student-focus.jpg","alt":"Student learning ICT with a headset at a desktop computer"},{"src":"/images/learning-places/quiet-study.webp","alt":"Student studying ICT in a quiet learning space"},{"src":"/images/learning-places/outdoor-laptop.webp","alt":"Student studying ICT outdoors with a laptop"},{"src":"/images/learning-places/home-learning.webp","alt":"Student learning comfortably from home with a laptop"},{"src":"/images/learning-places/outdoor-study.webp","alt":"Student studying ICT outdoors"}]}>
         <p className="eyebrow">Sri Lankan School ICT · Grades 6–13</p>
         <h1 id="home-hero-title">Study ICT Anytime. Anywhere.</h1>
         <p className="hero-language-note" lang="si">
@@ -35,60 +35,6 @@ export const HomeHero = () => {
             </Link>
           )}
         </div>
-      </div>
-      <div
-        aria-label="Students learning with laptops and tablets in different settings"
-        className="public-hero-media hero-image-grid"
-        role="group"
-      >
-        <img
-          alt="Student learning ICT with a headset at a desktop computer"
-          className="hero-grid-main"
-          fetchPriority="high"
-          height="1260"
-          loading="eager"
-          sizes="(min-width: 1024px) 24vw, 58vw"
-          src="/images/learning-places/home-hero-student-focus.jpg"
-          width="900"
-        />
-        <img
-          alt="Student studying ICT in a quiet learning space"
-          className="hero-grid-tablet"
-          height="600"
-          loading="lazy"
-          sizes="(min-width: 1024px) 14vw, 32vw"
-          src="/images/learning-places/quiet-study.webp"
-          width="800"
-        />
-        <img
-          alt="Student studying ICT outdoors with a laptop"
-          className="hero-grid-outdoor"
-          height="600"
-          loading="lazy"
-          sizes="(min-width: 1024px) 14vw, 32vw"
-          src="/images/learning-places/outdoor-laptop.webp"
-          width="800"
-        />
-        <img
-          alt="Student learning comfortably from home with a laptop"
-          className="hero-grid-home"
-          height="600"
-          loading="lazy"
-          sizes="(min-width: 1024px) 14vw, 32vw"
-          src="/images/learning-places/home-learning.webp"
-          width="800"
-        />
-        <img
-          alt="Student studying ICT outdoors"
-          className="hero-grid-notes"
-          height="600"
-          loading="lazy"
-          sizes="(min-width: 1024px) 14vw, 32vw"
-          src="/images/learning-places/outdoor-study.webp"
-          width="800"
-        />
-        <p className="hero-gallery-caption">Your lesson. Your device. Your place.</p>
-      </div>
-    </section>
+    </PageHero>
   );
 };

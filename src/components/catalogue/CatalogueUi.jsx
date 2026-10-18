@@ -1,4 +1,6 @@
+import { courseCardImage } from '../../utils/course-image.js';
 import { Link } from 'react-router-dom';
+import { ArrowRight, CircleHelp, FileText, GraduationCap, ChartNoAxesColumnIncreasing, PlayCircle } from 'lucide-react';
 import { trackPublicEvent } from '../../analytics/events.js';
 import { gradeForCourse, mediumForCourse } from '../../utils/academic-course.js';
 
@@ -10,7 +12,7 @@ export const BilingualHeading = ({ as = 'h2', english, sinhala }) => {
   return as === 'h1' ? <h1 className="bilingual-heading">{content}</h1> : <h2 className="bilingual-heading">{content}</h2>;
 };
 
-const isSinhalaMedium = (course = {}) => mediumForCourse(course) === 'si';
+const isSinhalaMedium = (course = {}) => mediumForCourse(course) === 'si' || /^(sinhala|si)(\b|_)/i.test(typeof course.medium === 'string' ? course.medium : String(course.medium?.code || course.medium?.nameEn || course.medium?.name || ''));
 
 const primaryCourseTitle = (course = {}) => (
   isSinhalaMedium(course)
@@ -53,17 +55,20 @@ const ChartIcon = () => (
   </svg>
 );
 
-const ArrowRightIcon = () => (
-  <svg aria-hidden="true" fill="none" focusable="false" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </svg>
-);
+const mediumBadgeLabel = (medium) => {
+  if (!medium) return '';
+  const mediumValue = typeof medium === 'string' ? medium : medium.code || medium.nameEn || medium.name || '';
+  const sinhala = /^(sinhala|si)(\b|_)/i.test(mediumValue);
+  return sinhala
+    ? (typeof medium === 'object' && medium.nameSi) || 'සිංහල මාධ්‍ය'
+    : typeof medium === 'string' ? (/\bmedium\b/i.test(medium) ? medium : `${medium} medium`) : medium.nameEn || medium.name || medium.code;
+};
 
 export const MediumBadge = ({ medium }) => {
-  const sinhala = ['sinhala', 'si'].includes(String(medium?.code || '').toLowerCase());
-  const label = sinhala
-    ? medium?.nameSi || 'සිංහල මාධ්‍ය'
-    : medium?.nameEn || medium?.name || medium?.code || 'English Medium';
+  if (!medium) return null;
+  const mediumValue = typeof medium === 'string' ? medium : medium.code || medium.nameEn || medium.name || '';
+  const sinhala = /^(sinhala|si)(\b|_)/i.test(mediumValue);
+  const label = mediumBadgeLabel(medium);
 
   return <span className={`course-medium-badge ${sinhala ? 'is-sinhala' : 'is-english'}`} lang={sinhala ? 'si' : undefined}>
     <GlobeIcon />
@@ -108,36 +113,6 @@ const highlightsForCourse = (course) => {
   return supplied.length ? supplied : defaultHighlights(course);
 };
 
-const courseImagePools = {
-  SCHOOL: [
-    '/images/learning-places/school-desk.webp',
-    '/images/learning-places/school-online-learning.webp',
-    '/images/learning-places/lesson-tablet-headphones.webp',
-    '/images/learning-places/lesson-laptop-focus.webp'
-  ],
-  OL: [
-    '/images/learning-places/study-desk.webp',
-    '/images/learning-places/ol-online-learning.webp',
-    '/images/learning-places/lesson-headset-laptop.webp',
-    '/images/learning-places/lesson-study-notes.webp'
-  ],
-  AL: [
-    '/images/learning-places/lesson-study.webp',
-    '/images/learning-places/al-online-learning.webp',
-    '/images/learning-places/lesson-focused-study.webp',
-    '/images/learning-places/lesson-cafe-learning.webp'
-  ]
-};
-
-const stableImageIndex = (value, length) => [...String(value || '')]
-  .reduce((total, character) => total + character.charCodeAt(0), 0) % length;
-
-const courseImage = (area, course) => {
-  const imagePool = courseImagePools[area] || courseImagePools.AL;
-  return course.imageUrl || course.image?.url || course.coverImageUrl || course.coverImage?.url
-    || imagePool[stableImageIndex(course.slug || course.id || primaryCourseTitle(course), imagePool.length)];
-};
-
 export const CourseHighlights = ({ course }) => {
   const icons = [BookIcon, MonitorIcon, ChartIcon];
   return <ul className="course-highlights">
@@ -148,37 +123,52 @@ export const CourseHighlights = ({ course }) => {
   </ul>;
 };
 
-export const CatalogueCourseCard = ({ area, course, compact = false }) => {
-  const title = primaryCourseTitle(course) || 'ICT course';
-  const route = course.slug ? `/courses/${course.slug}` : '/courses';
+const featureIcons = { video: PlayCircle, tutorial: FileText, quiz: CircleHelp };
+
+export const CatalogueCourseCard = ({ area, course = {}, title: suppliedTitle, subtitle, image, badge, category, href, features, level, grades }) => {
+  const title = suppliedTitle || primaryCourseTitle(course) || 'ICT course';
   const sinhala = isSinhalaMedium(course);
+  const destination = href || (course.slug ? `/courses/${course.slug}` : '');
+  const available = course.availabilityStatus !== 'inactive' && Boolean(destination);
+  const courseSubtitle = subtitle || course.subtitle;
+  const courseCategory = category || (typeof course.category === 'string' ? course.category : course.category?.nameEn || course.category?.name);
+  const courseFeatures = (Array.isArray(features) ? features : Array.isArray(course.features) ? course.features : []).filter((feature) => feature?.label);
+  const accessibleBadge = badge || mediumBadgeLabel(course.medium);
+  const courseArea = area || course.courseGroup || course.academicLevel?.code;
+  const levelLabel = level || course.levelLabel || ({ AL: 'Advanced Level', OL: 'Ordinary Level', SCHOOL: 'School ICT' })[courseArea];
+  const gradesLabel = grades || course.gradeLabel || (gradeForCourse(course) ? gradeLabel(course) : ({ AL: 'Grade 12–13', OL: 'Grade 10–11' })[courseArea]);
+  const content = <>
+    <div className="catalogue-course-media"><img alt={`${title} course image`} className="catalogue-course-image" height="240" loading="lazy" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/images/course-card-default.jpg'; }} src={image || courseCardImage(course, area)} width="400" />
+      {accessibleBadge && <div className="catalogue-course-media-badge">{badge ? <span className="catalogue-course-badge"><GlobeIcon />{badge}</span> : <MediumBadge medium={course.medium} />}</div>}
+    </div>
+    <div className="catalogue-course-content">
+
+      {courseCategory && <p className="catalogue-course-category">{courseCategory}</p>}
+      <h3 lang={sinhala ? 'si' : undefined}>{title}</h3>
+      {courseSubtitle && <p className="catalogue-course-subtitle">{courseSubtitle}</p>}
+      {courseFeatures.length > 0 && <ul aria-label="Course features" className="catalogue-course-features">{courseFeatures.map((feature, index) => {
+          const Icon = featureIcons[feature.type];
+          return <li key={`${feature.type}-${feature.label}-${index}`}><span className="catalogue-course-feature-icon">{Icon && <Icon aria-hidden="true" size={24} />}</span><span>{feature.label}</span></li>;
+        })}</ul>}
+      <div className="catalogue-course-footer">
+        {(levelLabel || gradesLabel) && <div className="catalogue-course-meta">
+          {levelLabel && <span><GraduationCap aria-hidden="true" size={20} />{levelLabel}</span>}
+          {levelLabel && gradesLabel && <span aria-hidden="true" className="catalogue-course-meta-dot">·</span>}
+          {gradesLabel && <span><ChartNoAxesColumnIncreasing aria-hidden="true" size={20} />{gradesLabel}</span>}
+        </div>}
+        {available ? <span aria-hidden="true" className="catalogue-course-arrow"><ArrowRight size={20} /></span> : <span className="course-selection-soon">Coming soon</span>}
+      </div>
+    </div>
+  </>;
 
   return (
-    <article className={`catalogue-course-card ${sinhala ? 'is-sinhala' : 'is-english'}${compact ? ' catalogue-course-card-compact' : ''}`}>
-      <img
-        alt={`${title} course cover`}
-        className="catalogue-course-image"
-        height="240"
-        loading="lazy"
-        onError={(event) => {
-          event.currentTarget.onerror = null;
-          event.currentTarget.src = '/images/course-card-default.jpg';
-        }}
-        src={courseImage(area, course)}
-        width="400"
-      />
-      <div className="catalogue-course-content">
-        <MediumBadge medium={course.medium} />
-        {!compact && <p className="course-grade">{gradeLabel(course)}</p>}
-        <h3 lang={sinhala ? 'si' : undefined}>{title}</h3>
-        {!compact && <><p className="course-description" lang={sinhala ? 'si' : undefined}>{descriptionForCourse(course)}</p><CourseHighlights course={course} /></>}
-        <Link aria-label={compact ? `View ${title}, ${sinhala ? 'Sinhala' : 'English'} medium` : undefined} className="button secondary catalogue-course-cta" onClick={() => trackPublicEvent('course_card_opened', { course_slug: course.slug })} to={route}>
-          <span>View Course</span><ArrowRightIcon />
-        </Link>
-      </div>
+    <article className={`catalogue-course-card catalogue-course-card-compact ${sinhala ? 'is-sinhala' : 'is-english'}${available ? ' is-available' : ''}`}>
+      {available ? <Link aria-label={[accessibleBadge, title].filter(Boolean).join(' ')} className="catalogue-course-surface" onClick={() => trackPublicEvent('course_card_opened', { course_slug: course.slug })} to={destination}>{content}</Link> : <div className="catalogue-course-surface">{content}</div>}
     </article>
   );
 };
+
+export const CatalogueCourseGrid = ({ courses, area, className = '' }) => <div className={`catalogue-course-grid shared-course-grid ${className}`}>{courses.map((course) => <CatalogueCourseCard area={area} course={course} key={course.id} />)}</div>;
 
 export const ActiveCourseCard = ({ course, continueLearning }) => (
   <article className="path-card active-path-card">

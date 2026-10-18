@@ -9,6 +9,7 @@ import { LessonExperienceLayout } from '../layouts/LessonExperienceLayout.jsx';
 import { PhoneAuthPage } from '../pages/PhoneAuthPage.jsx';
 import { ReviewAccessPage } from '../pages/ReviewAccessPage.jsx';
 import { EnrollmentPage } from '../pages/EnrollmentPage.jsx';
+import { LessonLandingPage } from '../pages/LessonLandingPage.jsx';
 import { CompleteProfilePage, LearningHistoryPage, MyCoursesPage, ProfileCompletionGuard, StudentDashboard, StudentProfilePage } from '../pages/StudentExperiencePages.jsx';
 import { LogoutPage } from '../pages/LogoutPage.jsx';
 import {
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
       { path: '/short-courses', element: <ShortCoursesPage /> },
       { path: '/courses', element: <CourseSelectionPage /> },
       { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
+      { path: '/courses/:courseSlug/lessons/:lessonSlug', element: <LessonLandingPage /> },
       { path: '/enroll/:courseSlug', element: <EnrollmentPage /> },
       { path: '/resources', element: <PublicResourcesPage /> },
       { path: '/free-lessons', element: <PublicResourcesPage /> },
@@ -80,7 +82,7 @@ export const router = createBrowserRouter([
       { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug/activities/:activityId', element: <StudentActivityPlayer /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug/topics/:topicId', element: <LessonLearningPage /> },
-      { path: '/courses/:courseSlug/lessons/:lessonSlug', element: <LessonLearningPage /> }
+      { path: '/courses/:courseSlug/lessons/:lessonSlug/learn', element: <LessonLearningPage /> }
     ]
   },
   {

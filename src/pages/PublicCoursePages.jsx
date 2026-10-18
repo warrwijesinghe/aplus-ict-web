@@ -1,3 +1,7 @@
+import { LessonPageTemplate } from '../components/courses/LessonPageTemplate.jsx';
+import { LessonCard } from '../components/courses/LessonCard.jsx';
+import { courseCardImage } from '../utils/course-image.js';
+import { CoursePageTemplate } from '../components/courses/CoursePageTemplate.jsx';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -15,7 +19,6 @@ import { trackPublicEvent } from '../analytics/events.js';
 import { LessonPrice } from '../components/pricing/LessonPrice.jsx';
 import { StudentQuiz } from '../components/learning/StudentQuiz.jsx';
 import { academicAreaForCourse, lessonPurchaseText } from '../config/lesson-pricing.js';
-import { courseBreadcrumbs } from '../utils/academic-course.js';
 import { safeExternalUrl } from '../utils/safe-url.js';
 import { useCourseEnrollment } from '../features/student/hooks.js';
 import { LessonActivityNavigator, StudentCourseOverview } from '../components/learning/StudentLessonPlayer.jsx';
@@ -50,31 +53,12 @@ const counts = (course) => {
   );
 };
 
-// Course cards use local imagery while the catalogue is being populated. The default
-// keeps future courses presentable until an admin assigns API-managed resource metadata.
-const courseCardImages = [
-  '/images/learning-places/al-online-learning.webp',
-  '/images/learning-places/lesson-focused-study.webp',
-  '/images/learning-places/lesson-cafe-learning.webp',
-  '/images/learning-places/lesson-campus-call.webp'
-];
-
-const courseCardImage = (course) => {
-  const imageSeed = String(course.slug || course.id || course.title || 'course');
-  const imageIndex = [...imageSeed].reduce((total, character) => total + character.charCodeAt(0), 0) % courseCardImages.length;
-  return courseCardImages[imageIndex];
-};
-
 // Course descriptions can be filled in from the admin catalogue later. This
 // fallback prevents empty cards while the initial syllabus content is prepared.
 const courseDescription = (course) =>
   course.shortDescription ||
   course.description ||
   'Explore the lessons and learning content available in this course.';
-
-const courseHeading = (course) => course?.medium?.code === 'sinhala'
-  ? course.titleSi || course.title
-  : course?.titleEn || course?.title;
 
 // Reuse the supplied learning imagery as lightweight lesson covers. The number
 // determines the image, so both Sinhala and English tracks stay visually aligned.
@@ -235,45 +219,7 @@ const ActivityStudyContent = ({ activity }) => {
   );
 };
 
-const SyllabusLessonCard = ({ course, courseSlug, isEnrolled, lesson, progress }) => {
-  const availability = lessonAvailability(lesson);
-  const lessonStats = lessonProgress({ ...lesson, progress });
-
-  return (
-    <article className="syllabus-lesson-card">
-      <div className="lesson-card-image-frame">
-        <LessonImage lesson={lesson} />
-      </div>
-      <div className="lesson-card-content">
-        <div className="lesson-card-meta">
-          <span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span>
-          {lesson.estimatedPeriods ? <span>{lesson.estimatedPeriods} periods</span> : null}
-        </div>
-        <LessonAvailabilityBadge lesson={lesson} />
-        <h3>{lesson.title}</h3>
-        {lesson.shortDescription ? <p>{lesson.shortDescription}</p> : null}
-        <div className="lesson-content-counts">
-          {lesson.freeContentCount ? <span>{lesson.freeContentCount} free</span> : null}
-          {lesson.paidContentCount ? <span>{lesson.paidContentCount} full lesson items</span> : null}
-        </div>
-        <span className={'lesson-access ' + availability.className}>{availability.label}</span>
-        <LessonPrice area={academicAreaForCourse(course)} course={course} product={lesson.unlockProduct} />
-        {isEnrolled ? (
-          <div className="card-progress">
-            <div>
-              <span>Your progress</span>
-              <strong>{lessonStats.progressPercent}%</strong>
-            </div>
-            <progress max="100" value={lessonStats.progressPercent} />
-          </div>
-        ) : null}
-        <Link className="lesson-card-link" onClick={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}`}>
-          {isEnrolled ? 'Start lesson' : 'Preview lesson'}
-        </Link>
-      </div>
-    </article>
-  );
-};
+const SyllabusLessonCard = ({ course, courseSlug, isEnrolled, lesson, progress }) => <LessonCard course={course} courseSlug={courseSlug} lesson={lesson} image={lessonImage(lesson.lessonNumber)} isEnrolled={isEnrolled} progress={lessonProgress({ ...lesson, progress })} onOpen={() => trackPublicEvent('lesson_preview_opened', { course_slug: courseSlug })} />;
 
 const CourseCard = ({ course }) => {
   const { isAuthenticated } = useAuth();
@@ -580,66 +526,9 @@ export const PublicCourseDetailPage = () => {
   const progressByLesson = new Map(
     (learningProgress.data?.lessons || []).map((lesson) => [lesson.id, lesson.progress])
   );
-  return (
-    <>
-      <nav aria-label="Breadcrumb" className="breadcrumbs">{courseBreadcrumbs(course).map((item, index) => <span key={`${item.label}-${index}`}>{index ? <span aria-hidden="true">/</span> : null}{item.path ? <Link to={item.path}>{item.label}</Link> : <span>{item.label}</span>}</span>)}</nav>
-      <section className="course-detail-hero">
-        <div className="course-hero-image-frame">
-          {course.heroResourceId ? (
-            <ResourceImage
-              alt={`${course.title} course hero`}
-              className="course-hero-image"
-              resourceId={course.heroResourceId}
-            />
-          ) : (
-            <img
-              alt={`${course.title} course cover`}
-              className="course-hero-image"
-              height="675"
-              loading="eager"
-              sizes="(min-width: 768px) 50vw, 100vw"
-              src={courseCardImage(course)}
-              width="1200"
-            />
-          )}
-        </div>
-        <div>
-          <p className="eyebrow">{course.academicLevel?.nameEn || 'ICT'} · {course.medium?.nameEn || course.medium?.name || course.medium?.code}</p>
-          <h1 lang={course.medium?.code === 'sinhala' ? 'si' : undefined}>{courseHeading(course)}</h1>
-          <p className="course-detail-description">{courseDescription(course)}</p>
-          <p className="course-online-value">Online learning—study this course anytime, from anywhere.</p>
-          {counts(course)}
-          <LessonPrice area={academicAreaForCourse(course)} course={course} />
-          <p className="course-detail-note">
-            Free content may be available first. Full lesson content is available after purchasing the lesson.
-          </p>
-          <div className="course-detail-actions"><Link className="button" to={enrollment.data ? `/courses/${course.slug}/learn` : `/enroll/${course.slug}`}>{enrollment.data ? 'Continue Learning' : isAuthenticated ? 'Enroll Free' : 'Login to Enroll'}</Link></div>
-        </div>
-      </section>
-      <section className="syllabus-summary">
-        <p className="eyebrow">Syllabus overview</p>
-        <h2>Complete syllabus and lessons</h2>
-        <p className="syllabus-intro">
-          View each published lesson, its topics, free content and full lesson access where available.
-        </p>
-        {lessons.length ? (
-          <div className="syllabus-lesson-grid">
-            {lessons.map((lesson) => (
-              <SyllabusLessonCard
-                course={course}
-                courseSlug={courseSlug}
-                key={lesson.id}
-                lesson={lesson}
-              isEnrolled={Boolean(enrollment.data)} progress={progressByLesson.get(lesson.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState title="Syllabus lessons will be published soon" />
-        )}
-      </section>
-    </>
-  );
+  return <CoursePageTemplate course={course} lessons={lessons} isAuthenticated={isAuthenticated} isEnrolled={Boolean(enrollment.data)} renderLesson={(lesson) => (
+    <SyllabusLessonCard course={course} courseSlug={courseSlug} lesson={lesson} isEnrolled={Boolean(enrollment.data)} progress={progressByLesson.get(lesson.id)} />
+  )} />;
 };
 
 const ActivityRow = ({ activity, courseSlug }) => {
@@ -1045,7 +934,7 @@ const LessonContents = ({ courseSlug, lesson, lessonSlug, onNavigate, open, sele
         {lesson.topics?.map((topic, index) => {
           return (
             <li key={topic.id}>
-              <Link aria-current={String(selectedTopicId) === String(topic.id) ? 'page' : undefined} onClick={onNavigate} to={`/courses/${courseSlug}/lessons/${lessonSlug}#topic-${topic.id}`}>{String(index + 1).padStart(2, '0')}. {topic.title}</Link>
+              <Link aria-current={String(selectedTopicId) === String(topic.id) ? 'page' : undefined} onClick={onNavigate} to={`/courses/${courseSlug}/lessons/${lessonSlug}/learn#topic-${topic.id}`}>{String(index + 1).padStart(2, '0')}. {topic.title}</Link>
             </li>
           );
         })}
@@ -1078,45 +967,11 @@ export const LessonLearningPage = () => {
   if (query.isPending) return <LoadingSkeleton label="Loading lesson" />;
   if (query.isError) return <InlineError error={query.error} onRetry={query.refetch} />;
   if (!lesson) return <EmptyState title="This lesson is not available" />;
-  const topicCount = lesson.topics?.length || 0;
-  if (!isAuthenticated) return (
-    <section className="login-cta">
-      <p className="eyebrow">Student sign in</p>
-      <h1>{lesson.title}</h1>
-      <p>{lesson.descriptionEn || lesson.shortDescription || 'Sign in to open this lesson and save your progress.'}</p>
-      <p>{topicCount} topics · {lesson.freeContentCount || 0} free items · {lesson.paidContentCount || 0} locked items</p>
-      {lesson.topics?.length ? <ul className="lesson-topic-preview">{lesson.topics.map((topic) => <li key={topic.id}>{topic.title}</li>)}</ul> : null}
-      <a className="button" href={`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Sign in with your phone to Start This Lesson</a>
-    </section>
-  );
-  if (enrollment.isPending) return <LoadingSkeleton label="Checking lesson access" />;
-  if (!enrollment.data) return (
-    <section className="login-cta">
-      <p className="eyebrow">Free enrollment</p><h1>Enroll Free to Open Available Lesson Content</h1>
-      <p>Enroll once to open the available content and begin this lesson.</p>
-      <Link className="button" to={`/enroll/${courseSlug}?returnTo=${encodeURIComponent(location.pathname + location.search)}`}>Enroll Free and Start This Lesson</Link>
-    </section>
-  );
-  return (
-    <div className="lesson-workspace public-lesson-workspace">
-      <nav aria-label="Breadcrumb" className="breadcrumbs"><Link to="/">Home</Link><span>/</span><Link to={`/courses/${courseSlug}`}>{course?.title}</Link><span>/</span><span>{lesson.title}</span></nav>
-      <section className="lesson-workspace-hero">
-        <div className="lesson-workspace-title">
-          <div><p className="eyebrow">Lesson {String(lesson.lessonNumber).padStart(2, '0')}</p><h1>{lesson.title}</h1><p>{lesson.descriptionEn || lesson.shortDescription}</p></div>
-          <span className="lesson-access">{lesson.premiumUnlocked ? 'Lesson unlocked' : 'Free and locked content'}</span>
-        </div>
-        <p className="lesson-topic-summary">{topicCount} topic{topicCount === 1 ? '' : 's'} · {lesson.freeContentCount} free items · {lesson.paidContentCount} locked items</p>
-        <LessonPrice area={academicAreaForCourse(course)} course={course} product={lesson.unlockProduct} />
-        {!lesson.premiumUnlocked && lesson.unlockProduct ? <UnlockLessonButton course={course} lesson={lesson} /> : null}
-      </section>
-      <div className="public-lesson-layout">
-        <aside className="lesson-navigation-stack" aria-label="Lesson navigation"><LessonActivityNavigator courseSlug={courseSlug} lessonSlug={lessonSlug} /><LessonContents courseSlug={courseSlug} lesson={lesson} lessonSlug={lessonSlug} onNavigate={() => setContentsOpen(false)} open={contentsOpen} setOpen={setContentsOpen} /></aside>
-        <section className="topic-learning-area" aria-label="Lesson topics">
-          {lesson.topics?.length ? <LessonTopicList courseSlug={courseSlug} lesson={lesson} lessonSlug={lessonSlug} /> : <EmptyState title="Lesson content is being prepared" />}
-        </section>
-      </div>
-    </div>
-  );
+  return <LessonPageTemplate course={course} lesson={lesson} courseSlug={courseSlug} lessonSlug={lessonSlug} isAuthenticated={isAuthenticated} enrollment={enrollment} returnTo={location.pathname + location.search}
+    unlockAction={<UnlockLessonButton course={course} lesson={lesson} />}
+    navigation={<><LessonActivityNavigator courseSlug={courseSlug} lessonSlug={lessonSlug} /><LessonContents courseSlug={courseSlug} lesson={lesson} lessonSlug={lessonSlug} onNavigate={() => setContentsOpen(false)} open={contentsOpen} setOpen={setContentsOpen} /></>}
+    topics={<LessonTopicList courseSlug={courseSlug} lesson={lesson} lessonSlug={lessonSlug} />}
+  />;
 };
 
 export const TopicLearningPage = () => {

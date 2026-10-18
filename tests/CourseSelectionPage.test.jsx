@@ -33,7 +33,7 @@ describe('course selection', () => {
     show(false, '/courses?category=short_courses');
     await screen.findByText('Digital Skills');
     expect(screen.getByRole('heading', { level: 1, name: 'Short Courses' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Explore Digital Skills, English medium' })).toHaveAttribute('href', '/courses/digital-skills');
+    expect(screen.getByRole('link', { name: /English medium.*Digital Skills/ })).toHaveAttribute('href', '/courses/digital-skills');
     expect(within(screen.getByText('Web Basics').closest('article')).getByText('Coming soon')).toBeInTheDocument();
     expect(screen.queryByText('School course')).not.toBeInTheDocument();
   });

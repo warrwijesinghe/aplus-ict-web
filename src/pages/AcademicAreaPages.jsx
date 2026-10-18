@@ -1,8 +1,9 @@
+import { PageHero } from '../components/common/PageHero.jsx';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { contentApi } from '../api/content.api.js';
 import { queryKeys } from '../api/query-keys.js';
-import { CatalogueCourseCard } from '../components/catalogue/CatalogueUi.jsx';
+import { CatalogueCourseGrid } from '../components/catalogue/CatalogueUi.jsx';
 import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/States.jsx';
 import { academicAreaForCourse } from '../config/lesson-pricing.js';
 import { usePageSeo } from '../seo/use-page-seo.js';
@@ -11,7 +12,6 @@ import { PlatformExperience } from '../components/home/PlatformExperience.jsx';
 import { EducatorSection } from '../components/home/EducatorSection.jsx';
 import { HomeFaq as RefinedHomeFaq } from '../components/home/HomeFaq.jsx';
 import { HomeCourseCollections } from '../components/home/HomeCourseCollections.jsx';
-import { CourseSummaryCards } from './CourseSelectionPage.jsx';
 
 const AREAS = {
   SCHOOL: {
@@ -111,20 +111,13 @@ export const PlatformHomePage = () => {
 
 const Hero = ({ area }) => {
   const info = AREAS[area];
-  return <section aria-labelledby={`${area.toLowerCase()}-hero-title`} className="public-hero academic-landing-hero">
-    <div className="academic-landing-hero-inner">
-      <div className="public-hero-copy">
+  return <PageHero titleId={area.toLowerCase() + '-hero-title'} galleryLabel={info.label + ' student learning gallery'} images={info.gallery.map(([src, alt]) => ({ src, alt }))}>
         <p className="eyebrow">{info.label}</p>
         <h1 id={`${area.toLowerCase()}-hero-title`}>{info.title}</h1>
         {info.support && <p className="hero-language-note" lang="si">{info.support}</p>}
         <p>{info.description}</p>
         <div className="hero-actions"><a className="button" href="#course-selection">{info.action}</a><Link className="button secondary" to="/free-lessons">Start Learning Free</Link></div>
-      </div>
-      <div aria-label={`${info.label} student learning gallery`} className="public-hero-media academic-image-grid" role="group">
-        {info.gallery.map(([src, alt], index) => <img alt={alt} className={`academic-grid-image academic-grid-image-${index + 1}`} fetchPriority={index === 0 ? 'high' : undefined} height={index === 0 ? '810' : '600'} key={`${src}-${index}`} loading={index === 0 ? 'eager' : 'lazy'} sizes="(min-width: 1024px) 16vw, (min-width: 768px) 20vw, 50vw" src={src} width={index === 0 ? '1440' : '800'} />)}
-      </div>
-    </div>
-  </section>;
+  </PageHero>;
 };
 
 const learningPathLabels = {
@@ -148,8 +141,7 @@ const LearningPathSwitcher = ({ currentArea }) => <section className="home-secti
 const CourseCards = ({ area, courses, loading, error }) => {
   if (loading) return <LoadingSkeleton label="Loading published courses" />;
   if (error) return <InlineError error={error} />;
-  const gridColumns = courses.length > 2 ? 3 : 2;
-  return courses.length ? <div className={`catalogue-course-grid catalogue-course-grid-${gridColumns} landing-course-grid${area === 'SCHOOL' ? ' school-course-grid' : ''}`}>{courses.map((course) => <CatalogueCourseCard area={area} compact={area === 'SCHOOL'} course={course} key={course.id} />)}</div> : <EmptyState title="Courses will appear here as they are published"><p>Check back soon for the latest lessons.</p></EmptyState>;
+  return courses.length ? <CatalogueCourseGrid area={area} className="landing-course-grid" courses={courses} /> : <EmptyState title="Courses will appear here as they are published"><p>Check back soon for the latest lessons.</p></EmptyState>;
 };
 
 
@@ -170,7 +162,7 @@ const AcademicLandingPage = ({ area }) => {
   return <><Hero area={area} />
     <section className="home-section course-picker" id="course-selection"><p className="eyebrow">Courses</p><h2>{area === 'SCHOOL' ? 'ICT courses for Grades 6–9' : info.action}</h2>
       {schoolArea && (courses.length > 0 || catalogue.isPending || catalogue.error) && <CourseCards area={area} courses={courses} error={catalogue.error} loading={catalogue.isPending} />}
-      {selection.isPending ? <LoadingSkeleton label="Loading courses" /> : selection.error ? <InlineError error={selection.error} /> : summaries.length ? <CourseSummaryCards courses={summaries} /> : !courses.length && !catalogue.error && (!schoolArea || !catalogue.isPending) ? <EmptyState title="Courses in this category are coming soon"><p>Check back for updates.</p></EmptyState> : null}
+      {selection.isPending ? <LoadingSkeleton label="Loading courses" /> : selection.error ? <InlineError error={selection.error} /> : summaries.length ? <CatalogueCourseGrid area={area} className="additional-course-grid" courses={summaries} /> : !courses.length && !catalogue.error && (!schoolArea || !catalogue.isPending) ? <EmptyState title="Courses in this category are coming soon"><p>Check back for updates.</p></EmptyState> : null}
     </section>
     {schoolArea ? <LearningPathSwitcher currentArea={area} /> : <section className="home-section"><Link className="button secondary" to="/courses">Explore all categories</Link></section>}
   </>;

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BookOpen, GraduationCap, Laptop, Award, School } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { contentApi } from '../api/content.api.js';
+import { CatalogueCourseGrid } from '../components/catalogue/CatalogueUi.jsx';
 import { usePageSeo } from '../seo/use-page-seo.js';
 
 const categories = [
@@ -12,7 +13,6 @@ const categories = [
   { id: 'PROFESSIONAL', path: '/professional-certifications', title: 'Professional Certifications', detail: 'Professional learning', image: 'lesson-laptop-focus.webp', icon: <Award aria-hidden="true" size={22} /> },
   { id: 'SHORT_COURSES', path: '/short-courses', title: 'Short Courses', detail: 'Practical learning', image: 'practical-learning.webp', icon: <BookOpen aria-hidden="true" size={22} /> }
 ];
-const mediumLabel = (medium) => /\bmedium\b/i.test(medium) ? medium : `${medium} medium`;
 
 export const CourseSelectionPage = ({ student = false }) => {
   const [search] = useSearchParams();
@@ -31,7 +31,7 @@ export const CourseSelectionPage = ({ student = false }) => {
       {student && <Link className="course-selection-dashboard" to="/student">Go to my dashboard <span aria-hidden="true">→</span></Link>}
     </header>
     {courses.isLoading ? <p className="course-selection-message" role="status">Loading courses…</p> : courses.isError ? <div className="course-selection-message" role="alert"><p>Courses could not be loaded. Please try again.</p><button onClick={() => courses.refetch()} type="button">Try again</button></div> :
-      selected ? items.length ? <CourseSummaryCards courses={items} /> : <p className="course-selection-message">Courses in this category are coming soon.</p> : <div className="course-selection-grid course-selection-categories">{categories.map(({ id, path, title, detail, icon, image }) => {
+      selected ? items.length ? <CatalogueCourseGrid area={selected.id} courses={items} /> : <p className="course-selection-message">Courses in this category are coming soon.</p> : <div className="course-selection-grid course-selection-categories">{categories.map(({ id, path, title, detail, icon, image }) => {
         const categoryCourses = (courses.data?.data || []).filter((course) => course.courseGroup === id);
         return <Link className="course-selection-card course-selection-category" key={id} to={path}>
           <img alt="" className="course-selection-category-image" decoding="async" loading="lazy" src={`/images/learning-places/${image}`} />
@@ -41,8 +41,3 @@ export const CourseSelectionPage = ({ student = false }) => {
       })}</div>}
   </section>;
 };
-
-export const CourseSummaryCards = ({ courses }) => <div className="course-selection-grid">{courses.map((course) => <article className="course-selection-card course-selection-course" key={course.id}>
-  <div><h3>{course.title}</h3>{course.medium && <p>{mediumLabel(course.medium)}</p>}</div>
-  {course.availabilityStatus === 'active' ? <Link aria-label={`Explore ${course.title}${course.medium ? `, ${mediumLabel(course.medium)}` : ''}`} to={`/courses/${course.slug}`}>Explore course <span aria-hidden="true">→</span></Link> : <span className="course-selection-soon">Coming soon</span>}
-</article>)}</div>;

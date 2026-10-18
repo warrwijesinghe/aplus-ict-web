@@ -30,7 +30,7 @@ describe('category landing pages', () => {
       { id: 'other', slug: 'degree', title: 'Degree course', courseGroup: 'DEGREE', availabilityStatus: 'active' }
     ] });
     show(<ShortCoursesPage />);
-    expect(await screen.findByRole('link', { name: 'Explore Digital Skills, English medium' })).toHaveAttribute('href', '/courses/digital-skills');
+    expect(await screen.findByRole('link', { name: /English medium.*Digital Skills/ })).toHaveAttribute('href', '/courses/digital-skills');
     const soon = screen.getByText('Web Basics').closest('article');
     expect(within(soon).getByText('Coming soon')).toBeInTheDocument();
     expect(within(soon).queryByRole('link')).not.toBeInTheDocument();
@@ -50,7 +50,7 @@ describe('category landing pages', () => {
     const card = (await screen.findByRole('heading', { name: 'Grade 6 ICT' })).closest('article');
     expect(card).toHaveClass('catalogue-course-card-compact');
     expect(within(card).getByText('English Medium')).toBeInTheDocument();
-    expect(within(card).getByRole('link', { name: 'View Grade 6 ICT, English medium' })).toHaveAttribute('href', '/courses/grade-6-english');
+    expect(within(card).getByRole('link', { name: /English Medium.*Grade 6 ICT/ })).toHaveAttribute('href', '/courses/grade-6-english');
     expect(within(card).queryByRole('list')).not.toBeInTheDocument();
   });
 });

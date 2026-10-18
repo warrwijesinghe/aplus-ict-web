@@ -1,0 +1,272 @@
+.lesson-sales-page { --sales-ink: #111b2d; --sales-muted: #536078; --sales-red: var(--aplus-red, #bb0000); color: var(--sales-ink); padding-top: 0; }
+.lesson-sales-page * { min-width: 0; }
+.lesson-sales-page h1, .lesson-sales-page h2, .lesson-sales-page h3 { color: var(--sales-ink); letter-spacing: -.035em; }
+.lesson-sales-page h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800; line-height: 1.2; margin: 0 0 12px; }
+.lesson-sales-page p { line-height: 1.6; }
+.lesson-sales-page svg { flex-shrink: 0; }
+.sales-hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(28px, 4vw, 64px); align-items: center; padding: 20px 0 35px; position: relative; isolation: isolate; }
+.sales-hero::before { content: ''; position: absolute; z-index: -1; inset: -20px calc(-1 * var(--public-gutter)) 0; background: radial-gradient(ellipse at 20% 0%, #fff 0%, #f7f7f6 75%); }
+.sales-course-label { display: inline-flex; align-items: center; gap: 12px; padding: 8px 16px; border-radius: 30px; background: #fce9e8; color: #a00000; font-size: .87rem; font-weight: 650; }
+.sales-hero h1 { font-size: clamp(2.1rem, 3.8vw, 3.65rem); line-height: 1.18; margin: 22px 0 18px; overflow-wrap: anywhere; font-weight: 800; }
+.sales-hero h1 > span { display: block; color: var(--sales-red); }
+.sales-hero-promise { font-size: clamp(1.1rem, 1.8vw, 1.38rem); font-weight: 750; line-height: 1.35 !important; margin: 0 0 16px; }
+.sales-hero-promise > span { display: block; font-weight: 400; margin-top: 4px; }
+.sales-hero-description { color: var(--sales-muted); font-size: 1rem; max-width: 560px; margin: 0 0 26px; white-space: pre-line; }
+.sales-actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
+.lesson-sales-page .sales-button { min-height: 52px; display: inline-flex; justify-content: center; align-items: center; gap: 12px; border: 1px solid var(--sales-red); padding: 13px 20px; border-radius: 8px; font-size: .95rem; font-weight: 750; text-decoration: none; line-height: 1.35; transition: background .15s, transform .15s; }
+.sales-button-primary { color: #fff; background: var(--sales-red); }
+.sales-button-primary:hover { background: var(--aplus-red-dark); color: #fff; transform: translateY(-1px); }
+.sales-button-outline { background: #fff; color: var(--sales-red); }
+.sales-button-outline:hover { background: #fff0f0; }
+.sales-hero-points { display: flex; flex-wrap: wrap; gap: 16px 22px; padding: 0; list-style: none; margin: 26px 0 0; }
+.sales-hero-points li { display: flex; gap: 8px; align-items: center; font-size: .78rem; font-weight: 600; }
+.sales-hero-points svg { color: var(--sales-red); }
+.sales-purchase-card { border: 1px solid #eeecea; border-radius: 16px; background: #fff; padding: 12px; box-shadow: 0 6px 28px #17233309; }
+.sales-preview { display: block; position: relative; border-radius: 9px; overflow: hidden; aspect-ratio: 16 / 9; background: #edece9; }
+.sales-preview > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sales-preview::after { content: ''; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, #10182080); }
+.sales-preview-brand { position: absolute; top: 12px; right: 12px; background: var(--sales-red); color: #fff; font-weight: 850; font-size: 1.5rem; padding: 4px 9px; border-radius: 3px; }
+.sales-preview-play { position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); background: #fffffff0; color: #192435; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; z-index: 1; }
+.sales-preview-caption { position: absolute; bottom: 0; left: 0; right: 0; z-index: 1; background: linear-gradient(90deg, #b90000e8, #b9000000); padding: 14px 20px; color: #fff; }
+.sales-preview-caption small { display: block; font-size: .85rem; margin-bottom: 2px; }
+.sales-preview-caption strong { font-size: clamp(.95rem, 1.45vw, 1.2rem); line-height: 1.35; display: block; }
+.sales-package-details { padding: 18px 12px 3px; }
+.sales-package-price { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.sales-package-price > strong { font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 850; color: var(--sales-red); line-height: 1.2; }
+.sales-package-price > span { background: #fcf1df; color: #a00000; font-size: .69rem; font-weight: 700; padding: 7px 10px; border-radius: 5px; white-space: nowrap; }
+.sales-package-details ul { list-style: none; padding: 0; display: grid; gap: 10px; margin: 18px 0 12px; }
+.sales-package-details li { display: flex; gap: 10px; align-items: center; font-size: .88rem; line-height: 1.4; }
+.sales-package-details li svg, .sales-checklist svg { color: #fff; background: var(--sales-red); border-radius: 50%; padding: 3px; box-sizing: content-box; }
+.sales-package-note { font-size: .75rem; color: var(--sales-muted); margin: 14px 0 4px; }
+.sales-mobile-price { display: none; }
+.sales-value-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding: 28px 0 32px; }
+.sales-value-grid article { text-align: center; padding: 26px 20px 22px; border: 1px solid #efeeec; border-radius: 12px; box-shadow: 0 4px 18px #17233303; }
+.sales-value-grid svg { color: var(--sales-red); margin-bottom: 14px; }
+.sales-value-grid h2 { font-size: 1.12rem; max-width: 210px; margin: 0 auto 12px; line-height: 1.25; letter-spacing: -.02em; }
+.sales-value-grid p { margin: 0; font-size: .92rem; color: var(--sales-muted); }
+.sales-tutorial { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 24px; padding: 42px 0; isolation: isolate; }
+.sales-tutorial::before { content: ''; position: absolute; inset: 0 calc(-1 * var(--public-gutter)); background: #fff8ee; z-index: -1; }
+.sales-eyebrow { text-transform: uppercase; letter-spacing: .07em; font-size: .76rem; font-weight: 800; color: var(--sales-red); margin: 0 0 16px; }
+.sales-tutorial-copy > .sales-eyebrow { display: flex; align-items: center; gap: 12px; }
+.sales-tutorial-copy > .sales-eyebrow::before { content: ''; width: 34px; height: 3px; background: var(--sales-red); }
+.sales-section-intro { color: var(--sales-muted); font-size: 1.02rem; margin: 0; max-width: 840px; white-space: pre-line; }
+.sales-checklist { padding: 0; margin: 24px 0; list-style: none; display: grid; gap: 15px; }
+.sales-checklist li { display: flex; align-items: center; gap: 12px; font-size: .95rem; }
+.sales-delivery-note { display: flex; gap: 9px; align-items: center; color: var(--sales-muted); font-size: .8rem; }
+.sales-book-scene { position: relative; min-height: 370px; display: grid; place-items: center; padding: 15px 60px 15px 20px; perspective: 1100px; }
+.sales-tutorial-image { width: 100%; max-height: 390px; object-fit: contain; border-radius: 12px; mix-blend-mode: multiply; }
+.sales-book-mockup { position: relative; width: min(260px, 85%); transform: rotate(-5deg) rotateY(-12deg); filter: drop-shadow(15px 24px 12px #57382425); }
+.sales-book-cover { min-height: 350px; border-left: 9px solid #920000; background: #fff; display: flex; flex-direction: column; padding: 22px 20px 0; color: #142134; box-shadow: 3px 0 0 #c6c5bf, 7px 0 0 #f4eee5; }
+.sales-book-logo { color: var(--sales-red); font-size: 2.5rem; font-weight: 900; line-height: 1; text-align: center; }
+.sales-book-cover > strong { text-align: center; font-size: .95rem; margin-top: 6px; }
+.sales-book-cover > small { font-size: .6rem; margin: 6px 0; text-align: center; }
+.sales-book-divider { height: 2px; background: var(--sales-red); margin: 12px 0 6px; }
+.sales-book-cover h3 { font-size: 1.15rem; line-height: 1.5; margin: 8px 0 16px; }
+.sales-book-cover ul { font-size: .64rem; margin: 0 0 20px; padding-left: 16px; line-height: 1.9; }
+.sales-book-footer { margin: auto -20px 0; background: var(--sales-red); padding: 20px; color: #fff; font-size: .7rem; font-weight: 700; }
+.sales-book-pages { position: absolute; width: 155px; height: 230px; right: -55px; bottom: -4px; transform: rotate(20deg); background: repeating-linear-gradient(#faf9f5 0 12px, #d8d9d7 13px 14px, #faf9f5 15px 20px); border: 8px solid #f3efe9; z-index: -1; box-shadow: 6px 8px 0 #d3cec3; }
+.sales-book-note { position: absolute; top: 10px; right: 0; font-family: Georgia, serif; font-style: italic; font-size: 1rem; color: #9f2424; text-align: center; transform: rotate(6deg); max-width: 140px; }
+.sales-book-note > span { display: block; font-size: 2.5rem; line-height: 1; }
+.sales-section { padding: 38px 0; }
+.sales-section-heading { display: flex; justify-content: space-between; align-items: start; gap: 24px; }
+.sales-handwritten { font-family: Georgia, serif; font-style: italic; font-size: 1.3rem; text-align: center; transform: rotate(-7deg); line-height: 1.2; color: var(--sales-muted); padding: 0 10px 8px; border-bottom: 2px solid var(--sales-red); flex-shrink: 0; }
+.sales-lms-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 25px; }
+.sales-lms-grid article { border: 1px solid #eeecea; border-radius: 11px; padding: 22px; display: flex; align-items: start; gap: 20px; }
+.sales-lms-grid svg, .sales-why svg { color: var(--sales-red); }
+.sales-lms-grid h3, .sales-why h3 { font-size: 1rem; font-weight: 750; line-height: 1.3; margin: 0 0 7px; letter-spacing: -.02em; }
+.sales-lms-grid p, .sales-why article p { color: var(--sales-muted); margin: 0; font-size: .88rem; line-height: 1.5; }
+.sales-why { padding-top: 12px; }
+.sales-why > div { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
+.sales-why article { display: flex; align-items: start; gap: 16px; }
+.sales-why article + article { border-left: 1px solid #eeecea; padding-left: 20px; }
+.sales-final-cta { position: relative; overflow: hidden; isolation: isolate; background: #ac0010; padding: 34px; border-radius: 14px; color: #fff; margin: 6px 0 22px; display: flex; align-items: center; min-height: 225px; }
+.sales-final-cta > div { max-width: 76%; z-index: 1; }
+.sales-final-cta .sales-eyebrow { color: #ffe4df; margin-bottom: 12px; font-size: .7rem; }
+.sales-final-cta h2 { color: #fff; font-size: clamp(1.4rem, 2.2vw, 1.9rem); margin: 0 0 22px; line-height: 1.4; }
+.sales-actions-light .sales-button-primary { background: #fff; color: var(--sales-red); border-color: #fff; }
+.sales-actions-light .sales-button-primary:hover { background: #ffe6e6; }
+.sales-actions-light .sales-button-outline { color: #fff; border-color: #fff; background: transparent; }
+.sales-actions-light .sales-button-outline:hover { background: #ffffff18; }
+.sales-final-cta > img { position: absolute; z-index: 0; right: 0; top: 0; width: 30%; height: 100%; object-fit: cover; object-position: center; mask-image: linear-gradient(90deg, transparent, #000 60%); opacity: .85; }
+.sales-bottom-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font-size: .84rem; padding: 0 0 28px; }
+.sales-bottom-links a { color: var(--sales-muted); text-underline-offset: 4px; }
+.sales-outline { border-top: 1px solid #eeecea; border-bottom: 1px solid #eeecea; margin-bottom: 24px; }
+.sales-outline ol { list-style: none; padding: 0; margin-bottom: 0; }
+.sales-outline li { border-bottom: 1px solid #eeecea; }
+.sales-outline li:last-child { border: 0; }
+.sales-outline summary, .sales-outline-title { display: flex; align-items: center; gap: 16px; padding: 18px 0; list-style: none; }
+.sales-outline summary { cursor: pointer; }
+.sales-outline summary::-webkit-details-marker { display: none; }
+.sales-outline summary > span, .sales-outline-title > span { color: var(--sales-red); font-size: .8rem; font-weight: 750; }
+.sales-outline summary strong { flex: 1; }
+.sales-outline details > p { margin: 0 0 22px 34px; color: var(--sales-muted); }
+.sales-outline details[open] svg { transform: rotate(180deg); }
+.sales-preserve-lines { white-space: pre-line; }
+.sales-unavailable { border-left: 3px solid var(--sales-red); padding: 8px 14px; font-weight: 650; }
+.lesson-sales-page a:focus-visible, .lesson-sales-page summary:focus-visible { outline: 3px solid var(--sales-red); outline-offset: 5px; }
+@media (max-width: 1050px) {
+  .sales-hero { gap: 26px; }
+  .sales-hero .sales-actions { gap: 10px; }
+  .sales-hero .sales-button { padding-inline: 14px; font-size: .86rem; }
+  .sales-value-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sales-lms-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sales-why > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sales-why article:nth-child(3) { border-left: 0; padding-left: 0; }
+  .sales-book-scene { padding-right: 25px; }
+  .sales-book-note { display: none; }
+}
+@media (max-width: 760px) {
+  .lesson-sales-page { padding-top: 0; }
+  .sales-hero { grid-template-columns: minmax(0, 1fr); gap: 25px; }
+  .sales-hero h1 { font-size: clamp(2rem, 6vw, 2.8rem); }
+  .sales-mobile-price { display: block; font-weight: 800; font-size: 1.8rem; color: var(--sales-red); margin: 0 0 20px; }
+  .sales-mobile-price small { display: block; font-size: .8rem; font-weight: 500; color: var(--sales-muted); margin-top: 4px; }
+  .sales-package-price { display: none; }
+  .sales-tutorial { grid-template-columns: minmax(0, 1fr); padding-block: 32px; }
+  .sales-book-scene { min-height: 350px; padding: 10px 35px 25px 0; }
+  .sales-tutorial-image { max-height: 350px; }
+  .sales-section { padding-block: 30px; }
+  .sales-handwritten { display: none; }
+  .sales-value-grid { gap: 12px; }
+  .sales-value-grid article { padding: 22px 14px; }
+  .sales-final-cta { padding: 28px 22px; }
+  .sales-final-cta > div { max-width: 100%; }
+  .sales-final-cta > img { display: none; }
+  .sales-hero .sales-actions, .sales-final-cta .sales-actions { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; }
+  .lesson-sales-page .sales-button { min-height: 52px; font-size: 1rem; }
+}
+@media (max-width: 480px) {
+  .sales-course-label { font-size: .8rem; }
+  .sales-hero-points { gap: 16px; }
+  .sales-hero-points li { font-size: .75rem; }
+  .sales-value-grid h2 { font-size: 1rem; }
+  .sales-value-grid p { font-size: .87rem; }
+  .sales-lms-grid, .sales-why > div { grid-template-columns: minmax(0, 1fr); }
+  .sales-why article + article { padding-left: 0; border-left: 0; }
+  .sales-bottom-links { flex-direction: column; }
+  .sales-book-cover { min-height: 340px; }
+}
+
+/* Dedicated lesson hero: shared brand styling with a course introduction video. */
+.lesson-intro-hero { background: #000; color: #fff; position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-top: calc(-1 * clamp(1rem, 3vw, 2.5rem)); }
+.lesson-intro-hero-inner { max-width: var(--public-content-width); padding: 40px var(--public-gutter); margin: auto; min-height: 35rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 64px); align-items: center; }
+.lesson-intro-hero .eyebrow { color: #ffb3b3; }
+.lesson-intro-hero h1 { color: #fff; font-size: clamp(2rem, 3.5vw, 3.25rem); max-width: 18ch; line-height: 1.2; margin: 16px 0 20px; }
+.lesson-intro-tagline { color: #ffb3b3; font-weight: 650; }
+.lesson-site-hero-description { color: #ddd; white-space: pre-line; margin-bottom: 18px; }
+.lesson-site-hero-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; color: #fff; margin: 0 0 20px; }
+.lesson-site-hero-price strong { font-size: 1.65rem; line-height: 1.3; }
+.lesson-site-hero-price span { font-size: .82rem; color: #ddd; }
+.lesson-intro-hero .sales-button-outline { background: transparent; color: #fff; border-color: #ffffff80; }
+.lesson-intro-hero .sales-button-outline:hover { background: #ffffff18; }
+.lesson-intro-hero .sales-unavailable { color: #fff; }
+.lesson-intro-video { margin: 0; width: 100%; }
+.lesson-intro-video-frame { aspect-ratio: 16 / 9; border: 1px solid #ffffff40; border-radius: 14px; overflow: hidden; background: #171717; box-shadow: 0 16px 48px #bb00001a; }
+.lesson-intro-video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.lesson-intro-video figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-top: 14px; color: #ddd; font-size: .8rem; line-height: 1.5; }
+.lesson-intro-video figcaption a { color: #ffb3b3; text-underline-offset: 4px; }
+@media (max-width: 767px) {
+  .lesson-intro-hero-inner { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-block: 32px; gap: 28px; }
+  .lesson-intro-hero .sales-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+}
+
+/* A simple tutorial highlight with the supplied book illustration. */
+.sales-tutorial-simple { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 24px; align-items: center; background: #fff8f3; border-radius: 16px; padding: clamp(24px, 4vw, 48px); margin-block: 12px 24px; overflow: hidden; }
+.sales-tutorial-simple h2 { color: var(--sales-ink); margin: 0; max-width: 12ch; font-size: clamp(1.9rem, 3.2vw, 2.8rem); }
+.sales-tutorial-delivery { color: var(--sales-red); font-size: 1.05rem; margin: 16px 0 0; }
+.sales-tutorial-placeholder { display: block; width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 10px; }
+@media (max-width: 767px) {
+  .sales-tutorial-simple { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .sales-tutorial-simple h2 { max-width: none; text-align: center; }
+  .sales-tutorial-delivery { text-align: center; }
+}
+
+/* Keep Sinhala text open and readable across lesson landing sections. */
+.lesson-sales-page[lang='si'] h1, .lesson-sales-page[lang='si'] h2, .lesson-sales-page[lang='si'] h3 { letter-spacing: 0; line-height: 1.55; }
+.lesson-sales-page[lang='si'] p { line-height: 1.85; }
+.lesson-sales-page[lang='si'] .sales-eyebrow, .lesson-sales-page[lang='si'] .eyebrow { letter-spacing: 0; line-height: 1.7; }
+.lesson-sales-page[lang='si'] .sales-button { line-height: 1.65; }
+.lesson-sales-page[lang='si'] .sales-handwritten { font-family: inherit; font-style: normal; font-size: 1rem; }
+.lesson-sales-page[lang='si'] .sales-tutorial-simple h2 { max-width: none; }
+
+.lesson-course-identity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; border-left: 4px solid var(--sales-red); padding: 10px 16px; margin-bottom: 16px; background: #ffffff0d; border-radius: 0 8px 8px 0; }
+.lesson-course-identity strong { color: #fff; font-size: clamp(1.3rem, 2.1vw, 1.8rem); line-height: 1.5; }
+.lesson-course-identity span { color: #ffb3b3; font-size: .85rem; }
+.lesson-course-identity .lesson-course-label { flex-basis: 100%; color: #ffb3b3; font-size: .75rem; font-weight: 700; }
+
+/* Balance long course names and Sinhala copy without squeezing the video. */
+.lesson-intro-hero-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(28px, 4vw, 64px); row-gap: 30px; padding-block: clamp(28px, 4vw, 48px); min-height: 0; }
+.lesson-course-identity { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 16px 28px; margin: 0; padding: 14px 20px; }
+.lesson-course-identity > div { flex: 1 1 360px; }
+.lesson-course-identity .lesson-course-label { display: block; margin-bottom: 4px; }
+.lesson-course-identity strong { display: block; font-size: clamp(1.1rem, 1.8vw, 1.5rem); line-height: 1.5; overflow-wrap: anywhere; }
+.lesson-course-identity .lesson-course-medium { flex: 0 1 auto; padding: 6px 12px; border: 1px solid #ffffff26; border-radius: 24px; line-height: 1.5; }
+.lesson-intro-hero-copy { width: 100%; }
+.lesson-intro-hero-copy > .eyebrow { margin: 0 0 12px; }
+.lesson-intro-hero h1 { max-width: none; font-size: clamp(1.85rem, 3vw, 2.8rem); line-height: 1.25; margin: 0 0 18px; text-wrap: balance; overflow-wrap: anywhere; }
+.lesson-sales-page[lang='si'] .lesson-intro-hero h1 { line-height: 1.45; }
+.lesson-intro-tagline { margin: 0 0 10px; }
+.lesson-site-hero-description { margin: 0 0 20px; max-width: 58ch; }
+.lesson-intro-hero .sales-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.lesson-intro-hero .sales-button { flex: 1 1 210px; min-height: 52px; padding: 13px 16px; text-align: center; }
+.lesson-site-hero-price { margin-bottom: 22px; }
+.lesson-intro-video { align-self: center; max-width: 760px; justify-self: center; }
+@media (min-width: 1600px) {
+  .lesson-intro-hero .sales-button { flex-grow: 0; }
+}
+@media (max-width: 980px) {
+  .lesson-intro-hero-inner { grid-template-columns: minmax(0, 1fr); row-gap: 28px; }
+  .lesson-intro-hero-copy { max-width: 760px; justify-self: center; }
+  .lesson-course-identity { width: 100%; max-width: 760px; justify-self: center; }
+  .lesson-intro-hero h1 { font-size: clamp(1.85rem, 4.5vw, 2.6rem); }
+}
+@media (max-width: 480px) {
+  .lesson-intro-hero-inner { padding-block: 24px 30px; row-gap: 24px; }
+  .lesson-course-identity { padding: 12px 14px; gap: 10px; }
+  .lesson-course-identity > div { flex-basis: 100%; }
+  .lesson-course-identity .lesson-course-medium { font-size: .78rem; padding: 4px 10px; }
+  .lesson-intro-hero h1 { font-size: clamp(1.65rem, 7vw, 2rem); margin-bottom: 14px; }
+  .lesson-intro-hero .sales-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .lesson-intro-hero .sales-button { width: 100%; }
+  .lesson-site-hero-price { align-items: start; flex-direction: column; gap: 5px; }
+  .lesson-intro-video-frame { border-radius: 10px; }
+}
+
+/* A focused text hero, followed by a separate introduction in the page container. */
+.lesson-intro-hero-inner { display: flex; flex-direction: column; align-items: stretch; gap: 24px; padding-block: clamp(28px, 4vw, 48px); }
+.lesson-course-identity { max-width: none; }
+.lesson-intro-hero-copy { max-width: 900px; margin-inline: auto; text-align: center; }
+.lesson-intro-hero h1 { max-width: 30ch; margin-inline: auto; font-size: clamp(1.85rem, 3.3vw, 3rem); }
+.lesson-site-hero-description { margin-inline: auto; }
+.lesson-site-hero-price { justify-content: center; }
+.lesson-intro-hero .sales-actions { justify-content: center; }
+.lesson-intro-hero .sales-button { flex: 0 1 auto; min-width: 220px; }
+.lesson-introduction-section { max-width: 880px; margin-inline: auto; padding-block: clamp(28px, 4vw, 48px); }
+.lesson-introduction-section h2 { text-align: center; margin-bottom: 22px; }
+.lesson-introduction-section .lesson-intro-video-frame { box-shadow: 0 8px 28px #111b2d0d; border-color: #e8e8e8; }
+@media (max-width: 480px) {
+  .lesson-intro-hero-copy { text-align: left; }
+  .lesson-intro-hero h1 { font-size: clamp(1.65rem, 7vw, 2rem); }
+  .lesson-intro-hero .sales-button { min-width: 0; }
+  .lesson-site-hero-price { align-items: start; }
+}
+
+/* Course name and medium form a quiet, centered identity above the lesson. */
+.lesson-course-identity { justify-content: center; flex-direction: column; gap: 10px; padding: 0 0 22px; border: 0; border-bottom: 1px solid #ffffff20; border-radius: 0; background: transparent; text-align: center; }
+.lesson-course-identity strong { max-width: 900px; font-size: clamp(1.05rem, 1.7vw, 1.4rem); color: #fff; }
+.lesson-course-identity .lesson-course-medium { padding: 4px 12px; color: #ffb3b3; border-color: #ffb3b330; background: #bb000015; }
+@media (max-width: 480px) {
+  .lesson-course-identity { align-items: flex-start; text-align: left; padding-bottom: 18px; }
+}
+
+/* Consistent enrollment actions after the main decision-making sections. */
+.lesson-section-cta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px 28px; padding: 24px clamp(20px, 3vw, 32px); margin-bottom: 28px; background: #fff8f3; border: 1px solid #f0e5de; border-radius: 12px; }
+.lesson-section-cta > p { flex: 1 1 230px; margin: 0; font-weight: 700; color: var(--sales-ink); font-size: 1.05rem; }
+.lesson-section-cta .sales-actions { flex: 0 1 auto; }
+@media (max-width: 760px) {
+  .lesson-section-cta .sales-actions { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lesson-section-cta .sales-button { padding-inline: 12px; text-align: center; }
+}
+@media (max-width: 480px) {
+  .lesson-section-cta .sales-actions { grid-template-columns: minmax(0, 1fr); }
+}

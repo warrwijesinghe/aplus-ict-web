@@ -40,7 +40,7 @@ test('shows signed-in students the three ICT learning pathways in the hero', () 
     user: { name: 'Student', roles: [{ code: 'student' }] }
   });
 
-  const hero = document.querySelector('.platform-home-hero');
+  const hero = document.querySelector('.shared-page-hero');
   expect(within(hero).getByRole('link', { name: 'A/L ICT' })).toHaveAttribute('href', '/al-ict');
   expect(within(hero).getByRole('link', { name: 'O/L ICT' })).toHaveAttribute('href', '/ol-ict');
   expect(within(hero).getByRole('link', { name: 'Grades 6–9 ICT' })).toHaveAttribute(
@@ -193,7 +193,7 @@ test('groups homepage courses by school stage in database display order', async 
   const gradeSixCard = within(schoolSection)
     .getByRole('heading', { level: 3, name: 'Grade 6 ICT' })
     .closest('article');
-  expect(within(gradeSixCard).getByRole('link', { name: 'View Course' })).toHaveAttribute(
+  expect(within(gradeSixCard).getByRole('link', { name: /English Medium.*Grade 6 ICT/ })).toHaveAttribute(
     'href',
     '/courses/grade-6-ict-en'
   );
@@ -212,7 +212,7 @@ test('shows the four essential FAQ questions and educator identity', () => {
 
 test('places the course collections directly after the homepage hero', () => {
   renderWithProviders(<PlatformHomePage />);
-  const hero = document.querySelector('.platform-home-hero');
+  const hero = document.querySelector('.shared-page-hero');
   expect(hero.nextElementSibling).toHaveClass('home-course-loading');
   expect(document.querySelector('.learning-steps')).not.toBeInTheDocument();
   expect(document.querySelector('.final-home-cta')).not.toBeInTheDocument();
