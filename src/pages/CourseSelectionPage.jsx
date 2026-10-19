@@ -14,21 +14,20 @@ const categories = [
   { id: 'SHORT_COURSES', path: '/short-courses', title: 'Short Courses', detail: 'Practical learning', image: 'practical-learning.webp', icon: <BookOpen aria-hidden="true" size={22} /> }
 ];
 
-export const CourseSelectionPage = ({ student = false }) => {
+export const CourseSelectionPage = () => {
   const [search] = useSearchParams();
   const selected = categories.find((category) => category.id.toLowerCase() === search.get('category'));
-  const basePath = student ? '/student/explore' : '/courses';
+  const basePath = '/courses';
   const courses = useQuery({ queryKey: ['course-selection'], queryFn: ({ signal }) => contentApi.courseSelection(signal), retry: false });
   const items = (courses.data?.data || []).filter((course) => course.courseGroup === selected?.id);
-  usePageSeo({ path: student ? '/student/explore' : '/courses', title: 'Explore courses', description: 'Explore ICT courses and learning paths at A Plus ICT.', noIndex: student });
+  usePageSeo({ path: '/courses', title: 'Explore courses', description: 'Explore ICT courses and learning paths at A Plus ICT.' });
 
-  return <section className={`course-selection${student ? ' course-selection-student' : ''}`}>
+  return <section className="course-selection">
     <header className="course-selection-heading">
       {selected && <Link className="course-selection-back" to={basePath}>← All categories</Link>}
       <p className="eyebrow">{selected ? selected.detail : 'Explore courses'}</p>
       <h1>{selected ? selected.title : 'Choose your learning path'}</h1>
       <p>{selected ? 'Choose a course below. Courses marked coming soon are not available yet.' : 'Select a category to see its courses.'}</p>
-      {student && <Link className="course-selection-dashboard" to="/student">Go to my dashboard <span aria-hidden="true">→</span></Link>}
     </header>
     {courses.isLoading ? <p className="course-selection-message" role="status">Loading courses…</p> : courses.isError ? <div className="course-selection-message" role="alert"><p>Courses could not be loaded. Please try again.</p><button onClick={() => courses.refetch()} type="button">Try again</button></div> :
       selected ? items.length ? <CatalogueCourseGrid area={selected.id} courses={items} /> : <p className="course-selection-message">Courses in this category are coming soon.</p> : <div className="course-selection-grid course-selection-categories">{categories.map(({ id, path, title, detail, icon, image }) => {

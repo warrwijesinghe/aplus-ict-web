@@ -4,7 +4,6 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { contentApi } from '../../api/content.api.js';
 import { queryKeys } from '../../api/query-keys.js';
 import { useAuth } from '../../auth/auth-context.jsx';
-import { destinationForUser } from '../../utils/route-destination.js';
 import { BrandLogo } from './BrandLogo.jsx';
 import { trackPublicEvent } from '../../analytics/events.js';
 
@@ -48,7 +47,6 @@ export const PublicHeader = () => {
     closeMenu();
   }, [location.pathname, location.search]);
   const roles = user?.roles?.map((role) => (typeof role === 'string' ? role : role.code)) || [];
-  const memberDestination = destinationForUser(user);
   const initials = (user?.name || user?.email || 'Student')
     .split(/\s+/)
     .map((part) => part[0])
@@ -107,7 +105,7 @@ export const PublicHeader = () => {
                   <strong>{user?.name || 'A Plus ICT member'}</strong>
                   <span>{user?.email}</span>
                 </p>
-                {roles.includes('student') ? <Link onClick={closeMenu} to={memberDestination}>My Learning</Link> : null}
+                {roles.includes('student') ? <Link onClick={closeMenu} to="/dashboard">My Learning</Link> : null}
                 {roles.includes('student') ? (
                   <Link onClick={closeMenu} to="/student/profile">
                     Profile

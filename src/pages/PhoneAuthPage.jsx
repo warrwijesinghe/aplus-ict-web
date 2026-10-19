@@ -10,7 +10,7 @@ export const PhoneAuthPage = ({ mode = 'login' }) => {
   const auth = useAuth(), navigate = useNavigate(), location = useLocation();
   const [search] = useSearchParams();
   const [step, setStep] = useState('phone');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(() => typeof location.state?.phoneNumber === 'string' ? location.state.phoneNumber : '');
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +22,7 @@ export const PhoneAuthPage = ({ mode = 'login' }) => {
   const [notice, setNotice] = useState('');
   const [remaining, setRemaining] = useState(0);
   const isLogin = mode === 'login', isReset = mode === 'reset';
-  const returnTo = safeDestination(search.get('returnTo') || location.state?.from || sessionStorage.getItem('aplus-return-to'), '/student/explore');
+  const returnTo = safeDestination(search.get('returnTo') || location.state?.from, '/courses');
   const query = `?returnTo=${encodeURIComponent(returnTo)}`;
   usePageSeo({ path: location.pathname, title: isLogin ? 'Student sign in' : isReset ? 'Reset password' : 'Create account', description: 'Secure student account access.', noIndex: true });
 
@@ -86,7 +86,7 @@ export const PhoneAuthPage = ({ mode = 'login' }) => {
         {!isLogin && step === 'otp' && <button type="button" disabled={busy || remaining > 0} onClick={sendCode}>{remaining > 0 ? `Resend code in ${remaining}s` : 'Resend code'}</button>}
         {!isLogin && step !== 'phone' && <button type="button" disabled={busy} onClick={() => { setStep('phone'); setChallenge(null); setVerificationToken(''); setError(''); setNotice(''); setPassword(''); setConfirmPassword(''); }}>Start again</button>}
       </form>}
-      <nav className="phone-auth-links" aria-label="Account options">{isLogin ? <><Link to={`/register${query}`}>Create an account</Link><Link to={`/forgot-password${query}`}>Forgot password?</Link></> : <Link to={`/login${query}`}>Back to sign in</Link>}</nav>
+      <nav className="phone-auth-links" aria-label="Account options">{isLogin ? <><Link state={{ phoneNumber }} to={`/register${query}`}>Create an account</Link><Link state={{ phoneNumber }} to={`/forgot-password${query}`}>Forgot password?</Link></> : <Link state={{ phoneNumber }} to={`/login${query}`}>Back to sign in</Link>}</nav>
       {!isLogin && <p className="student-login-note">Previously signed in with Google? Contact support to connect your existing account to a mobile number, then use password reset.</p>}
     </div><aside className="student-login-visual"><div className="student-login-visual-copy"><p className="eyebrow">LEARN ON YOUR TERMS</p><h2>Your learning is ready when you are.</h2><ul><li>Return to lessons from any device</li><li>Keep your completed activities and progress</li><li>Explore free learning before unlocking premium lessons</li></ul></div><p className="student-login-visual-mark" aria-hidden="true">A+</p></aside></div>
   </section>;

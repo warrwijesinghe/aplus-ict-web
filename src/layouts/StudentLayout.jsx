@@ -1,13 +1,10 @@
 import { PortalLayout } from './PortalLayout.jsx';
 export const StudentLayout = () => (
   <PortalLayout
-    title="My learning"
+    title="My Learning"
     links={[
-      { to: '/student/explore', label: 'Explore courses' },
-      { to: '/dashboard', label: 'Dashboard' },
-      { to: '/my-courses', label: 'My courses' },
-      { to: '/learning-history', label: 'Learning history' },
-      { to: '/student/orders', label: 'My orders' },
+      { to: '/dashboard', label: 'My Learning' },
+      { to: '/my-orders', label: 'My orders' },
       { to: '/profile', label: 'Profile' }
     ]}
   />

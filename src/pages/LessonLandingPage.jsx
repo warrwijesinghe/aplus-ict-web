@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { contentApi } from '../api/content.api.js';
 import { queryKeys } from '../api/query-keys.js';
 import { useAuth } from '../auth/auth-context.jsx';
-import { useCourseEnrollment } from '../features/student/hooks.js';
+import { useLessonEnrollment } from '../features/student/hooks.js';
 import { EmptyState, InlineError, LoadingSkeleton } from '../components/common/States.jsx';
 import { LessonValueFeatures, TutorialHighlight, LmsFeatures, WhyAPlusICT, LessonFinalCTA, LessonOutline } from '../components/courses/LessonLandingSections.jsx';
 import { LessonHero } from '../components/courses/LessonHero.jsx';
@@ -31,7 +31,7 @@ export const LessonLanding = ({ course, lesson, courseSlug, lessonSlug, isAuthen
   const canBuy = !comingSoon && !unlocked && Boolean(lesson.unlockProduct) && !['inactive', 'archived', 'draft'].includes(lesson.unlockProduct?.status);
   const enroll = `/enroll/${courseSlug}?returnTo=${encodeURIComponent(base + '/learn')}`;
   const model = {
-    course, lesson, content, mediumLabel, areaLabel, courseTitle, examCourse, comingSoon, sinhala, t, area: area.area,
+    course, courseSlug, lesson, content, mediumLabel, areaLabel, courseTitle, examCourse, comingSoon, sinhala, t, area: area.area,
     price: formatLkr(lessonPriceFor({ product: lesson.unlockProduct }))?.replace('LKR', sinhala ? 'රු.' : 'LKR'),
     freeLabel: unlocked ? t('Continue Lesson', 'පාඩම දිගටම ඉගෙන ගන්න') : isAuthenticated && isEnrolled ? t('Continue Free Lesson', 'නොමිලේ පාඩම දිගටම ඉගෙන ගන්න') : isAuthenticated ? t('Start Free Lesson', 'නොමිලේ පාඩම අරඹන්න') : t('Start Learning Free Now', 'දැන් නොමිලේ ඉගෙනීම අරඹන්න'),
     freeTo: unlocked || (isAuthenticated && isEnrolled) ? base + '/learn' : enroll,
@@ -59,10 +59,10 @@ export const LessonLandingPage = () => {
   const query = useQuery({ queryKey: queryKeys.content.publicLesson(courseSlug, lessonSlug), queryFn: ({ signal }) => contentApi.publicLesson(courseSlug, lessonSlug, signal) });
   const { course, lesson } = query.data?.data || {};
   const sinhala = mediumForCourse(course) === 'si' || (!course && /(?:^|-)sinhala(?:-|$)/.test(courseSlug));
-  const enrollment = useCourseEnrollment(course?.id, isAuthenticated && Boolean(course?.id));
+  const enrollment = useLessonEnrollment(lesson?.id, isAuthenticated);
   usePageSeo({ title: lesson ? lesson.title : sinhala ? 'තොරතුරු තාක්ෂණ පාඩම' : 'ICT lesson', description: lesson?.landingPageContent?.heroDescription || (sinhala ? 'තොරතුරු තාක්ෂණය නොමිලේ ඉගෙනීම අරඹන්න. වීඩියෝ පාඩම්, මුද්‍රිත නිබන්ධන සහ පුහුණු ප්‍රශ්න සමඟ ඉගෙන ගන්න.' : 'Start learning ICT free. Explore exam-focused lessons, printed tutorials and LMS learning tools.'), path: `/courses/${courseSlug}/lessons/${lessonSlug}` });
   if (query.isPending) return <LoadingSkeleton label={sinhala ? 'පාඩම පූරණය වෙමින් පවතී' : 'Loading lesson'} />;
   if (query.isError) return <InlineError error={query.error} onRetry={query.refetch} />;
   if (!lesson || !course) return <EmptyState title={sinhala ? 'මෙම පාඩම දැනට ලබා ගත නොහැක' : 'This lesson is not available'} />;
-  return <LessonLanding course={course} lesson={lesson} courseSlug={courseSlug} lessonSlug={lessonSlug} isAuthenticated={isAuthenticated} isEnrolled={Boolean(enrollment.data)} />;
+  return <LessonLanding course={course} lesson={lesson} courseSlug={courseSlug} lessonSlug={lessonSlug} isAuthenticated={isAuthenticated} isEnrolled={enrollment.data?.status === 'active'} />;
 };

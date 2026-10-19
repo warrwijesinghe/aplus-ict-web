@@ -9,7 +9,7 @@ export const lessonPriceFor = ({ product } = {}) => {
 };
 
 export const formatLkr = (amount) => Number.isFinite(Number(amount)) && Number(amount) > 0
-  ? new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR', maximumFractionDigits: 0 }).format(Number(amount)).replace('LKR', 'LKR')
+  ? new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(amount))
   : null;
 
 export const bilingualLessonPriceLabel = (amount) => ({

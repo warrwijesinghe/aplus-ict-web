@@ -18,7 +18,7 @@ const useCourseLessons = (courseSlug, lessonSlug) =>
 const LmsLessonHeader = ({ courseSlug, lesson }) => {
   if (!lesson) return null;
 
-  const activities = lesson.topics.flatMap((topic) => topic.activities);
+  const activities = lesson.topics.flatMap((topic) => topic.activities).filter((activity) => activity.completionMode !== 'none');
   const completed = activities.filter(
     (activity) => activity.progress?.status === 'completed'
   ).length;
@@ -105,9 +105,9 @@ const LmsLessonSwitcher = ({ courseSlug, lesson, lessons, title }) => {
             <Link
               className="lms-switcher-all"
               onClick={closeSwitcher}
-              to={`/courses/${courseSlug}/learn`}
+              to={`/courses/${courseSlug}`}
             >
-              All lessons in this course
+              Browse lessons in this course
             </Link>
             <Link className="lms-switcher-my-courses" onClick={closeSwitcher} to="/my-courses">
               All My Courses

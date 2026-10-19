@@ -24,7 +24,7 @@ describe('utilities', () => {
     const user = { roles: [{ code: 'student' }], permissions: ['learning.progress.read'] };
     expect(hasRole(user, 'student')).toBe(true);
     expect(hasPermission(user, 'learning.progress.read')).toBe(true);
-    expect(destinationForUser(user)).toBe('/student/explore');
+    expect(destinationForUser(user)).toBe('/courses');
   });
   test('normalizes network errors without leaking internals', () => {
     const error = normalizeApiError({ code: 'ECONNABORTED' }, 'content');

@@ -1,10 +1,18 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test } from 'vitest';
 import { LessonLanding } from '../src/pages/LessonLandingPage.jsx';
 
 const lesson = { id: 'one', title: 'Information systems', lessonNumber: 1, freeContentCount: 2, unlockProduct: { price: 2200 }, landingPageContent: { overview: 'An overview written for visitors.', syllabus: [{ title: 'Landing page syllabus item', description: 'A public explanation of this lesson.' }] }, topics: [{ id: 'topic', title: 'Understanding information', contentItems: [{ id: 'paid', title: 'Paid activity', isLocked: true, content: 'Protected lesson text' }] }] };
 const show = (overrides = {}, state = {}) => render(<MemoryRouter><LessonLanding course={{ title: 'O/L ICT', medium: 'english' }} lesson={{ ...lesson, ...overrides }} courseSlug="ol-ict" lessonSlug="information" {...state} /></MemoryRouter>);
+
+test.each([
+  { courseImage: 'course-cover', lessonImage: null, expected: 'course-cover' },
+  { courseImage: 'course-cover', lessonImage: 'lesson-cover', expected: 'lesson-cover' },
+])('uses the course tutorial cover unless the lesson overrides it: $expected', ({ courseImage, lessonImage, expected }) => {
+  render(<MemoryRouter><LessonLanding course={{ title: 'ICT', medium: 'english', tutorialImageResourceId: courseImage }} lesson={{ ...lesson, tutorialImageResourceId: lessonImage }} courseSlug="ict" lessonSlug="information" /></MemoryRouter>);
+  expect(screen.getByAltText('Information systems — Printed tutorial').getAttribute('src')).toContain(`/api/v1/resources/${expected}/content`);
+});
 
 test.each([
   { title: 'A/L ICT', courseGroup: 'AL', medium: 'english' },
@@ -24,7 +32,7 @@ test('keeps the chosen lesson through free enrollment and purchase enrollment', 
   expect(screen.getAllByRole('link', { name: /Start Learning Free Now/ })[0]).toHaveAttribute('href', '/enroll/ol-ict?returnTo=' + encodeURIComponent('/courses/ol-ict/lessons/information/learn'));
   expect(screen.getAllByRole('link', { name: /Buy Full Lesson/ })[0]).toHaveAttribute('href', '/enroll/ol-ict?returnTo=' + encodeURIComponent('/courses/ol-ict/lessons/information/exam-success-pack'));
   expect(screen.getAllByText(/2,200/).length).toBeGreaterThan(0);
-  fireEvent.click(screen.getByText('Landing page syllabus item'));
+  fireEvent.click(within(document.querySelector('.sales-outline')).getByText('Landing page syllabus item'));
   expect(screen.getByText('A public explanation of this lesson.')).toBeVisible();
   expect(screen.getByText('An overview written for visitors.')).toBeInTheDocument();
   expect(screen.queryByText('Understanding information')).not.toBeInTheDocument();

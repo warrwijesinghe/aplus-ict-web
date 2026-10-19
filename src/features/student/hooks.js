@@ -4,6 +4,8 @@ import { studentLearningApi } from './student-learning.js';
 const keys = { profile: ['student', 'profile'], enrollments: ['student', 'enrollments'], enrollment: (id) => ['student', 'enrollment', id], dashboard: ['student', 'dashboard'], history: ['student', 'learning-history'], progress: (slug) => ['learning', 'activity-progress', slug] };
 export const useStudentProfile = (enabled = true) => useQuery({ queryKey: keys.profile, queryFn: studentLearningApi.profile, enabled });
 export const useStudentEnrollments = () => useQuery({ queryKey: keys.enrollments, queryFn: studentLearningApi.enrollments });
+export const useLessonEnrollments = () => useQuery({ queryKey: ['student', 'lesson-enrollments'], queryFn: studentLearningApi.lessonEnrollments });
+export const useLessonEnrollment = (id, enabled = true) => useQuery({ queryKey: ['student', 'lesson-enrollment', id], queryFn: () => studentLearningApi.lessonEnrollment(id), enabled: Boolean(id) && enabled });
 export const useCourseEnrollment = (courseId, enabled = true) => useQuery({ queryKey: keys.enrollment(courseId), queryFn: () => studentLearningApi.enrollment(courseId), enabled });
 export const useUpdateStudentProfile = () => { const client = useQueryClient(); return useMutation({ mutationFn: studentLearningApi.saveProfile, onSuccess: () => client.invalidateQueries({ queryKey: keys.profile }) }); };
 export const useEnrollInCourse = () => { const client = useQueryClient(); return useMutation({ mutationFn: studentLearningApi.enroll, onSuccess: () => client.invalidateQueries({ queryKey: ['student'] }) }); };

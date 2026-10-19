@@ -22,6 +22,11 @@ const verify = async () => {
   await screen.findByLabelText('New password');
 };
 describe('phone authentication screens', () => {
+  test('prefills the phone from enrollment without putting it into the URL', () => {
+    render(<MemoryRouter initialEntries={[{ pathname: '/login', search: '?returnTo=%2Fenroll%2Fal-ict', state: { phoneNumber: '+94771234567' } }]}><PhoneAuthPage /></MemoryRouter>);
+    expect(screen.getByLabelText('Mobile number')).toHaveValue('+94771234567');
+    expect(screen.getByRole('link', { name: 'Create an account' })).toHaveAttribute('href', '/register?returnTo=%2Fenroll%2Fal-ict');
+  });
   beforeEach(() => {
     vi.clearAllMocks(); sessionStorage.clear();
     authApi.requestOtp.mockResolvedValue({ challengeId: 'challenge', resendAfter: 60, message: 'Code sent' });
@@ -37,17 +42,25 @@ describe('phone authentication screens', () => {
     expect(login).toHaveBeenCalledWith({ phoneNumber: '0771234567', password: 'Learning123!' });
   });
   test('opens course selection after a regular sign in', async () => {
+    sessionStorage.setItem('aplus-return-to', '/enroll/old-course');
     show();
     type('Mobile number', '0771234567'); type('Password', 'Learning123!');
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
-    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/student/explore', { replace: true }));
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/courses', { replace: true }));
+  });
+  test('keeps the selected lesson when signing in to continue enrollment', async () => {
+    const destination = '/enroll/al-ict?returnTo=' + encodeURIComponent('/courses/al-ict/lessons/one/learn');
+    show('login', '/login?returnTo=' + encodeURIComponent(destination));
+    type('Mobile number', '0771234567'); type('Password', 'Learning123!');
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith(destination, { replace: true }));
   });
   test('verifies before password setup and creates an account with proof', async () => {
     show('register', '/register'); await verify();
     type('Full name', 'Student One'); type('New password', 'Learning123!'); type('Confirm password', 'Learning123!');
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
     await waitFor(() => expect(register).toHaveBeenCalledWith({ challengeId: 'challenge', verificationToken: 'proof', name: 'Student One', password: 'Learning123!' }));
-    expect(navigate).toHaveBeenCalledWith('/complete-profile?returnTo=%2Fstudent%2Fexplore', { replace: true });
+    expect(navigate).toHaveBeenCalledWith('/complete-profile?returnTo=%2Fcourses', { replace: true });
   });
   test('rejects mismatched passwords without calling the API', async () => {
     show('register', '/register'); await verify();
@@ -78,7 +91,7 @@ describe('phone authentication screens', () => {
     show('login', '/login?returnTo=https%3A%2F%2Fevil.example');
     type('Mobile number', '0771234567'); type('Password', 'Learning123!');
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
-    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/student/explore', { replace: true }));
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/courses', { replace: true }));
     expect(document.querySelector('meta[name="robots"]').content).toBe('noindex, nofollow');
   });
 });

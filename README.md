@@ -14,6 +14,8 @@ npm ci
 npm run dev
 ```
 
+Web development runs at http://localhost:5173; Admin runs at http://localhost:5174. If its port is occupied, the server exits instead of switching ports. Stop the existing server before restarting.
+
 Set `VITE_API_URL=http://localhost:4000` for backend access. PayHere checkout details are returned by the authenticated API after it creates a server-side payment attempt; no PayHere credentials are configured in this application. In the Docker stack, Nginx supplies `/api` as the same-origin API base.
 
 ## Legal identity and policies

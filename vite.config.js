@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
   return {
   plugins: [react(), tailwindcss(), publicSeoFiles(env, mode)],
   define: { __APLUS_BUILD_ENV__: JSON.stringify(env.VITE_APP_ENV || mode) },
-  server: { port: 5173 },
+  server: { port: 5173, strictPort: true },
   test: {
     environment: 'jsdom',
     setupFiles: ['./tests/setup.js'],

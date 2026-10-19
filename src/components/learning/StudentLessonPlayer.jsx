@@ -35,7 +35,7 @@ const ActivityTypeIcon = ({ type }) => {
 const playerPath = (courseSlug, target) =>
   target
     ? `/courses/${courseSlug}/lessons/${target.lessonSlug}/activities/${target.activityId}`
-    : `/courses/${courseSlug}/learn`;
+    : "/my-courses";
 
 const youtubeEmbedUrl = (url) => {
   const safe = safeExternalUrl(url);
@@ -222,6 +222,7 @@ const PremiumActivityLock = ({ activity, course }) => {
   const state = activity.accessState || {};
   const hasPremiumRequirement = state.unmetRequirements?.some((item) => item.type === 'premium');
   const purchasePath = `/courses/${courseSlug}/lessons/${lessonSlug}/exam-success-pack`;
+  if (state.unmetRequirements?.some((item) => item.type === 'lesson_enrollment')) return <section className="player-premium-lock" role="status"><h2>{isSinhalaMedium ? 'පාඩමට පිවිසීම සඳහා ලියාපදිංචිය අවශ්‍යයි' : 'Lesson enrolment required'}</h2><p>{state.reasons?.find((reason) => reason.includes('two years')) || 'An active lesson enrolment is required.'}</p><Link className="button" to={`/courses/${courseSlug}/lessons/${lessonSlug}`}>{isSinhalaMedium ? 'පාඩමේ විස්තර බලන්න' : 'View lesson access details'}</Link></section>;
 
   if (!isSinhalaMedium)
     return (
@@ -334,7 +335,7 @@ const ActivityLink = ({ activity, courseSlug, lessonSlug, current }) => (
 const LessonJourney = ({ lesson }) => {
   const activities = lesson.topics
     .flatMap((topic) => topic.activities)
-    .filter((activity) => !activity.isLocked);
+    .filter((activity) => activity.completionMode !== 'none');
   const completed = activities.filter(
     (activity) => activity.progress?.status === 'completed'
   ).length;
@@ -370,8 +371,8 @@ export const CourseMap = ({ courseSlug, lessons, currentId, lessonSlug, open, on
     />
   );
   /*
-  if (publicLesson?.unlockProduct && hasLockedPremiumActivity) return <aside className={`student-course-map ${open ? 'open' : ''}`} aria-label="Lesson navigation"><div className="course-map-heading"><div><strong>Lesson navigation</strong><span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span></div><button aria-label="Close lesson navigation" onClick={onClose} type="button">×</button></div><Link className="course-map-back" to={`/courses/${courseSlug}/learn`}>← All lessons</Link><section className="course-map-lesson"><strong className="course-map-lesson-title">{lesson.title}</strong><LessonJourney lesson={lesson} />{lesson.topics.map((topic) => <div className="course-map-topic" key={topic.id}><strong>{topic.title}</strong>{topic.activities.map((activity) => <ActivityLink activity={activity} courseSlug={courseSlug} current={activity.id === currentId} key={activity.id} lessonSlug={lesson.slug || lesson.id} />)}</div>)}<div className="lms-unlock-card"><span>Premium පාඩම් කොටස</span><strong>පාඩම සම්පූර්ණයෙන් ඉගෙනගන්න</strong><p>Premium activities සහ resources ලබාගැනීමට මෙම පාඩම unlock කරන්න.</p><LessonPrice area={academicAreaForCourse(publicCourse)} course={publicCourse} product={publicLesson.unlockProduct} /><Link className="button" to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}/exam-success-pack`}>පාඩම unlock කරන්න</Link></div></section></aside>;
-  return <aside className={`student-course-map ${open ? 'open' : ''}`} aria-label="Lesson navigation"><div className="course-map-heading"><div><strong>Lesson navigation</strong><span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span></div><button aria-label="Close lesson navigation" onClick={onClose} type="button">×</button></div><Link className="course-map-back" to={`/courses/${courseSlug}/learn`}>← All lessons</Link><section className="course-map-lesson"><strong className="course-map-lesson-title">{lesson.title}</strong><LessonJourney lesson={lesson} />{lesson.topics.map((topic) => <div className="course-map-topic" key={topic.id}><strong>{topic.title}</strong>{topic.activities.map((activity) => <ActivityLink activity={activity} courseSlug={courseSlug} current={activity.id === currentId} key={activity.id} lessonSlug={lesson.slug || lesson.id} />)}</div>)}</section></aside>;
+  if (publicLesson?.unlockProduct && hasLockedPremiumActivity) return <aside className={`student-course-map ${open ? 'open' : ''}`} aria-label="Lesson navigation"><div className="course-map-heading"><div><strong>Lesson navigation</strong><span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span></div><button aria-label="Close lesson navigation" onClick={onClose} type="button">×</button></div><Link className="course-map-back" to="/my-courses">← My lessons</Link><section className="course-map-lesson"><strong className="course-map-lesson-title">{lesson.title}</strong><LessonJourney lesson={lesson} />{lesson.topics.map((topic) => <div className="course-map-topic" key={topic.id}><strong>{topic.title}</strong>{topic.activities.map((activity) => <ActivityLink activity={activity} courseSlug={courseSlug} current={activity.id === currentId} key={activity.id} lessonSlug={lesson.slug || lesson.id} />)}</div>)}<div className="lms-unlock-card"><span>Premium පාඩම් කොටස</span><strong>පාඩම සම්පූර්ණයෙන් ඉගෙනගන්න</strong><p>Premium activities සහ resources ලබාගැනීමට මෙම පාඩම unlock කරන්න.</p><LessonPrice area={academicAreaForCourse(publicCourse)} course={publicCourse} product={publicLesson.unlockProduct} /><Link className="button" to={`/courses/${courseSlug}/lessons/${lesson.slug || lesson.id}/exam-success-pack`}>පාඩම unlock කරන්න</Link></div></section></aside>;
+  return <aside className={`student-course-map ${open ? 'open' : ''}`} aria-label="Lesson navigation"><div className="course-map-heading"><div><strong>Lesson navigation</strong><span>Lesson {String(lesson.lessonNumber).padStart(2, '0')}</span></div><button aria-label="Close lesson navigation" onClick={onClose} type="button">×</button></div><Link className="course-map-back" to="/my-courses">← My lessons</Link><section className="course-map-lesson"><strong className="course-map-lesson-title">{lesson.title}</strong><LessonJourney lesson={lesson} />{lesson.topics.map((topic) => <div className="course-map-topic" key={topic.id}><strong>{topic.title}</strong>{topic.activities.map((activity) => <ActivityLink activity={activity} courseSlug={courseSlug} current={activity.id === currentId} key={activity.id} lessonSlug={lesson.slug || lesson.id} />)}</div>)}</section></aside>;
 */
 };
 
@@ -447,8 +448,8 @@ const CollapsibleCourseMap = ({ courseSlug, currentId, lesson, onClose, open }) 
           </button>
         ) : null}
       </div>
-      <Link className="course-map-back" to={`/courses/${courseSlug}/learn`}>
-        ← All lessons
+      <Link className="course-map-back" to="/my-courses">
+        ← My lessons
       </Link>
       <section className="course-map-lesson">
         <strong className="course-map-lesson-title">{lesson.title}</strong>
@@ -521,7 +522,7 @@ export const LessonActivityNavigator = ({ courseSlug, lessonSlug }) => {
 };
 
 const EnrolledLessonCard = ({ course, courseSlug, lesson, publicLesson }) => {
-  const activities = lesson.topics.flatMap((topic) => topic.activities);
+  const activities = lesson.topics.flatMap((topic) => topic.activities).filter((activity) => activity.completionMode !== 'none');
   const progress = lesson.progress || {};
   const hasPaidContent = Boolean(
     publicLesson?.hasPaidContent ||
@@ -566,7 +567,7 @@ const EnrolledLessonCard = ({ course, courseSlug, lesson, publicLesson }) => {
           value={progress.progressPercent || 0}
         />
         <p>
-          {completed} of {total} available activities complete
+          {completed} of {total} required activities complete
         </p>
       </div>
       <div className="enrolled-lesson-details">
@@ -817,7 +818,7 @@ export const StudentActivityPlayer = () => {
       <nav aria-label="Breadcrumb" className="breadcrumbs">
         <Link to="/dashboard">My Courses</Link>
         <span>/</span>
-        <Link to={`/courses/${courseSlug}/learn`}>{data.course.title}</Link>
+        <Link to="/my-courses">{data.course.title}</Link>
         <span>/</span>
         <span>{activity.title}</span>
       </nav>
@@ -826,7 +827,7 @@ export const StudentActivityPlayer = () => {
           <p className="eyebrow">{typeNames[activity.type] || 'Learning activity'}</p>
           <h1>{activity.title}</h1>
           <p>
-            {data.course.medium?.name} · {data.progress.progressPercent}% course complete
+            {data.course.medium?.name} · {data.progress.progressPercent}% of course activities completed
           </p>
         </div>
         <button
@@ -893,7 +894,7 @@ export const StudentActivityPlayer = () => {
                 Next <span className="sr-only">activity</span> →
               </Link>
             ) : (
-              <Link to={`/courses/${courseSlug}/learn`}>Return to course</Link>
+              <Link to="/my-courses">Return to my lessons</Link>
             )}
           </nav>
         </main>

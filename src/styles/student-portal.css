@@ -1,0 +1,86 @@
+/* Existing student shell, simplified around studying and resuming. */
+.portal.portal-minimal { background: #fbf8f6; grid-template-columns: 232px minmax(0, 1fr); color: #181414; }
+.portal-minimal .portal-sidebar { position: sticky; top: 0; height: 100dvh; width: auto; background: #2a1115; padding: 24px 20px; display: flex; flex-direction: column; gap: 22px; border: 0; box-shadow: none; }
+.portal-minimal .portal-brand { margin: 0; padding: 0; }
+.portal-minimal .portal-brand .brand-logo-image { display: block; width: 172px; height: auto; max-width: 100%; }
+.portal-minimal .portal-heading { margin: 0; padding: 0; }
+.portal-minimal .portal-heading > span { font-size: 10px; color: #e8c8ca; letter-spacing: .08em; }
+.portal-minimal .portal-heading h1 { margin: 8px 0 0; font-size: 21px; font-weight: 600; color: #fff; }
+.portal-minimal .portal-member { padding: 16px 0; margin: 0; border-block: 1px solid #573338; gap: 10px; }
+.portal-minimal .portal-member strong { color: #fff; font-size: 13px; overflow-wrap: anywhere; }
+.portal-minimal .member-avatar { width: 30px; height: 30px; min-width: 30px; background: #fff4f3; color: #ca1717; font-size: 10px; }
+.portal-minimal .portal-sidebar > nav { display: grid; gap: 5px; }
+.portal-minimal .portal-sidebar nav a { border: 0; border-radius: 10px; padding: 12px; min-height: 42px; font-size: 13px; font-weight: 500; color: #fff; }
+.portal-minimal .portal-sidebar nav a.active { background: #6b3b40; box-shadow: none; }
+.portal-minimal .portal-sidebar > .portal-logout { margin-top: auto; padding: 12px; color: #e8c8ca; font-size: 12px; text-decoration: none; }
+.portal-minimal .portal-content { width: 100%; max-width: none; min-width: 0; margin: 0; padding: 48px clamp(24px, 5vw, 70px) 56px; }
+.portal-content-inner { width: 100%; max-width: 960px; margin-inline: auto; }
+.portal-minimal .student-dashboard-heading, .portal-minimal .my-courses-heading { margin: 0 0 28px; padding: 0; }
+.portal-minimal .student-dashboard-heading h1, .portal-minimal .my-courses-heading h1 { margin: 12px 0; font-size: clamp(28px, 3vw, 36px); font-weight: 500; line-height: 1.35; letter-spacing: -.035em; }
+.portal-minimal .eyebrow { font-size: 10px; font-weight: 750; letter-spacing: .08em; color: #ca1717; margin: 0; }
+.portal-minimal .student-dashboard-heading > p:last-child, .portal-minimal .my-courses-heading > p:last-child { color: #625c59; font-size: 14px; margin: 0; }
+.minimal-continue-card { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 24px; align-items: center; padding: 24px; border: 1px solid #e9e1dd; border-radius: 18px; background: #fff; margin-bottom: 28px; min-height: 170px; }
+.minimal-continue-card h2 { font-size: clamp(20px, 2vw, 25px); font-weight: 600; line-height: 1.5; margin: 8px 0; color: #181414; }
+.minimal-continue-card > div > p:not(.eyebrow) { color: #625c59; font-size: 14px; line-height: 1.7; margin: 0 0 10px; }
+.minimal-continue-card small { color: #8c8581; font-size: 11px; }
+.minimal-continue-action { display: grid; gap: 12px; }
+.portal-minimal .member-section-heading { border: 0; padding: 0; margin: 0 0 20px; gap: 18px; align-items: center; }
+.portal-minimal .member-section-heading h2 { font-size: 24px; font-weight: 500; margin: 4px 0 0; line-height: 1.4; }
+.portal-minimal .member-section-heading > a { font-size: 12px; color: #ca1717; white-space: nowrap; }
+.portal-minimal .student-course-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.portal-minimal .minimal-lesson-card { min-height: 265px; display: flex; flex-direction: column; gap: 16px; padding: 20px; border: 1px solid #efd6d8; border-top: 4px solid #ca1717; border-radius: 16px; background: linear-gradient(145deg, #fff 35%, #fff4f3 100%); box-shadow: 0 6px 20px #6b3b4008; transition: border-color .15s, box-shadow .15s; overflow: visible; }
+.portal-minimal .minimal-lesson-card::before { display: none; }
+.portal-minimal .minimal-lesson-card:hover { border-color: #dba4aa; border-top-color: #aa1414; box-shadow: 0 10px 26px #6b3b4012; transform: none; }
+.minimal-lesson-card > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 10px; background: #fae9e9; }
+.minimal-lesson-card > header > p { color: #b91818; font-size: 11px; line-height: 1.6; font-weight: 650; margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.minimal-lesson-card > header > p > span { display: block; color: #8c8581; font-size: 10px; font-weight: 400; }
+.portal-minimal .lesson-access-badge { background: #fff1f0; color: #b91818; font-size: 9px; padding: 5px 9px; border-radius: 99px; text-transform: uppercase; line-height: 1.6; white-space: nowrap; }
+.portal-minimal .lesson-access-badge.is-full { background: #6b3b40; color: #fff; }
+.portal-minimal .minimal-lesson-card h3 { margin: 0; padding: 0; border: 0; color: #181414; font-size: 18px; font-weight: 600; line-height: 1.6; letter-spacing: -.015em; overflow-wrap: anywhere; }
+.portal-minimal .minimal-lesson-card h3[lang='si'] { letter-spacing: 0; line-height: 1.75; }
+.minimal-lesson-progress { display: grid; gap: 7px; }
+.minimal-lesson-progress progress { display: block; appearance: none; width: 100%; height: 7px; border: 0; border-radius: 99px; overflow: hidden; background: #f0d9dc; color: #ca1717; }
+.minimal-lesson-progress progress::-webkit-progress-bar { background: #f0d9dc; border-radius: 99px; }
+.minimal-lesson-progress progress::-webkit-progress-value { background: linear-gradient(90deg, #6b3b40, #ca1717); border-radius: 99px; }
+.minimal-lesson-progress progress::-moz-progress-bar { background: linear-gradient(90deg, #6b3b40, #ca1717); border-radius: 99px; }
+.minimal-lesson-progress > span, .lesson-progress-note { font-size: 11px; color: #8c8581; line-height: 1.6; margin: 0; }
+.minimal-lesson-progress > span { color: #6b3b40; font-weight: 600; }
+.portal-minimal .button { border-radius: 10px; min-height: 44px; font-size: 13px; font-weight: 650; background: #ca1717; color: #fff; box-shadow: none; justify-content: center; padding: 12px 16px; line-height: 1.5; }
+.portal-minimal .minimal-lesson-card > .button { width: 100%; margin-top: auto; }
+.lesson-card-actions { display: grid; gap: 10px; margin-top: auto; }
+.portal-minimal .lesson-card-actions .button { width: 100%; text-align: center; }
+.portal-minimal .lesson-card-actions .button.secondary { background: #fff; color: #b91818; border: 1px solid #dfb7bb; }
+.portal-minimal .lesson-card-actions .button.secondary:hover { background: #fae9e9; border-color: #b91818; }
+.portal-minimal .button:hover { background: #aa1414; }
+.lesson-expiry-warning { color: #986016; font-size: 11px; margin: 0; }
+.lesson-access-until { color: #6b3b40; font-size: 11px; line-height: 1.6; margin: 0; padding: 8px 10px; background: #f7e9eb; border-radius: 8px; }
+.lesson-access-until.lesson-expiry-warning { color: #9d2828; background: #ffe9e5; }
+.free-preview-completed { color: #77343d; background: #fae9e9; padding: 8px 10px; border-radius: 8px; }
+.minimal-learning-empty { border: 1px solid #e9e1dd; background: #fff; border-radius: 16px; padding: 32px; }
+.minimal-learning-empty h2 { font-size: 24px; font-weight: 500; margin: 0 0 12px; }
+.minimal-learning-empty > p { color: #625c59; font-size: 14px; margin-bottom: 22px; }
+.student-mobile-nav { display: none; }
+.portal-minimal a:focus-visible, .portal-minimal summary:focus-visible { outline: 3px solid #ca1717; outline-offset: 4px; }
+@media (max-width: 1150px) { .portal-minimal .student-course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 950px) {
+  .portal.portal-minimal { grid-template-columns: minmax(0, 1fr); }
+  .portal-minimal .portal-sidebar { display: none; }
+  .portal-minimal .portal-content { padding: 0 22px calc(90px + env(safe-area-inset-bottom)); }
+  .portal-minimal .portal-mobile-header { display: flex; position: relative; align-items: center; justify-content: space-between; margin: 0 -22px 28px; padding: 16px 22px; background: #fff; min-height: 68px; }
+  .portal-minimal .portal-mobile-brand .brand-logo-image { width: 130px; height: auto; }
+  .portal-mobile-account { position: relative; }
+  .portal-mobile-account summary { cursor: pointer; list-style: none; min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+  .portal-mobile-account summary::-webkit-details-marker { display: none; }
+  .portal-mobile-account nav { position: absolute; z-index: 20; top: 100%; right: 0; display: grid; background: #fff; border: 1px solid #e9e1dd; border-radius: 12px; min-width: 160px; padding: 8px; }
+  .portal-mobile-account nav a { color: #2a1115; padding: 12px; font-size: 13px; }
+  .student-mobile-nav { position: fixed; z-index: 35; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #e9e1dd; }
+  .student-mobile-nav a { display: grid; justify-items: center; gap: 5px; padding: 8px 4px; color: #756b68; font-size: 11px; text-decoration: none; min-height: 48px; border-radius: 8px; }
+  .student-mobile-nav a.active { color: #ca1717; background: #fff4f3; font-weight: 650; }
+}
+@media (max-width: 600px) {
+  .portal-minimal .student-course-grid { grid-template-columns: minmax(0, 1fr); }
+  .minimal-continue-card { grid-template-columns: minmax(0, 1fr); padding: 20px; gap: 20px; }
+  .portal-minimal .minimal-lesson-card { min-height: 245px; }
+  .portal-minimal .member-section-heading h2 { font-size: 21px; }
+  .portal-minimal .member-section-heading > a { font-size: 11px; }
+}

@@ -92,7 +92,7 @@ const LessonImage = ({ lesson }) => (
 const lessonProgress = (lesson) => {
   if (lesson.progress) return lesson.progress;
 
-  const accessibleActivities = (lesson.activities || []).filter((activity) => !activity.isLocked);
+  const accessibleActivities = (lesson.activities || []).filter((activity) => activity.completionMode !== 'none');
   const completedActivities = accessibleActivities.filter(
     (activity) => activity.progress?.status === 'completed'
   ).length;
@@ -258,11 +258,11 @@ const CourseCard = ({ course }) => {
             <progress max="100" value={courseProgress?.progressPercent || 0} />
             <p>
               {courseProgress?.completedAccessibleActivities || 0} of{' '}
-              {courseProgress?.totalAccessibleActivities || 0} available activities complete
+              {courseProgress?.totalAccessibleActivities || 0} required activities complete
             </p>
           </div>
         ) : null}
-        <Link className="button" to={enrollment.data ? `/courses/${course.slug}/learn` : `/courses/${course.slug}`}>
+        <Link className="button" to={enrollment.data ? "/my-courses" : `/courses/${course.slug}`}>
           {enrollment.data ? 'Continue Learning' : 'View Course'}
         </Link>
         {!isAuthenticated ? <Link className="button secondary" to={`/enroll/${course.slug}`}>Login to Enroll</Link> : !enrollment.data ? <Link className="button secondary" to={`/enroll/${course.slug}`}>Enroll Free</Link> : null}
@@ -621,7 +621,7 @@ const LearningLessonCard = ({ course, courseSlug, lesson }) => {
       ? progress.completedActivities +
         ' of ' +
         progress.totalAccessibleActivities +
-        ' available activities complete'
+        ' required activities complete'
       : 'Lesson content is being prepared.';
 
   return (
@@ -788,8 +788,8 @@ export const LegacyLessonLearningPage = () => {
   return (
     <div className="lesson-workspace">
       <section className="lesson-workspace-hero">
-        <Link className="back-link" to={`/courses/${courseSlug}/learn`}>
-          Back to course overview
+        <Link className="back-link" to="/my-courses">
+          Back to my lessons
         </Link>
         <div className="lesson-workspace-title">
           <div>
@@ -857,7 +857,7 @@ export const LegacyLessonLearningPage = () => {
             {nextLesson ? (
               <Link to={`/courses/${courseSlug}/lessons/${nextLesson.slug || nextLesson.id}`}>Next lesson</Link>
             ) : (
-              <Link to={`/courses/${courseSlug}/learn`}>Return to course</Link>
+              <Link to="/my-courses">Return to my lessons</Link>
             )}
           </div>
         </main>

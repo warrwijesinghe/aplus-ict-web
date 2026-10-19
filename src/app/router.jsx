@@ -1,8 +1,9 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { LegacyCourseListingRedirect } from '../pages/LegacyCourseListingRedirect.jsx';
 import { GuestOnlyRoute } from '../auth/guest-only-route.jsx';
 import { ProtectedRoute } from '../auth/protected-route.jsx';
-import { RoleRoute } from '../auth/role-route.jsx';
 import { AuthLayout } from '../layouts/AuthLayout.jsx';
+import { EnrollmentLayout } from '../layouts/EnrollmentLayout.jsx';
 import { PublicLayout } from '../layouts/PublicLayout.jsx';
 import { StudentLayout } from '../layouts/StudentLayout.jsx';
 import { LessonExperienceLayout } from '../layouts/LessonExperienceLayout.jsx';
@@ -15,7 +16,6 @@ import { LogoutPage } from '../pages/LogoutPage.jsx';
 import {
   AboutPage,
   ContactPage,
-  CourseLearningPage,
   LessonLearningPage,
   PublicCourseDetailPage,
   StudentGuidePage
@@ -44,6 +44,7 @@ import {
 } from '../pages/pages.jsx';
 
 export const router = createBrowserRouter([
+  { path: '/student/explore', element: <LegacyCourseListingRedirect /> },
   {
     element: <PublicLayout />,
     children: [
@@ -57,7 +58,6 @@ export const router = createBrowserRouter([
       { path: '/courses', element: <CourseSelectionPage /> },
       { path: '/courses/:courseSlug', element: <PublicCourseDetailPage /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug', element: <LessonLandingPage /> },
-      { path: '/enroll/:courseSlug', element: <EnrollmentPage /> },
       { path: '/resources', element: <PublicResourcesPage /> },
       { path: '/free-lessons', element: <PublicResourcesPage /> },
       { path: '/student-guide', element: <StudentGuidePage /> },
@@ -79,7 +79,7 @@ export const router = createBrowserRouter([
   {
     element: <LessonExperienceLayout />,
     children: [
-      { path: '/courses/:courseSlug/learn', element: <CourseLearningPage /> },
+      { path: '/courses/:courseSlug/learn', element: <Navigate replace to="/my-courses" /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug/activities/:activityId', element: <StudentActivityPlayer /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug/topics/:topicId', element: <LessonLearningPage /> },
       { path: '/courses/:courseSlug/lessons/:lessonSlug/learn', element: <LessonLearningPage /> }
@@ -98,18 +98,22 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [{ path: '/login/success', element: <Navigate replace to="/login" /> }]
   },
+  { element: <EnrollmentLayout />, children: [{ path: '/enroll/:courseSlug', element: <EnrollmentPage /> }] },
   { path: '/unauthorized', element: <UnauthorizedPage /> },
   { path: '/service-unavailable', element: <ServiceUnavailablePage /> },
   {
     element: <ProtectedRoute />,
     children: [
       {
-        element: <RoleRoute roles={['student']} />,
+        // These are the signed-in user's own learning and purchase routes.
+        // The API supports staff self-enrolment and enforces content access.
+        element: <Outlet />,
         children: [
           { path: '/complete-profile', element: <CompleteProfilePage /> },
           {
             element: <ProfileCompletionGuard />,
             children: [
+              { path: '/courses/:courseSlug/lessons/:lessonSlug/exam-success-pack', element: <ExamSuccessPackPage /> },
               {
                 element: <StudentLayout />,
                 children: [
@@ -119,15 +123,14 @@ export const router = createBrowserRouter([
               { path: '/dashboard/profile', element: <StudentProfilePage /> },
               { path: '/my-courses', element: <MyCoursesPage /> },
               { path: '/learning-history', element: <LearningHistoryPage /> },
-              { path: '/courses/:courseSlug/lessons/:lessonSlug/exam-success-pack', element: <ExamSuccessPackPage /> },
               { path: '/student', element: <StudentDashboard /> },
-              { path: '/student/explore', element: <CourseSelectionPage student /> },
               { path: '/student/courses', element: <MyCoursesPage /> },
               { path: '/student/courses/:courseId', element: <ProgressPage /> },
               { path: '/student/courses/:courseId/progress', element: <ProgressPage /> },
               { path: '/student/courses/:courseTrackId/grades', element: <StudentGradebook /> },
               { path: '/student/lessons/:lessonId', element: <StudentLessonPage /> },
               { path: '/student/orders', element: <StudentOrdersPage /> },
+              { path: '/my-orders', element: <StudentOrdersPage /> },
               { path: '/student/orders/new', element: <StudentOrdersPage /> },
               { path: '/student/orders/:orderId', element: <StudentOrderDetailPage /> },
               { path: '/student/orders/:orderId/payment', element: <StudentOrderDetailPage /> },

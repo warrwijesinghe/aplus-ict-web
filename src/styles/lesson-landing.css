@@ -171,8 +171,16 @@
 }
 
 /* A simple tutorial highlight with the supplied book illustration. */
-.sales-tutorial-simple { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 24px; align-items: center; background: #fff8f3; border-radius: 16px; padding: clamp(24px, 4vw, 48px); margin-block: 12px 24px; overflow: hidden; }
-.sales-tutorial-simple h2 { color: var(--sales-ink); margin: 0; max-width: 12ch; font-size: clamp(1.9rem, 3.2vw, 2.8rem); }
+.sales-tutorial-simple { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; align-items: center; background: #fff8f3; border-radius: 16px; padding: clamp(24px, 4vw, 48px); margin-block: 12px 24px; overflow: hidden; }
+.sales-tutorial-simple h2 { color: var(--sales-ink); margin: 0; font-size: clamp(1.9rem, 3.2vw, 2.8rem); }
+.sales-tutorial-content > p { color: var(--sales-muted); margin: 16px 0; }
+.sales-tutorial-content .sales-tutorial-lead { color: var(--sales-ink); font-size: 1.12rem; font-weight: 650; }
+.sales-tutorial-content h3 { margin: 24px 0 14px; font-size: 1.05rem; }
+.sales-tutorial-includes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; padding: 0; margin: 0 0 22px; list-style: none; }
+.sales-tutorial-includes li { display: flex; align-items: baseline; gap: 9px; font-size: .9rem; line-height: 1.6; }
+.sales-tutorial-includes svg { color: var(--sales-red); align-self: start; margin-top: 4px; }
+.sales-tutorial-content .sales-tutorial-delivery { color: var(--sales-red); background: #fff; padding: 14px 18px; border-radius: 10px; margin-bottom: 0; }
+@media (max-width: 480px) { .sales-tutorial-includes { grid-template-columns: minmax(0, 1fr); } }
 .sales-tutorial-delivery { color: var(--sales-red); font-size: 1.05rem; margin: 16px 0 0; }
 .sales-tutorial-placeholder { display: block; width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 10px; }
 @media (max-width: 767px) {
@@ -251,12 +259,42 @@
   .lesson-site-hero-price { align-items: start; }
 }
 
-/* Course name and medium form a quiet, centered identity above the lesson. */
-.lesson-course-identity { justify-content: center; flex-direction: column; gap: 10px; padding: 0 0 22px; border: 0; border-bottom: 1px solid #ffffff20; border-radius: 0; background: transparent; text-align: center; }
-.lesson-course-identity strong { max-width: 900px; font-size: clamp(1.05rem, 1.7vw, 1.4rem); color: #fff; }
+/* Course context stays secondary to the lesson title and access choices. */
+.lesson-course-identity { justify-content: flex-start; flex-direction: row; gap: 10px 16px; padding: 0; border: 0; border-radius: 0; background: transparent; text-align: left; }
+.lesson-course-identity > a { color: #eee; font-size: .95rem; font-weight: 600; text-decoration: none; text-underline-offset: 4px; }
+.lesson-course-identity > a:hover { text-decoration: underline; }
 .lesson-course-identity .lesson-course-medium { padding: 4px 12px; color: #ffb3b3; border-color: #ffb3b330; background: #bb000015; }
-@media (max-width: 480px) {
-  .lesson-course-identity { align-items: flex-start; text-align: left; padding-bottom: 18px; }
+.lesson-intro-hero { background: radial-gradient(ellipse at 8% 12%, #291617 0%, #111112 62%); }
+.lesson-intro-hero-inner { gap: 30px; padding-block: clamp(30px, 4vw, 58px); }
+.lesson-landing-decision { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr); align-items: center; gap: clamp(32px, 5vw, 72px); }
+.lesson-intro-hero-copy { text-align: left; max-width: none; margin: 0; }
+.lesson-number-label { margin: 0 0 12px; color: #aaa; font-size: .78rem; font-weight: 500; }
+.lesson-intro-hero h1 { margin: 0 0 22px; font-size: clamp(2.2rem, 4vw, 3.6rem); line-height: 1.12; font-weight: 750; text-wrap: balance; }
+.lesson-site-hero-description { margin: 0; color: #c9c9ce; max-width: 52ch; font-size: 1.04rem; }
+.lesson-hero-topics { margin-top: 28px; }
+.lesson-hero-topics > p { margin: 0 0 12px; color: #fff; font-size: .9rem; font-weight: 650; }
+.lesson-hero-topics ul { display: grid; gap: 10px; list-style: none; margin: 0 0 18px; padding: 0; }
+.lesson-hero-topics li { display: flex; align-items: baseline; gap: 10px; font-size: .92rem; color: #d4d4d8; line-height: 1.6; }
+.lesson-hero-topics li svg { align-self: start; margin-top: 5px; color: #ffadad; }
+.lesson-hero-topics > a { display: inline-flex; gap: 8px; align-items: center; color: #ffb3b3; font-size: .85rem; text-underline-offset: 4px; }
+.lesson-access-panel { background: #fff; color: var(--sales-ink); border: 1px solid #e8e2e2; border-radius: 18px; padding: 26px; box-shadow: 0 20px 60px #0003; }
+.lesson-access-heading { display: flex; align-items: center; gap: 10px; }
+.lesson-access-heading svg { color: var(--sales-red); }
+.lesson-sales-page .lesson-access-heading h2 { color: var(--sales-ink); font-size: 1.1rem; letter-spacing: -.02em; margin: 0; line-height: 1.5; }
+.lesson-access-option > p { margin: 10px 0 18px; font-size: .88rem; color: var(--sales-muted); }
+.lesson-intro-hero .lesson-access-option .sales-button { width: 100%; min-width: 0; }
+.lesson-access-paid { margin-top: 24px; padding-top: 22px; border-top: 1px solid #eee8e8; }
+.lesson-access-panel .lesson-site-hero-price { margin: 12px 0 0; justify-content: flex-start; color: var(--sales-ink); }
+.lesson-access-panel .lesson-site-hero-price strong { font-size: 1.8rem; letter-spacing: -.04em; }
+.lesson-access-paid > p { margin-top: 4px; }
+.lesson-intro-hero .lesson-access-panel .sales-button-outline { border-color: #cfc4c4; color: var(--sales-red); background: #fff; }
+.lesson-intro-hero .lesson-access-panel .sales-button-outline:hover { background: #fff2f2; border-color: var(--sales-red); }
+.lesson-intro-hero .lesson-access-panel .sales-unavailable { color: var(--sales-ink); }
+#sales-outline-title { scroll-margin-top: 110px; }
+@media (max-width: 760px) {
+  .lesson-landing-decision { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .lesson-intro-hero h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+  .lesson-access-panel { padding: 22px; border-radius: 14px; }
 }
 
 /* Consistent enrollment actions after the main decision-making sections. */

@@ -12,4 +12,5 @@ test('uses a valid API price and never returns a zero or invalid price', () => {
   expect(lessonPriceFor({ course, product: { price: 2750 } })).toBe(2750);
   expect(lessonPriceFor({ course, product: { price: 0 } })).toBeNull();
   expect(lessonPriceFor({ area: 'UNKNOWN' })).toBeNull();
+  expect(formatLkr(1750.50)).toContain('1,750.5');
 });

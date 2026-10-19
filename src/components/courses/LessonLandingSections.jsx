@@ -1,5 +1,5 @@
 import { createElement } from 'react';
-import { BookOpen, ChevronDown, Clock3, FileQuestion, FileText, Gift, Layers3, Play, Smartphone, Target, Trophy, Users, Gem } from 'lucide-react';
+import { BookOpen, Check, ChevronDown, Clock3, FileQuestion, FileText, Gift, Layers3, Play, Smartphone, Target, Trophy, Users, Gem } from 'lucide-react';
 import { ResourceImage } from '../resources/ResourceImage.jsx';
 import { LessonActions } from './LessonActions.jsx';
 
@@ -13,9 +13,26 @@ export const LessonValueFeatures = ({ model }) => <section className="sales-valu
 ].map(([icon, title, text]) => <article key={title}><Icon icon={icon} size={38} /><h2>{title}</h2><p>{text}</p></article>)}</section>;
 
 export const TutorialHighlight = ({ model }) => <section className="sales-tutorial-simple" aria-labelledby="sales-tutorial-title">
-  <div><h2 id="sales-tutorial-title">{model.content.tutorialTitle || model.t('Printed Tutorial Included')}</h2><p className="sales-tutorial-delivery">{model.t("Delivered to your home.")}</p></div>
-  {model.lesson.tutorialImageResourceId
-    ? <ResourceImage className="sales-tutorial-placeholder" resourceId={model.lesson.tutorialImageResourceId} alt={`${model.lesson.title} — ${model.t("Printed tutorial", "මුද්‍රිත නිබන්ධනය")}`} />
+  <div className="sales-tutorial-content">
+    <h2 id="sales-tutorial-title">{model.content.tutorialTitle || model.t('Printed Tutorial Included')}</h2>
+    <p className="sales-tutorial-lead">{model.t('Your learning does not end with the video.', 'ඔබේ ඉගෙනීම වීඩියෝවෙන් අවසන් නොවේ.')}</p>
+    <p>{model.t('You receive a specially prepared', 'පාඩම ආවරණය වන පරිදි විශේෂයෙන් සකස් කළ')} <strong>{model.t('A Plus ICT Printed Tutorial', 'A Plus ICT මුද්‍රිත නිබන්ධනයක්')}</strong>{model.t(' covering the lesson.', ' ඔබට ලැබේ.')}</p>
+    <h3>{model.t('Your Tutorial Includes', 'ඔබේ නිබන්ධනයට ඇතුළත් දේ')}</h3>
+    <ul className="sales-tutorial-includes">{[
+      ['Complete syllabus coverage', 'සම්පූර්ණ විෂය නිර්දේශය ආවරණය කිරීම'],
+      ['Important definitions', 'වැදගත් අර්ථ දැක්වීම්'],
+      ['Key ICT terminology', 'ප්‍රධාන තොරතුරු තාක්ෂණ පාරිභාෂික වචන'],
+      ['Diagrams and illustrations', 'රූප සටහන් සහ නිදර්ශන'],
+      ['Worked examples', 'විසඳූ උදාහරණ'],
+      ['Exam-focused notes', 'විභාගයට ඉලක්කගත සටහන්'],
+      ['Exam Question practice', 'විභාග ප්‍රශ්න පුහුණුව'],
+      ['Key points', 'ප්‍රධාන කරුණු'],
+    ].map(([english, sinhala]) => <li key={english}><Check size={17} aria-hidden="true" />{model.t(english, sinhala)}</li>)}</ul>
+    <p>{model.t('Use the tutorial while watching the lesson and keep it for revision before your examination.', 'පාඩම නරඹන අතරතුර නිබන්ධනය භාවිත කරන්න. විභාගයට පෙර නැවත අධ්‍යයනය කිරීම සඳහා එය තබා ගන්න.')}</p>
+    <p className="sales-tutorial-delivery"><strong>{model.t('Printed Tutorial', 'මුද්‍රිත නිබන්ධනය')} <span aria-hidden="true">→</span> <span>{model.t('Delivered to Your Home', 'ඔබේ නිවසටම ගෙන්වා ගන්න.')}</span></strong></p>
+  </div>
+  {(model.lesson.tutorialImageResourceId || model.course.tutorialImageResourceId)
+    ? <ResourceImage key={model.lesson.tutorialImageResourceId || model.course.tutorialImageResourceId} className="sales-tutorial-placeholder" resourceId={model.lesson.tutorialImageResourceId || model.course.tutorialImageResourceId} alt={`${model.lesson.title} — ${model.t("Printed tutorial", "මුද්‍රිත නිබන්ධනය")}`} />
     : <img className="sales-tutorial-placeholder" src="/images/tutorial-covers/printed-tutorial-placeholder.png" alt={model.t("A Plus ICT printed tutorial — placeholder book illustration", "A Plus ICT මුද්‍රිත නිබන්ධනයේ ආදර්ශ රූපයක්")} width="1536" height="1024" loading="lazy" />}
 </section>;
 export const LmsFeatures = ({ model }) => <section className="sales-section" id="lesson-lms" aria-labelledby="sales-lms-title"><div className="sales-section-heading"><div><h2 id="sales-lms-title">{model.t("What you get in the LMS")}</h2><p className="sales-section-intro">{model.t("A complete online learning experience with tools to support your learning.")}</p></div><span className="sales-handwritten">{model.t("Study anytime.", "ඔබට පහසු වේලාවක.")}<br />{model.t("Anywhere.", "ඕනෑම තැනක සිට.")}</span></div><div className="sales-lms-grid">{[

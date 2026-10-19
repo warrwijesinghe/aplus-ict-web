@@ -9068,6 +9068,13 @@ body.navigation-open {
   }
 }
 
+.lesson-enrollment-card .learning-course-card-header > div > p { font-size: .85rem; text-transform: none; letter-spacing: 0; line-height: 1.5; }
+.lesson-access-badge { background: #e7f8ef; color: #176344; padding: 5px 8px; border-radius: 20px; font-size: .7rem; font-weight: 750; }
+.lesson-access-badge.is-expired { color: #9c2727; background: #ffeded; }
+.lesson-enrollment-duration { color: #666; font-size: .85rem; margin: 0 0 18px; }
+.lesson-enrollment-dates { display: grid; gap: 16px; padding-block: 18px; border-top: 1px solid #eee; margin: 0 0 20px; }
+.lesson-enrollment-dates dt { display: flex; align-items: center; gap: 6px; color: #666; font-size: .8rem; margin-bottom: 5px; }
+.lesson-enrollment-dates dd { margin: 0; font-size: .95rem; font-weight: 700; }
 /* Course enrollment */
 .enrollment-page {
   background: linear-gradient(135deg, #fff9f9, #fff 52%, #fff1f2);
@@ -10808,6 +10815,7 @@ body:has(.student-profile-page) {
 .student-order-card-top { align-items: flex-start; display: grid; gap: 0.8rem; grid-template-columns: auto minmax(0, 1fr) auto; padding: 1.05rem 1.1rem 0.9rem; }
 .student-order-mark { align-items: center; background: #111; border-radius: 0.5rem; color: #fff; display: inline-flex; font-size: 0.78rem; font-weight: 900; height: 2.35rem; justify-content: center; width: 2.35rem; }
 .student-order-product { min-width: 0; }
+.student-order-medium { color: var(--color-primary-hover); font-size: 0.75rem; font-weight: 600; line-height: 1.6; margin: 4px 0 6px; }
 .student-order-product p { color: var(--color-primary); font-size: 0.68rem; font-weight: 900; letter-spacing: 0.07em; margin: 0; text-transform: uppercase; }
 .student-order-product h2 { color: var(--color-navy); font-size: 1rem; line-height: 1.35; margin: 0.25rem 0; }
 .student-order-product > span { color: var(--color-text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; }
@@ -10837,7 +10845,7 @@ body:has(.student-profile-page) {
 .student-order-card-top { align-items: flex-start; display: flex; gap: 0.75rem; padding: 0; }
 .student-order-mark { flex: 0 0 auto; height: 2.4rem; width: 2.4rem; }
 .student-order-product h2 { display: -webkit-box; font-size: 1rem; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: 0.22rem 0 0.35rem; overflow: hidden; }
-.student-order-product > span { font-size: 0.68rem; }
+.student-order-product > span { color: var(--color-text); font-size: 0.85rem; font-weight: 600; line-height: 1.6; }
 .student-order-status-panel { align-items: flex-start; border: 1px solid currentColor; border-radius: 0.65rem; display: flex; gap: 0.55rem; margin-top: 1rem; padding: 0.75rem 0.8rem; }
 .student-order-status-panel > svg { flex: 0 0 auto; height: 1rem; margin-top: 0.08rem; width: 1rem; }
 .student-order-status-panel strong { display: block; font-size: 0.8rem; }
@@ -10851,6 +10859,9 @@ body:has(.student-profile-page) {
 .student-order-meta div { display: grid; gap: 0.2rem; }
 .student-order-meta dt { color: var(--color-text-muted); font-size: 0.7rem; }
 .student-order-meta dd { color: var(--color-navy); font-size: 0.8rem; font-weight: 700; line-height: 1.35; margin: 0; }
+.student-order-meta .student-order-payment-method { display: flex; align-items: center; gap: 8px; }
+.student-order-payment-icon { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 8px; background: var(--color-primary-soft); color: var(--color-primary); }
+.student-order-payment-icon svg { width: 18px; height: 18px; }
 .student-order-card-footer { align-items: center; background: #f7f3f4; border: 1px solid #e3d8da; border-radius: 0.65rem; color: inherit; display: flex; gap: 1rem; justify-content: space-between; padding: 0.75rem 0.8rem; }
 .student-order-total { display: grid; gap: 0.1rem; text-align: left; }
 .student-order-total span { color: var(--color-text-muted); font-size: 0.7rem; }
@@ -10867,7 +10878,7 @@ body:has(.student-profile-page) {
   .student-order-card-top { gap: 0.65rem; grid-template-columns: auto minmax(0, 1fr); padding: 0.85rem 0.85rem 0.7rem; }
   .student-order-mark { border-radius: 0.45rem; height: 2rem; width: 2rem; }
   .student-order-product h2 { font-size: 0.85rem; line-height: 1.4; margin: 0.18rem 0; }
-  .student-order-product > span { font-size: 0.64rem; }
+  .student-order-product > span { font-size: 0.85rem; }
   .student-order-status { grid-column: 2; justify-self: start; margin-top: 0.05rem; padding: 0.34rem 0.55rem; }
   .student-order-card-body { column-gap: 0.7rem; grid-template-columns: minmax(0, 1fr) auto; padding: 0.65rem 0.85rem; row-gap: 0.55rem; }
   .student-order-card-body > div:nth-child(2) { grid-column: 1 / -1; }
