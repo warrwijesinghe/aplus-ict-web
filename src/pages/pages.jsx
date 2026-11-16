@@ -419,7 +419,7 @@ export const ProductDetailPage = () => {
       <p>{item.description || item.shortDescription}</p>
       <p>
         <strong>{formatCurrency(item.price, item.currency)}</strong>
-        {item.compareAtPrice && <del>{formatCurrency(item.compareAtPrice, item.currency)}</del>}
+        {Number(item.compareAtPrice) > Number(item.price) && <del>{formatCurrency(item.compareAtPrice, item.currency)}</del>}
       </p>
       <p>
         <StatusBadge status={item.availability} />

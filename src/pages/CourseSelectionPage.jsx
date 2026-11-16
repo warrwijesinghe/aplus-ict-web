@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BookOpen, GraduationCap, Laptop, Award, School } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { contentApi } from '../api/content.api.js';
+import { resourceApi } from '../api/resource.api.js';
 import { CatalogueCourseGrid } from '../components/catalogue/CatalogueUi.jsx';
 import { usePageSeo } from '../seo/use-page-seo.js';
 
@@ -16,10 +17,24 @@ const categories = [
 
 export const CourseSelectionPage = () => {
   const [search] = useSearchParams();
-  const selected = categories.find((category) => category.id.toLowerCase() === search.get('category'));
   const basePath = '/courses';
   const courses = useQuery({ queryKey: ['course-selection'], queryFn: ({ signal }) => contentApi.courseSelection(signal), retry: false });
-  const items = (courses.data?.data || []).filter((course) => course.courseGroup === selected?.id);
+  const categoryCards = courses.data?.categories?.map((category) => {
+    const preset = categories.find(({ path }) => path === `/${category.slug}`);
+    return {
+      id: category.slug, categoryId: category.id, group: preset?.id,
+      title: category.name, detail: category.subtitle || preset?.detail,
+      path: preset?.path || `/courses?category=${encodeURIComponent(category.slug)}`,
+      icon: preset?.icon || <BookOpen aria-hidden="true" size={22} />,
+      image: preset?.image, imageId: category.featuredImageResourceId,
+      description: category.description, status: category.status,
+    };
+  }) ?? categories;
+  const requested = search.get('category');
+  const selected = categoryCards.find((category) => category.id.toLowerCase() === requested || category.group?.toLowerCase() === requested);
+  const forCategory = (category) => (courses.data?.data || []).filter((course) =>
+    category?.categoryId ? course.categoryId === category.categoryId : course.courseGroup === category?.id);
+  const items = forCategory(selected);
   usePageSeo({ path: '/courses', title: 'Explore courses', description: 'Explore ICT courses and learning paths at A Plus ICT.' });
 
   return <section className="course-selection">
@@ -27,15 +42,17 @@ export const CourseSelectionPage = () => {
       {selected && <Link className="course-selection-back" to={basePath}>← All categories</Link>}
       <p className="eyebrow">{selected ? selected.detail : 'Explore courses'}</p>
       <h1>{selected ? selected.title : 'Choose your learning path'}</h1>
-      <p>{selected ? 'Choose a course below. Courses marked coming soon are not available yet.' : 'Select a category to see its courses.'}</p>
+      <p>{selected ? selected.description || 'Choose a course below. Courses marked coming soon are not available yet.' : 'Select a category to see its courses.'}</p>
     </header>
     {courses.isLoading ? <p className="course-selection-message" role="status">Loading courses…</p> : courses.isError ? <div className="course-selection-message" role="alert"><p>Courses could not be loaded. Please try again.</p><button onClick={() => courses.refetch()} type="button">Try again</button></div> :
-      selected ? items.length ? <CatalogueCourseGrid area={selected.id} courses={items} /> : <p className="course-selection-message">Courses in this category are coming soon.</p> : <div className="course-selection-grid course-selection-categories">{categories.map(({ id, path, title, detail, icon, image }) => {
-        const categoryCourses = (courses.data?.data || []).filter((course) => course.courseGroup === id);
+      selected ? selected.status !== 'draft' && items.length ? <CatalogueCourseGrid area={selected.group || selected.id} courses={items} /> : <p className="course-selection-message">Courses in this category are coming soon.</p> : <div className="course-selection-grid course-selection-categories">{categoryCards.map((category) => {
+        const { id, path, title, detail, icon, image, imageId, description, status } = category;
+        const categoryCourses = forCategory(category);
         return <Link className="course-selection-card course-selection-category" key={id} to={path}>
-          <img alt="" className="course-selection-category-image" decoding="async" loading="lazy" src={`/images/learning-places/${image}`} />
+          {(imageId || image) && <img alt="" className="course-selection-category-image" decoding="async" loading="lazy" src={imageId ? resourceApi.publicContentUrl(imageId) : `/images/learning-places/${image}`} />}
           <div className="course-selection-category-body"><div className="course-selection-card-heading"><span className="course-selection-icon">{icon}</span><div><p>{detail}</p><h2>{title}</h2></div></div>
-          <span className="course-selection-category-action">{categoryCourses.some((course) => course.availabilityStatus === 'active') ? 'View courses' : 'Coming soon'} <span aria-hidden="true">→</span></span></div>
+          {description && <p>{description}</p>}
+          <span className="course-selection-category-action">{status !== 'draft' && categoryCourses.some((course) => course.availabilityStatus === 'active') ? 'View courses' : 'Coming soon'} <span aria-hidden="true">→</span></span></div>
         </Link>;
       })}</div>}
   </section>;

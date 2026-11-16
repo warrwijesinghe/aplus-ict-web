@@ -45,7 +45,7 @@ export const PhoneAuthPage = ({ mode = 'login' }) => {
   const finishLogin = (user, newlyRegistered = false) => {
     sessionStorage.removeItem('aplus-return-to');
     const destination = safeDestination(returnTo, destinationForUser(user));
-    navigate(newlyRegistered ? `/complete-profile?returnTo=${encodeURIComponent(destination)}` : destination, { replace: true });
+    navigate(newlyRegistered ? '/complete-profile?returnTo=%2Fcourses' : destination, { replace: true });
   };
   const submit = (event) => {
     event.preventDefault();

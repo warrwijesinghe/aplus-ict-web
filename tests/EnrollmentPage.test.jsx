@@ -33,7 +33,6 @@ test.each([{ suffix: '/learn', result: 'Lesson workspace' }, { suffix: '/exam-su
   expect(screen.getByText('Account ready')).toBeInTheDocument();
   expect(state.useProfile).toHaveBeenCalledWith(false);
   fireEvent.click(screen.getByRole('button', { name: 'Enroll Free Now' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Yes, enroll me' }));
   expect(await screen.findByText(result)).toBeInTheDocument();
   expect(state.enroll).toHaveBeenCalledWith(expect.objectContaining({ id: 'course', lessonSlug: 'concept-of-ict' }));
 });

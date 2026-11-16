@@ -8,6 +8,12 @@ export const lessonPriceFor = ({ product } = {}) => {
   return null;
 };
 
+export const originalLessonPriceFor = (product) => {
+  const current = lessonPriceFor({ product });
+  const original = Number(product?.compareAtPrice);
+  return current && Number.isFinite(original) && original > current ? original : null;
+};
+
 export const formatLkr = (amount) => Number.isFinite(Number(amount)) && Number(amount) > 0
   ? new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(amount))
   : null;

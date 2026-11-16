@@ -24,7 +24,7 @@ export const LessonHero = ({ model }) => <section className="lesson-intro-hero" 
         </div>
         {!model.unlocked && <div className="lesson-access-option lesson-access-paid">
           <div className="lesson-access-heading"><ShoppingCart size={20} aria-hidden="true" /><h2>{model.t('Get the full lesson', 'සම්පූර්ණ පාඩම ලබා ගන්න')}</h2></div>
-          <div className="lesson-site-hero-price"><strong>{model.price || model.t('Price to be announced')}</strong></div>
+          <div className="lesson-site-hero-price">{model.originalPrice && <del>{model.originalPrice}</del>} <strong>{model.price || model.t('Price to be announced')}</strong></div>
           <p>{model.t('Full lesson + printed tutorial')}</p>
           {model.canBuy && <Link className="sales-button sales-button-outline" to={model.buyTo}>{model.t('Buy Full Lesson')}<ArrowRight size={18} aria-hidden="true" /></Link>}
         </div>}

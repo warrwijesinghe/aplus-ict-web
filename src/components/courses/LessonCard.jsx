@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen } from 'lucide-react';
-import { formatLkr, lessonPriceFor } from '../../config/lesson-pricing.js';
+import { formatLkr, lessonPriceFor, originalLessonPriceFor } from '../../config/lesson-pricing.js';
 
 const mediumDetails = (value) => {
   const values = (Array.isArray(value) ? value : [value]).filter(Boolean).map((item) => typeof item === 'string' ? item : item.code || item.nameEn || item.name || '').join(' ').toLowerCase();
@@ -15,6 +15,7 @@ const mediumDetails = (value) => {
 export const LessonCard = ({ course = {}, courseSlug, lesson, image, isEnrolled, progress, onOpen }) => {
   const published = lesson.isPublished !== false && (!lesson.status || ['published', 'active'].includes(lesson.status));
   const available = published && lesson.availabilityStatus !== 'inactive' && lesson.availabilityStatus !== 'coming_soon' && Number(lesson.freeContentCount || 0) + Number(lesson.paidContentCount || 0) > 0;
+  const original = formatLkr(originalLessonPriceFor(lesson.unlockProduct));
   const price = formatLkr(lessonPriceFor({ product: lesson.unlockProduct }));
   const medium = mediumDetails(lesson.mediums || lesson.medium || course.mediums || course.medium);
   const content = <>
@@ -28,7 +29,7 @@ export const LessonCard = ({ course = {}, courseSlug, lesson, image, isEnrolled,
       {lesson.shortDescription && <p className="student-lesson-description">{lesson.shortDescription}</p>}
       {isEnrolled && available && <div className="student-lesson-progress"><label>Your progress <progress aria-label={lesson.title + ' progress'} max="100" value={progress?.progressPercent || 0} /></label></div>}
       <div className="student-lesson-bottom">
-        <div className="student-lesson-price"><span>Course Price</span>{price ? <strong>{price}</strong> : <small>Price to be announced</small>}</div>
+        <div className="student-lesson-price"><span>Course Price</span>{original && <del>{original}</del>}{price ? <strong>{price}</strong> : <small>Price to be announced</small>}</div>
         {available ? <span className="student-lesson-cta">Start Learning Free<ArrowRight aria-hidden="true" size={20} /></span> : <button className="student-lesson-cta" disabled type="button">Coming Soon</button>}
       </div>
     </div>

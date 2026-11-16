@@ -10,7 +10,7 @@ import { LessonHero } from '../components/courses/LessonHero.jsx';
 import { LessonIntroduction } from '../components/courses/LessonIntroduction.jsx';
 import { LessonSectionCTA } from '../components/courses/LessonSectionCTA.jsx';
 import { lessonLandingSinhala } from '../components/courses/lesson-landing-copy.js';
-import { formatLkr, lessonPriceFor } from '../config/lesson-pricing.js';
+import { formatLkr, lessonPriceFor, originalLessonPriceFor } from '../config/lesson-pricing.js';
 import { academicAreaDetails, mediumForCourse } from '../utils/academic-course.js';
 import { usePageSeo } from '../seo/use-page-seo.js';
 import '../styles/lesson-landing.css';
@@ -32,6 +32,7 @@ export const LessonLanding = ({ course, lesson, courseSlug, lessonSlug, isAuthen
   const enroll = `/enroll/${courseSlug}?returnTo=${encodeURIComponent(base + '/learn')}`;
   const model = {
     course, courseSlug, lesson, content, mediumLabel, areaLabel, courseTitle, examCourse, comingSoon, sinhala, t, area: area.area,
+    originalPrice: formatLkr(originalLessonPriceFor(lesson.unlockProduct))?.replace('LKR', sinhala ? 'රු.' : 'LKR'),
     price: formatLkr(lessonPriceFor({ product: lesson.unlockProduct }))?.replace('LKR', sinhala ? 'රු.' : 'LKR'),
     freeLabel: unlocked ? t('Continue Lesson', 'පාඩම දිගටම ඉගෙන ගන්න') : isAuthenticated && isEnrolled ? t('Continue Free Lesson', 'නොමිලේ පාඩම දිගටම ඉගෙන ගන්න') : isAuthenticated ? t('Start Free Lesson', 'නොමිලේ පාඩම අරඹන්න') : t('Start Learning Free Now', 'දැන් නොමිලේ ඉගෙනීම අරඹන්න'),
     freeTo: unlocked || (isAuthenticated && isEnrolled) ? base + '/learn' : enroll,

@@ -1,3 +1,4 @@
+import { originalLessonPriceFor } from '../config/lesson-pricing.js';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -81,6 +82,7 @@ export const ExamSuccessPackPage = () => {
           </section>
           <section className="full-lesson-summary" aria-label={copy.label}>
             <p className="full-lesson-eyebrow">{copy.label}</p>
+            {originalLessonPriceFor(data.product) && <del>{price(data.product.compareAtPrice)}</del>}
             <strong className="full-lesson-price">{price(data.product.price)}</strong>
             <p className="full-lesson-payment">{copy.payment}<span className="full-lesson-mobile-duration"> · {copy.duration}</span></p>
             <ul className="full-lesson-assurances"><li>✓ {copy.tutorial}</li><li>✓ {copy.access}</li></ul>

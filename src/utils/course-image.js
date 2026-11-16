@@ -1,4 +1,5 @@
 import { academicAreaForCourse, mediumForCourse } from './academic-course.js';
+import { resourceApi } from '../api/resource.api.js';
 
 const courseImagePools = {
   SCHOOL: [
@@ -28,6 +29,7 @@ const stableImageIndex = (value, length) => [...String(value || '')]
   .reduce((total, character) => total + character.charCodeAt(0), 0) % length;
 
 export const courseCardImage = (course = {}, area) => {
+  if (course.featuredImageResourceId) return resourceApi.publicContentUrl(course.featuredImageResourceId);
   const imagePool = courseImagePools[area || course.courseGroup || academicAreaForCourse(course)] || courseImagePools.AL;
   return course.imageUrl || course.image?.url || course.coverImageUrl || course.coverImage?.url
     || imagePool[stableImageIndex(course.slug || course.id || (mediumForCourse(course) === 'si' ? course.titleSi || course.title || course.titleEn : course.titleEn || course.title || course.titleSi), imagePool.length)];

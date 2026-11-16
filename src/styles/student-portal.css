@@ -59,6 +59,52 @@
 .minimal-learning-empty { border: 1px solid #e9e1dd; background: #fff; border-radius: 16px; padding: 32px; }
 .minimal-learning-empty h2 { font-size: 24px; font-weight: 500; margin: 0 0 12px; }
 .minimal-learning-empty > p { color: #625c59; font-size: 14px; margin-bottom: 22px; }
+.student-explore-courses { margin-top: 24px; }
+.portal-minimal .student-explore-courses .button {
+  gap: 8px;
+  background: #fff;
+  color: #a7141c;
+  border: 1px solid #dfb7bb;
+}
+.portal-minimal .student-explore-courses .button:hover { background: #fae9e9; border-color: #a7141c; }
+.student-course-start {
+  padding: clamp(22px, 5vw, 56px);
+  border: 1px solid #edc9cc;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #fff 30%, #fbe7e7);
+  box-shadow: 0 12px 32px #6b3b4010;
+}
+.student-course-start-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  background: #f8dfe1;
+  color: #a7141c;
+}
+.student-course-start h2 {
+  margin: 0;
+  color: #2a1115;
+  font-size: clamp(26px, 4vw, 46px);
+  line-height: 1.12;
+  letter-spacing: -.035em;
+}
+.student-course-start > p {
+  max-width: 42ch;
+  margin: 14px 0 24px;
+  color: #534447;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.portal-minimal .student-course-start .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 50px;
+  font-size: 15px;
+}
 .student-mobile-nav { display: none; }
 .portal-minimal a:focus-visible, .portal-minimal summary:focus-visible { outline: 3px solid #ca1717; outline-offset: 4px; }
 @media (max-width: 1150px) { .portal-minimal .student-course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -78,6 +124,8 @@
   .student-mobile-nav a.active { color: #ca1717; background: #fff4f3; font-weight: 650; }
 }
 @media (max-width: 600px) {
+  .student-explore-courses .button { width: 100%; }
+  .portal-minimal .student-course-start .button { width: 100%; }
   .portal-minimal .student-course-grid { grid-template-columns: minmax(0, 1fr); }
   .minimal-continue-card { grid-template-columns: minmax(0, 1fr); padding: 20px; gap: 20px; }
   .portal-minimal .minimal-lesson-card { min-height: 245px; }

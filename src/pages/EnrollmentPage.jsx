@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { contentApi } from '../api/content.api.js';
@@ -23,7 +22,6 @@ export const EnrollmentPage = () => {
   const requestedPath = search.get('returnTo');
   const lessonPrefix = `/courses/${courseSlug}/lessons/`;
   const selectedLessonSlug = requestedPath?.startsWith(lessonPrefix) ? requestedPath.slice(lessonPrefix.length).split(/[/?#]/)[0] : null;
-  const [confirming, setConfirming] = useState(false);
   const courseQuery = useQuery({ queryKey: queryKeys.content.publicCourse(courseSlug), queryFn: ({ signal }) => contentApi.publicCourse(courseSlug, signal) });
   const lessonQuery = useQuery({ queryKey: queryKeys.content.publicLesson(courseSlug, selectedLessonSlug), queryFn: ({ signal }) => contentApi.publicLesson(courseSlug, selectedLessonSlug, signal), enabled: Boolean(selectedLessonSlug) });
   const selectedLesson = lessonQuery.data?.data?.lesson;
@@ -58,7 +56,11 @@ export const EnrollmentPage = () => {
     <div className="enrollment-layout">
       <article className="enrollment-course-card">
         <div className="enrollment-course-card-heading"><span className="enrollment-course-icon"><CourseIcon /></span><span className="enrollment-free-badge">Free content available</span></div>
-        <p className="eyebrow">{level}</p><h2>{course.title}</h2>{selectedLesson && <h3>{selectedLesson.title}</h3>}
+        <p className="eyebrow">{level}</p><h2>{course.title}</h2>
+        {selectedLesson && <div className="enrollment-selected-lesson">
+          <p>{selectedLesson.lessonNumber != null ? `Selected lesson · Lesson ${selectedLesson.lessonNumber}` : 'Selected lesson'}</p>
+          <h3>{selectedLesson.title}</h3>
+        </div>}
         <dl><div><dt>Medium</dt><dd>{medium}</dd></div><div><dt>Access</dt><dd>Free and paid lessons</dd></div></dl>
         <p className="enrollment-course-note"><CheckIcon />{selectedLessonSlug ? 'Free lesson enrolment does not expire. A full lesson purchase includes two years of access from successful payment.' : 'Choose a lesson to enrol for free. Free lesson access does not expire.'}</p>
       </article>
@@ -66,7 +68,7 @@ export const EnrollmentPage = () => {
         <div><p className="eyebrow">Your enrollment</p><h2>Ready to join?</h2><p>{needsStudentProfile ? 'We’ll use your completed student profile for this course.' : 'Enrol with your current account to start learning.'}</p></div>
         <div className="enrollment-profile-note"><span aria-hidden="true"><CheckIcon /></span><p><strong>{needsStudentProfile ? 'Student profile ready' : 'Account ready'}</strong>{needsStudentProfile && <><br /><Link to="/student/profile">Edit profile details</Link></>}</p></div>
         {enroll.error ? <InlineError error={enroll.error} /> : null}
-        {confirming ? <div className="enrollment-confirmation" role="status"><p><strong>Enroll in this course now?</strong><br />You can start learning immediately after confirmation.</p><div><button className="button" disabled={enroll.isPending} onClick={submit} type="button">{enroll.isPending ? 'Enrolling…' : 'Yes, enroll me'}</button><button className="enrollment-cancel" disabled={enroll.isPending} onClick={() => setConfirming(false)} type="button">Go back</button></div></div> : <button className="button enrollment-primary-action" onClick={() => setConfirming(true)} type="button">Enroll Free Now</button>}
+        <button className="button enrollment-primary-action" disabled={enroll.isPending} onClick={submit} type="button">{enroll.isPending ? 'Enrolling…' : 'Enroll Free Now'}</button>
       </article>
     </div>
   </div></section>;

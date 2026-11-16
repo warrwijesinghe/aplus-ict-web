@@ -17,6 +17,14 @@ const EssayInput = ({ disabled, question, response, saving, onSave }) => {
 const QuestionInput = ({ question, disabled, onSave, saving }) => {
   const response = initialResponse(question);
   const choose = (optionId, multiple) => onSave({ optionIds: multiple ? (response.optionIds.includes(optionId) ? response.optionIds.filter((id) => id !== optionId) : [...response.optionIds, optionId]) : [optionId] });
+  if (question.questionTextFormat === 'dropdown') {
+    return <select aria-label="Answer" disabled={disabled || saving} value={response.optionIds[0] || ''} onChange={(event) => choose(event.target.value, false)}>
+      <option disabled value="">___</option>
+      {question.options.map((option) => <option key={option.id} value={option.id}>
+        {new DOMParser().parseFromString(option.optionText, 'text/html').body.textContent}
+      </option>)}
+    </select>;
+  }
   if (['single_choice', 'true_false'].includes(question.questionType)) return <fieldset disabled={disabled || saving}><legend className="sr-only">Choose an answer</legend>{question.options.map((option) => <label className="quiz-option" key={option.id}><input checked={response.optionIds.includes(option.id)} name={`question-${question.id}`} onChange={() => choose(option.id, false)} type="radio" /> <span dangerouslySetInnerHTML={{ __html: option.optionText }} /></label>)}</fieldset>;
   if (question.questionType === 'multiple_choice') return <fieldset disabled={disabled || saving}><legend className="sr-only">Choose all answers that apply</legend>{question.options.map((option) => <label className="quiz-option" key={option.id}><input checked={response.optionIds.includes(option.id)} onChange={() => choose(option.id, true)} type="checkbox" /> <span dangerouslySetInnerHTML={{ __html: option.optionText }} /></label>)}</fieldset>;
   if (question.questionType === 'short_answer') return <textarea aria-label="Short answer" defaultValue={response.text || ''} disabled={disabled || saving} onBlur={(event) => onSave({ text: event.target.value })} rows="3" />;

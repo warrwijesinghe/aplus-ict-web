@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ArrowRight, BookOpen } from 'lucide-react';
 import { LessonEnrollmentCard } from '../components/learning/LessonEnrollmentCard.jsx';
 import { LessonProgress } from '../components/learning/LessonProgress.jsx';
 import { useLessonPresentation } from '../features/student/lesson-presentation.js';
@@ -26,7 +27,13 @@ export const ProfileCompletionGuard = ({ children }) => {
   return isProfileComplete(profile.data) ? children || <Outlet /> : <Navigate replace to={`/complete-profile?returnTo=${encodeURIComponent(location.pathname + location.search)}`} />;
 };
 
-const LessonEmptyState = () => <div className="minimal-learning-empty"><h2>Ready to start?</h2><p>Start learning ICT with a free lesson.</p><Link className="button" to="/courses">Explore lessons</Link></div>;
+const LessonEmptyState = () => <div className="minimal-learning-empty"><h2>Ready to start?</h2><p>Start learning ICT with a free lesson.</p><Link className="button" to="/courses">Explore Courses</Link></div>;
+
+const ExploreCoursesLink = () => (
+  <div className="student-explore-courses">
+    <Link className="button" to="/courses">Explore Courses <ArrowRight size={16} aria-hidden="true" /></Link>
+  </div>
+);
 
 export const StudentDashboard = () => {
   const { user } = useAuth();
@@ -40,13 +47,26 @@ export const StudentDashboard = () => {
   const continuation = data.data?.continueLearning;
   const course = data.data?.courses?.find((item) => item.courseTrackId === continuation?.courseTrackId) || continuation;
   const firstName = user?.name?.trim().split(/\s+/)[0] || 'student';
+  const canContinue = Boolean(continuation?.continueLearning?.activityId);
+  if (!canContinue && !lessons.length) return (
+    <section className="member-dashboard minimal-learning-page">
+      <header className="student-dashboard-heading"><p className="eyebrow">My Learning</p><h1>Welcome, {firstName}</h1></header>
+      <section className="student-course-start" aria-labelledby="student-course-start-title">
+        <div className="student-course-start-icon"><BookOpen size={28} aria-hidden="true" /></div>
+        <h2 id="student-course-start-title">Choose your first ICT course</h2>
+        <p>Select your grade and preferred medium to find your course and start a free lesson.</p>
+        <Link className="button" to="/courses">Choose a course <ArrowRight size={18} aria-hidden="true" /></Link>
+      </section>
+    </section>
+  );
   return <section className="member-dashboard minimal-learning-page">
     <header className="student-dashboard-heading"><p className="eyebrow">My ICT learning</p><h1>Hi, {firstName}</h1><p>Continue where you left off.</p></header>
-    {continuation?.continueLearning?.activityId && <article className="minimal-continue-card" aria-label="Continue learning">
+    {canContinue && <article className="minimal-continue-card" aria-label="Continue learning">
       <div><p className="eyebrow">Continue learning</p><h2>{continuation.title}</h2><p>{continuation.continueLearning.title}</p>{course?.lastLearningAt && <small>Last studied: {formatDate(course.lastLearningAt)}</small>}</div>
       <div className="minimal-continue-action"><LessonProgress progress={course?.progress} label={`${continuation.title} progress`} /><Link className="button" to={targetPath(continuation)}>Continue learning →</Link></div>
     </article>}
     {lessons.length ? <section aria-labelledby="dashboard-lessons-title"><div className="member-section-heading"><div><p className="eyebrow">My lessons</p><h2 id="dashboard-lessons-title">Your enrolled lessons</h2></div><Link to="/my-courses">View all →</Link></div><div className="student-course-grid">{lessons.map((enrollment) => <LessonEnrollmentCard enrollment={enrollment} key={enrollment.id} compact />)}</div></section> : <LessonEmptyState />}
+    {lessons.length > 0 && <ExploreCoursesLink />}
     {/* TODO: Show a tutorial delivery notice when the existing order API exposes
         an actual fulfilment status. Payment status does not imply dispatch. */}
   </section>;
@@ -58,7 +78,13 @@ export const MyCoursesPage = () => {
   usePageSeo({ path: '/my-courses', title: 'My lessons', noIndex: true });
   if (enrollments.isLoading) return <LoadingSkeleton label="Loading your lessons" />;
   if (enrollments.error) return <InlineError error={enrollments.error} onRetry={enrollments.refetch} />;
-  return <section className="my-courses-page minimal-learning-page"><header className="my-courses-heading"><p className="eyebrow">My lessons</p><h1>All enrolled lessons</h1><p>Open any lesson to continue studying or revise again.</p></header>{lessons.length ? <div className="student-course-grid">{lessons.map((enrollment) => <LessonEnrollmentCard enrollment={enrollment} key={enrollment.id} />)}</div> : <LessonEmptyState />}</section>;
+  return <section className="my-courses-page minimal-learning-page">
+    <header className="my-courses-heading"><p className="eyebrow">My lessons</p><h1>All enrolled lessons</h1><p>Open any lesson to continue studying or revise again.</p></header>
+    {lessons.length ? <>
+      <div className="student-course-grid">{lessons.map((enrollment) => <LessonEnrollmentCard enrollment={enrollment} key={enrollment.id} />)}</div>
+      <ExploreCoursesLink />
+    </> : <LessonEmptyState />}
+  </section>;
 };
 export const LearningHistoryPage = () => {
   const history = useLearningHistory(); if (history.isLoading) return <LoadingSkeleton />; if (history.error) return <InlineError error={history.error} />;

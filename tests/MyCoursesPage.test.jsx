@@ -13,7 +13,7 @@ beforeEach(() => hooks.useLessonEnrollments.mockReturnValue({ data: [], isLoadin
 it('takes students without lesson enrollments to the public courses page', () => {
   show();
   expect(screen.getByText('Ready to start?')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Explore lessons' })).toHaveAttribute('href', '/courses');
+  expect(screen.getByRole('link', { name: 'Explore Courses' })).toHaveAttribute('href', '/courses');
 });
 
 it('shows the selected lesson, real progress and study and unlock actions', () => {
@@ -26,6 +26,7 @@ it('shows the selected lesson, real progress and study and unlock actions', () =
   expect(within(card).getByRole('link', { name: 'Continue learning' })).toHaveAttribute('href', '/courses/grade-6/lessons/computers/learn');
   expect(within(card).getByRole('link', { name: 'Unlock Full Lesson' })).toHaveAttribute('href', '/courses/grade-6/lessons/computers/exam-success-pack');
   expect(within(card).getAllByRole('link')).toHaveLength(2);
+  expect(screen.getByRole('link', { name: 'Explore Courses' })).toHaveAttribute('href', '/courses');
 });
 
 it('keeps unavailable lessons from exposing learning actions', () => {
