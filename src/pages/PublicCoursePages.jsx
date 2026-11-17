@@ -1,3 +1,4 @@
+import { groupLessonTopics } from '../utils/lesson-topics.js';
 import { LessonPageTemplate } from '../components/courses/LessonPageTemplate.jsx';
 import { LessonCard } from '../components/courses/LessonCard.jsx';
 import { courseCardImage } from '../utils/course-image.js';
@@ -910,35 +911,53 @@ const TopicActivityList = ({ courseSlug, lessonSlug, topic }) => (
 const LessonTopicList = ({ courseSlug, lesson, lessonSlug }) => {
   const [selectedTopicId, setSelectedTopicId] = useState(null);
   const selectedTopic = lesson.topics.find((topic) => String(topic.id) === String(selectedTopicId));
+  const topicTree = groupLessonTopics(lesson.topics);
+  const findTopic = (nodes) => {
+    for (const node of nodes) {
+      if (node.topic.id === selectedTopic?.id) return node;
+      const match = findTopic(node.children);
+      if (match) return match;
+    }
+  };
+  const subtopics = selectedTopic ? findTopic(topicTree)?.children : [];
   if (selectedTopic) return <section className="lesson-topic-selection" id={`topic-${selectedTopic.id}`}>
     <h2>{selectedTopic.title}</h2>
     <TopicActivityList courseSlug={courseSlug} lessonSlug={lessonSlug} topic={selectedTopic} />
+    {subtopics?.length > 0 && <div className="lesson-topic-list"><LessonTopicCards nodes={subtopics} onSelect={setSelectedTopicId} /></div>}
     <button className="lesson-workspace-link lesson-topic-back" onClick={() => setSelectedTopicId(null)} type="button">← Back to lesson topics</button>
   </section>;
-  return <div className="lesson-topic-list">{lesson.topics.map((topic, index) => (
-    <section className="lesson-topic-list-item" id={`topic-${topic.id}`} key={topic.id}>
-      <button className="lesson-topic-link" onClick={() => setSelectedTopicId(topic.id)} type="button">
-        <span className="lesson-topic-link-number">{String(index + 1).padStart(2, '0')}</span>
-        <span><strong>{topic.title}</strong>{topic.descriptionEn ? <small>{topic.descriptionEn}</small> : <small>{topic.contentItems?.length || 0} learning item{topic.contentItems?.length === 1 ? '' : 's'}</small>}</span>
-        <b aria-hidden="true">→</b>
-      </button>
-    </section>
-  ))}</div>;
+  return <div className="lesson-topic-list">
+    <LessonTopicCards nodes={topicTree} onSelect={setSelectedTopicId} />
+  </div>;
 };
+
+const LessonTopicCards = ({ nodes, onSelect }) => nodes.map(({ topic, number, children }, index) => (
+  <section className="lesson-topic-list-item" id={`topic-${topic.id}`} key={topic.id}>
+    <button className="lesson-topic-link" onClick={() => onSelect(topic.id)} type="button">
+      <span className="lesson-topic-link-number">{number || String(index + 1).padStart(2, '0')}</span>
+      <span><strong>{number ? topic.title.slice(number.length).replace(/^[.)]?\s+/, '') : topic.title}</strong>{topic.descriptionEn ? <small>{topic.descriptionEn}</small> : <small>{topic.contentItems?.length || 0} learning item{topic.contentItems?.length === 1 ? '' : 's'}</small>}</span>
+      <b aria-hidden="true">→</b>
+    </button>
+    {children.length > 0 && <div className="lesson-topic-list lesson-subtopics"><LessonTopicCards nodes={children} onSelect={onSelect} /></div>}
+  </section>
+));
+
+const LessonTopicLinks = ({ nodes, href, selectedTopicId, onNavigate }) => <ol>
+  {nodes.map(({ topic, number, children }, index) => <li key={topic.id}>
+    <Link aria-current={String(selectedTopicId) === String(topic.id) ? 'page' : undefined} onClick={onNavigate}
+      to={`${href}#topic-${topic.id}`}>{number ? topic.title : `${String(index + 1).padStart(2, '0')}. ${topic.title}`}</Link>
+    {children.length > 0 && <div className="lesson-subtopics">
+      <LessonTopicLinks nodes={children} href={href} selectedTopicId={selectedTopicId} onNavigate={onNavigate} />
+    </div>}
+  </li>)}
+</ol>;
 
 const LessonContents = ({ courseSlug, lesson, lessonSlug, onNavigate, open, selectedTopicId, setOpen }) => (
   <details className="lesson-content-tree" onToggle={(event) => setOpen(event.currentTarget.open)} open={open}>
     <summary><span>This lesson</span><strong>Lesson contents</strong></summary>
     <nav aria-label="Lesson content navigation">
-      <ol>
-        {lesson.topics?.map((topic, index) => {
-          return (
-            <li key={topic.id}>
-              <Link aria-current={String(selectedTopicId) === String(topic.id) ? 'page' : undefined} onClick={onNavigate} to={`/courses/${courseSlug}/lessons/${lessonSlug}/learn#topic-${topic.id}`}>{String(index + 1).padStart(2, '0')}. {topic.title}</Link>
-            </li>
-          );
-        })}
-      </ol>
+      <LessonTopicLinks nodes={groupLessonTopics(lesson.topics)} href={`/courses/${courseSlug}/lessons/${lessonSlug}/learn`}
+        selectedTopicId={selectedTopicId} onNavigate={onNavigate} />
     </nav>
   </details>
 );

@@ -1449,6 +1449,14 @@ button:disabled {
   display: grid;
   gap: 0.8rem;
 }
+.lesson-subtopics {
+  margin-block-start: .55rem;
+  margin-inline-start: .6rem;
+  padding-inline-start: .65rem;
+  border-inline-start: 1px solid var(--color-border);
+}
+.lesson-content-tree .lesson-subtopics { margin-block-end: .35rem; }
+.course-map-topic .lesson-subtopics { margin-inline-start: .4rem; padding-inline-start: .4rem; }
 .lesson-topic-link {
   align-items: center;
   background: white;

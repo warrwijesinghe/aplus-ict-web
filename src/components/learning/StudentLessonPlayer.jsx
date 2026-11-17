@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { CircleHelp, FileText, LockKeyhole, Video } from 'lucide-react';
@@ -6,6 +6,7 @@ import { learningApi } from '../../api/learning.api.js';
 import { contentApi } from '../../api/content.api.js';
 import { queryKeys } from '../../api/query-keys.js';
 import { resourceApi } from '../../api/resource.api.js';
+import { groupLessonTopics, topicBranch } from '../../utils/lesson-topics.js';
 import { safeExternalUrl } from '../../utils/safe-url.js';
 import { useAuth } from '../../auth/auth-context.jsx';
 import { EmptyState, InlineError, LoadingSkeleton } from '../common/States.jsx';
@@ -422,17 +423,56 @@ const CollapsibleCourseMap = ({ courseSlug, currentId, lesson, onClose, open }) 
   const activeTopicId = lesson.topics.find((topic) =>
     topic.activities.some((activity) => String(activity.id) === String(currentId))
   )?.id;
+  const topicTree = useMemo(() => groupLessonTopics(lesson.topics), [lesson.topics]);
   useEffect(() => {
-    if (!activeTopicId) return;
-    setExpandedTopics(
-      Object.fromEntries(lesson.topics.map((topic) => [topic.id, topic.id === activeTopicId]))
-    );
-  }, [activeTopicId, lesson.topics]);
-  const toggleTopic = (topicId) =>
-    setExpandedTopics((current) => ({ ...current, [topicId]: !current[topicId] }));
+    const activeBranch = topicBranch(topicTree, activeTopicId);
+    setExpandedTopics(Object.fromEntries(activeBranch.map((id) => [id, true])));
+  }, [activeTopicId, topicTree]);
+  const toggleTopic = (topicId, expanded) =>
+    setExpandedTopics((current) => ({ ...current, [topicId]: !expanded }));
   const markCompletion = (activity, completed) => {
     if (activity.completionMode === 'manual' && !activity.isLocked)
       completion.mutate({ activity, completed });
+  };
+
+  const renderTopic = ({ topic, children }, defaultOpen = false) => {
+    const expanded = expandedTopics[topic.id] ?? defaultOpen;
+    const completed = topic.activities.filter(
+      (activity) => activity.progress?.status === 'completed'
+    ).length;
+    return (
+      <section className="course-map-topic" key={topic.id}>
+        <button
+          aria-controls={`course-map-topic-${topic.id}`}
+          aria-expanded={expanded}
+          className="course-map-topic-toggle"
+          onClick={() => toggleTopic(topic.id, expanded)}
+          type="button"
+        >
+          <span>
+            <strong>{topic.title}</strong>
+            {topic.activities.length > 0 && <small>{completed} / {topic.activities.length} complete</small>}
+          </span>
+          <b aria-hidden="true">{expanded ? '⌃' : '⌄'}</b>
+        </button>
+        {expanded ? (
+          <div id={`course-map-topic-${topic.id}`}>
+            {topic.activities.map((activity) => (
+              <CourseMapActivity
+                activity={activity}
+                courseSlug={courseSlug}
+                current={activity.id === currentId}
+                key={activity.id}
+                lessonSlug={lesson.slug || lesson.id}
+                onCompletionChange={markCompletion}
+                pending={completion.isPending}
+              />
+            ))}
+            {children.length > 0 && <div className="lesson-subtopics">{children.map((node) => renderTopic(node))}</div>}
+          </div>
+        ) : null}
+      </section>
+    );
   };
 
   return (
@@ -454,46 +494,7 @@ const CollapsibleCourseMap = ({ courseSlug, currentId, lesson, onClose, open }) 
       <section className="course-map-lesson">
         <strong className="course-map-lesson-title">{lesson.title}</strong>
         <LessonJourney lesson={lesson} />
-        {lesson.topics.map((topic, index) => {
-          const expanded = expandedTopics[topic.id] ?? index === 0;
-          const completed = topic.activities.filter(
-            (activity) => activity.progress?.status === 'completed'
-          ).length;
-          return (
-            <section className="course-map-topic" key={topic.id}>
-              <button
-                aria-controls={`course-map-topic-${topic.id}`}
-                aria-expanded={expanded}
-                className="course-map-topic-toggle"
-                onClick={() => toggleTopic(topic.id)}
-                type="button"
-              >
-                <span>
-                  <strong>{topic.title}</strong>
-                  <small>
-                    {completed} / {topic.activities.length} complete
-                  </small>
-                </span>
-                <b aria-hidden="true">{expanded ? '⌃' : '⌄'}</b>
-              </button>
-              {expanded ? (
-                <div id={`course-map-topic-${topic.id}`}>
-                  {topic.activities.map((activity) => (
-                    <CourseMapActivity
-                      activity={activity}
-                      courseSlug={courseSlug}
-                      current={activity.id === currentId}
-                      key={activity.id}
-                      lessonSlug={lesson.slug || lesson.id}
-                      onCompletionChange={markCompletion}
-                      pending={completion.isPending}
-                    />
-                  ))}
-                </div>
-              ) : null}
-            </section>
-          );
-        })}
+        {topicTree.map((node, index) => renderTopic(node, !activeTopicId && index === 0))}
       </section>
     </aside>
   );
@@ -741,19 +742,7 @@ export const StudentCourseOverview = ({ courseSlug }) => {
                 />
               </div>
               <div>
-                {lesson.topics.map((topic) => (
-                  <section key={topic.id}>
-                    <h3>{topic.title}</h3>
-                    {topic.activities.map((activity) => (
-                      <ActivityLink
-                        activity={activity}
-                        courseSlug={courseSlug}
-                        key={activity.id}
-                        lessonSlug={lesson.slug || lesson.id}
-                      />
-                    ))}
-                  </section>
-                ))}
+                <CourseOverviewTopics nodes={groupLessonTopics(lesson.topics)} courseSlug={courseSlug} lessonSlug={lesson.slug || lesson.id} />
               </div>
             </article>
           ))
@@ -902,3 +891,11 @@ export const StudentActivityPlayer = () => {
     </section>
   );
 };
+
+const CourseOverviewTopics = ({ nodes, courseSlug, lessonSlug }) => nodes.map(({ topic, children }) => (
+  <section key={topic.id}>
+    <h3>{topic.title}</h3>
+    {topic.activities.map((activity) => <ActivityLink activity={activity} courseSlug={courseSlug} key={activity.id} lessonSlug={lessonSlug} />)}
+    {children.length > 0 && <div className="lesson-subtopics"><CourseOverviewTopics nodes={children} courseSlug={courseSlug} lessonSlug={lessonSlug} /></div>}
+  </section>
+));
